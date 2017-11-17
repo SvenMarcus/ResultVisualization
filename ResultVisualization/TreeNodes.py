@@ -1,7 +1,7 @@
 from typing import List
 
 
-class TreeNode:
+class TreeNode(object):
     def __init__(self, text: str):
         self.__text = text
 
