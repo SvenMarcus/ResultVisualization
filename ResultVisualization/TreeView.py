@@ -22,11 +22,14 @@ class TreeView(object):
         index: int = self.__children.index(child)
         self.removeChildAt(index)
 
+    def getChildren(self):
+        return self.__children.copy()
+
     def filter(self, viewFilter: Filter) -> None:
         markedForRemove = []
         for child in self.__children:
             if not viewFilter.appliesTo(child):
-                child.setChecked(False)
+                child.checked = False
                 index = self.__children.index(child)
                 markedForRemove.append(child)
                 self.__filteredChildren.append(child)
@@ -50,3 +53,5 @@ class TreeView(object):
 
     def _removeFromView(self, index: int) -> None:
         raise NotImplementedError()
+
+

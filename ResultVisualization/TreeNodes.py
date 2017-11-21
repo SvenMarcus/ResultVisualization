@@ -1,47 +1,53 @@
 from typing import List
 
 
-class TreeNode(object):
-    def __init__(self, text: str):
+class TreeItem:
+    pass
+
+
+class TreeItem:
+    def __init__(self, text: str = None):
+        self.__text = text
+        self.__children: List[TreeItem] = []
+        self.__parent = None
+
+    @property
+    def text(self) -> str:
+        return self.__text
+
+    @text.setter
+    def text(self, text: str) -> None:
         self.__text = text
 
-    def get_text(self) -> str:
-        return self.__text
+    @property
+    def parent(self) -> TreeItem:
+        return self.__parent
 
-    def set_text(self, text) -> None:
-        self.__text = text
+    @parent.setter
+    def parent(self, parent: TreeItem) -> None:
+        self.__parent = parent
 
-    def __str__(self):
-        return self.__text
+    def getChildCount(self) -> int:
+        return len(self.__children)
 
-    def __repr__(self):
-        return self.__text
+    def getPosition(self):
+        if self.parent is None:
+            return -1
 
+        return self.parent.childPos(self)
 
-class CategoryNode(TreeNode):
+    def getChild(self, pos: int) -> TreeItem:
+        return self.__children[pos]
 
-    def __init__(self, text):
-        super().__init__(text)
-        self.__children: List[TreeNode] = []
+    def insert(self, child: TreeItem, pos: int) -> None:
+        self.__children.insert(pos, child)
+        child.parent = self
 
-    def add_child(self, child: TreeNode) -> None:
-        self.__children.append(child)
+    def remove(self, pos: int) -> None:
+        item: TreeItem = self.__children.pop(pos)
+        item.parent = None
 
-    def remove_child(self, child: TreeNode) -> None:
-        self.__children.remove(child)
-
-    def get_children(self) -> List[TreeNode]:
-        return self.__children.copy()
-
-
-class FloatNode(TreeNode):
-
-    def __init__(self, text: str, value: float):
-        super().__init__(text)
-        self.__value = value
-
-    def get_value(self) -> float:
-        return self.__value
-
-    def set_value(self, value: float) -> None:
-        self.__value = value
+    def __childPos(self, child: TreeItem) -> int:
+        if self.__children.count(child) == 0:
+            return -1
+        return self.__children.index(child)
