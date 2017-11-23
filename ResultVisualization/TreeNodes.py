@@ -47,7 +47,7 @@ class TreeItem:
         item: TreeItem = self.__children.pop(pos)
         item.parent = None
 
-    def __childPos(self, child: TreeItem) -> int:
+    def childPos(self, child: TreeItem) -> int:
         if self.__children.count(child) == 0:
             return -1
         return self.__children.index(child)
