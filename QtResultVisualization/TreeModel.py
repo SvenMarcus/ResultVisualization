@@ -5,7 +5,7 @@ from ResultVisualization.TreeNodes import TreeItem
 
 class TreeModel(QAbstractItemModel):
     def __init__(self):
-        super(TreeModel, self).__init__()
+        super().__init__()
         self.__root: TreeItem = TreeItem()
 
     def insertItem(self, child: TreeItem, index: QModelIndex, pos: int) -> None:
@@ -39,7 +39,7 @@ class TreeModel(QAbstractItemModel):
         item: TreeItem = self.__getItem(child)
         parentItem: TreeItem = item.parent
 
-        if parentItem is None:
+        if parentItem is None or parentItem is self.__root:
             return QModelIndex()
 
         self.createIndex(parentItem.getPosition(), 0, parentItem)
