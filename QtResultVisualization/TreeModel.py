@@ -14,20 +14,35 @@ class TreeModel(QAbstractItemModel):
         self.endInsertRows()
 
     def rowCount(self, parent: QModelIndex = ...) -> int:
+        if parent.column() > 0:
+            return 0
+
+        item = None
         if not parent.isValid():
-            return self.__root.getChildCount()
-        return self.__getItem(parent).getChildCount()
+            item = self.__root
+        else:
+            item = parent.internalPointer()
+
+        return item.getChildCount()
 
     def columnCount(self, parent: QModelIndex = ...) -> int:
         return 1
 
-    def index(self, row: int, column: int, parent: QModelIndex = ...) -> QModelIndex:
-        treeItem: TreeItem = self.__getItem(parent)
-
-        if row > treeItem.getChildCount():
+    def index(self, row, column, parent: QModelIndex = ...) -> QModelIndex:
+        if not self.hasIndex(row, column, parent):
             return QModelIndex()
 
-        return self.createIndex(row, column, treeItem)
+        parent_item = None
+        if not parent.isValid():
+            parent_item = self.__root
+        else:
+            parent_item = parent.internalPointer()
+
+        child_item = parent_item.getChild(row)
+        if child_item:
+            return self.createIndex(row, column, child_item)
+        else:
+            return QModelIndex()
 
     def data(self, index: QModelIndex, role: int = ...):
         if role == Qt.DisplayRole and index.column() == 0:
@@ -35,14 +50,21 @@ class TreeModel(QAbstractItemModel):
 
         return QVariant()
 
-    def parent(self, child: QModelIndex) -> QModelIndex:
-        item: TreeItem = self.__getItem(child)
-        parentItem: TreeItem = item.parent
+    def parent(self, childindex):
 
-        if parentItem is None or parentItem is self.__root:
+        if not childindex.isValid():
             return QModelIndex()
 
-        self.createIndex(parentItem.getPosition(), 0, parentItem)
+        child_item = childindex.internalPointer()
+        if not child_item:
+            return QModelIndex()
+
+        parent_item = child_item.parent
+
+        if parent_item == self.__root:
+            return QModelIndex()
+
+        return self.createIndex(parent_item.getPosition(), 0, parent_item)
 
     def __getItem(self, index: QModelIndex) -> TreeItem:
         if not index.isValid():

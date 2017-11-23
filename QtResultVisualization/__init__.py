@@ -12,8 +12,10 @@ i3 = TreeItem("C")
 
 treeModel = TreeModel()
 treeModel.insertItem(i1, QModelIndex(), 0)
-# treeModel.insertItem(i2, QModelIndex(), 1)
-# treeModel.insertItem(i3, QModelIndex(), 2)
+treeModel.insertItem(i2, QModelIndex(), 1)
+treeModel.insertItem(i3, QModelIndex(), 2)
+
+i1.insert(TreeItem("A2"), 0)
 
 app = QApplication(sys.argv)
 window = QMainWindow()
