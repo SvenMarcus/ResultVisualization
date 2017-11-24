@@ -1,14 +1,14 @@
 from typing import List
 
 
-class TreeItem:
+class TreeViewItem:
     pass
 
 
-class TreeItem:
+class TreeViewItem:
     def __init__(self, text: str = None):
         self.__text = text
-        self.__children: List[TreeItem] = []
+        self.__children: List[TreeViewItem] = []
         self.__parent = None
 
     @property
@@ -20,11 +20,11 @@ class TreeItem:
         self.__text = text
 
     @property
-    def parent(self) -> TreeItem:
+    def parent(self) -> TreeViewItem:
         return self.__parent
 
     @parent.setter
-    def parent(self, parent: TreeItem) -> None:
+    def parent(self, parent: TreeViewItem) -> None:
         self.__parent = parent
 
     def getChildCount(self) -> int:
@@ -36,18 +36,18 @@ class TreeItem:
 
         return self.parent.childPos(self)
 
-    def getChild(self, pos: int) -> TreeItem:
+    def getChild(self, pos: int) -> TreeViewItem:
         return self.__children[pos]
 
-    def insert(self, child: TreeItem, pos: int) -> None:
+    def insert(self, child: TreeViewItem, pos: int) -> None:
         self.__children.insert(pos, child)
         child.parent = self
 
     def remove(self, pos: int) -> None:
-        item: TreeItem = self.__children.pop(pos)
+        item: TreeViewItem = self.__children.pop(pos)
         item.parent = None
 
-    def childPos(self, child: TreeItem) -> int:
+    def childPos(self, child: TreeViewItem) -> int:
         if self.__children.count(child) == 0:
             return -1
         return self.__children.index(child)

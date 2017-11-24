@@ -1,14 +1,14 @@
 from PyQt5.QtCore import QAbstractItemModel, QModelIndex, Qt, QVariant
 
-from ResultVisualization.TreeNodes import TreeItem
+from ResultVisualization.TreeViewItem import TreeViewItem
 
 
 class TreeModel(QAbstractItemModel):
     def __init__(self):
         super().__init__()
-        self.__root: TreeItem = TreeItem()
+        self.__root: TreeViewItem = TreeViewItem()
 
-    def insertItem(self, child: TreeItem, index: QModelIndex, pos: int) -> None:
+    def insertItem(self, child: TreeViewItem, index: QModelIndex, pos: int) -> None:
         self.beginInsertRows(index, pos, pos)
         self.__getItem(index).insert(child, pos)
         self.endInsertRows()
@@ -29,7 +29,7 @@ class TreeModel(QAbstractItemModel):
         return QVariant()
 
     def index(self, row: int, column: int, parent: QModelIndex = ...) -> QModelIndex:
-        childItem: TreeItem = self.__getItem(parent).getChild(row)
+        childItem: TreeViewItem = self.__getItem(parent).getChild(row)
 
         if childItem is None:
             return QModelIndex()
@@ -37,14 +37,14 @@ class TreeModel(QAbstractItemModel):
         return self.createIndex(row, column, childItem)
 
     def parent(self, childIndex: QModelIndex) -> QModelIndex:
-        parentItem: TreeItem = self.__getItem(childIndex).parent
+        parentItem: TreeViewItem = self.__getItem(childIndex).parent
 
         if parentItem is self.__root or parentItem is None:
             return QModelIndex()
 
         return self.createIndex(parentItem.getPosition(), 0, parentItem)
 
-    def __getItem(self, index: QModelIndex) -> TreeItem:
+    def __getItem(self, index: QModelIndex) -> TreeViewItem:
         if not index.isValid():
             return self.__root
 
