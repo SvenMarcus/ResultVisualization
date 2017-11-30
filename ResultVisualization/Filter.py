@@ -8,4 +8,4 @@ class Filter(Generic[T]):
 
     @abstractmethod
     def appliesTo(self, arg: T) -> bool:
-        pass
+        raise NotImplementedError()

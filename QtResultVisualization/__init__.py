@@ -1,8 +1,9 @@
 import sys
 
 from PyQt5.QtCore import QModelIndex
-from PyQt5.QtWidgets import QApplication, QTreeView, QMainWindow
+from PyQt5.QtWidgets import QApplication, QTreeView, QMainWindow, QHBoxLayout, QWidget, QSplitter
 
+from QtResultVisualization.GraphWindow import GraphWindow
 from QtResultVisualization.TreeModel import TreeModel
 from ResultVisualization.TreeViewItem import TreeViewItem
 
@@ -20,6 +21,17 @@ app = QApplication(sys.argv)
 window = QMainWindow()
 treeView = QTreeView()
 treeView.setModel(treeModel)
-window.setCentralWidget(treeView)
+treeView.setMinimumWidth(200)
+
+graphWindow = GraphWindow()
+graphWindow.setMinimumWidth(800)
+graphWindow.setMinimumHeight(600)
+
+splitter = QSplitter()
+splitter.addWidget(treeView)
+splitter.addWidget(graphWindow)
+
+
+window.setCentralWidget(splitter)
 window.show()
 sys.exit(app.exec_())
