@@ -11,12 +11,20 @@ class TreeView(QWidget):
         super().__init__(parent)
         vBox: QVBoxLayout = QVBoxLayout()
 
-        i1 = TreeViewItem("A")
-        i2 = TreeViewItem("B")
-        i3 = TreeViewItem("C")
-        i1.insert(TreeViewItem("A2"), 0)
+        i1: TreeViewItem = TreeViewItem("A")
+        i2: TreeViewItem = TreeViewItem("B")
+        i3: TreeViewItem = TreeViewItem("C")
+        subItem: TreeViewItem = TreeViewItem("A2")
+        i1.insert(subItem, 0)
 
         treeModel = TreeModel()
+
+        self.__itemChangedHandler = ItemCheckHandler(treeModel)
+        self.__itemChangedHandler.addToTreeItem(i1)
+        self.__itemChangedHandler.addToTreeItem(subItem)
+        self.__itemChangedHandler.addToTreeItem(i2)
+        self.__itemChangedHandler.addToTreeItem(i3)
+
         treeModel.insertItem(i1, QModelIndex(), 0)
         treeModel.insertItem(i2, QModelIndex(), 1)
         treeModel.insertItem(i3, QModelIndex(), 2)
@@ -32,3 +40,54 @@ class TreeView(QWidget):
 
         vBox.addWidget(self.__filterButton)
 
+
+class ItemCheckHandler:
+
+    def __init__(self, treeModel: TreeModel):
+        self.__treeModel = treeModel
+        self.__origin: TreeViewItem = None
+        self.__upAllowed: bool = False
+
+    def addToTreeItem(self, item: TreeViewItem):
+        item.checkStateChanged.append(self.__item_changed_handler)
+
+    def __item_changed_handler(self, item: TreeViewItem, checkState: bool) -> None:
+        self.__set_origin(item)
+        self.__check_children(item)
+        self.__check_parents(item)
+        self.__reset_check_helpers(item)
+
+    def __set_origin(self, item: TreeViewItem) -> None:
+        if self.__origin is None:
+            self.__treeModel.blockSignals(True)
+            self.__origin = item
+
+    def __check_children(self, item: TreeViewItem) -> None:
+        if not self.__upAllowed:
+            for i in range(0, item.getChildCount()):
+                child: TreeViewItem = item.getChild(i)
+                child.checked = item.checked
+
+    def __check_parents(self, item) -> None:
+        if self.__origin == item:
+            self.__upAllowed = True
+
+        if self.__upAllowed:
+            parent: TreeViewItem = item.parent
+            if parent is not None and parent.parent is not None:
+                allChildrenSelected = self.__all_children_selected(parent)
+                parent.checked = allChildrenSelected
+
+    def __reset_check_helpers(self, item) -> None:
+        if self.__origin == item:
+            self.__origin = None
+            self.__upAllowed = False
+            self.__treeModel.blockSignals(False)
+
+    @staticmethod
+    def __all_children_selected(item: TreeViewItem) -> bool:
+        for i in range(0, item.getChildCount()):
+            child: TreeViewItem = item.getChild(i)
+            if not child.checked:
+                return False
+        return True
