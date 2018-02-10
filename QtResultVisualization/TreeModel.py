@@ -75,7 +75,7 @@ class TreeModel(QAbstractItemModel):
 
         if role == Qt.CheckStateRole:
             self.__getItem(index).checked = self.__getBoolFromCheckState(value)
-            self.dataChanged.emit(index, index)
+            self.dataChanged.emit(QModelIndex(), index)
             return True
         
         return super(TreeModel, self).setData(index, value)

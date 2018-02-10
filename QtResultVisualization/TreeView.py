@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QModelIndex
 from PyQt5.QtWidgets import QWidget, QTreeView, QVBoxLayout, QPushButton
 
-from QtResultVisualization import TreeModel
+from QtResultVisualization.TreeModel import TreeModel
 from ResultVisualization.TreeViewItem import TreeViewItem
 
 
@@ -15,11 +15,12 @@ class TreeView(QWidget):
         i2: TreeViewItem = TreeViewItem("B")
         i3: TreeViewItem = TreeViewItem("C")
         subItem: TreeViewItem = TreeViewItem("A2")
+
         i1.insert(subItem, 0)
 
+        self.__treeView: QTreeView = QTreeView()
         treeModel = TreeModel()
-
-        self.__itemChangedHandler = ItemCheckHandler(treeModel)
+        self.__itemChangedHandler = ItemCheckHandler(treeModel, self.__treeView)
         self.__itemChangedHandler.addToTreeItem(i1)
         self.__itemChangedHandler.addToTreeItem(subItem)
         self.__itemChangedHandler.addToTreeItem(i2)
@@ -30,7 +31,7 @@ class TreeView(QWidget):
         treeModel.insertItem(i3, QModelIndex(), 2)
 
         self.setLayout(vBox)
-        self.__treeView: QTreeView = QTreeView()
+
         self.__treeView.setModel(treeModel)
 
         vBox.addWidget(self.__treeView)
@@ -43,10 +44,11 @@ class TreeView(QWidget):
 
 class ItemCheckHandler:
 
-    def __init__(self, treeModel: TreeModel):
+    def __init__(self, treeModel: TreeModel, treeView: QTreeView):
         self.__treeModel = treeModel
         self.__origin: TreeViewItem = None
         self.__upAllowed: bool = False
+        self.__treeView: QTreeView = treeView
 
     def addToTreeItem(self, item: TreeViewItem):
         item.checkStateChanged.append(self.__item_changed_handler)
@@ -59,7 +61,6 @@ class ItemCheckHandler:
 
     def __set_origin(self, item: TreeViewItem) -> None:
         if self.__origin is None:
-            self.__treeModel.blockSignals(True)
             self.__origin = item
 
     def __check_children(self, item: TreeViewItem) -> None:
@@ -68,13 +69,14 @@ class ItemCheckHandler:
                 child: TreeViewItem = item.getChild(i)
                 child.checked = item.checked
 
-    def __check_parents(self, item) -> None:
+    def __check_parents(self, item: TreeViewItem) -> None:
         if self.__origin == item:
             self.__upAllowed = True
 
         if self.__upAllowed:
             parent: TreeViewItem = item.parent
-            if parent is not None and parent.parent is not None:
+            isTopLevel = parent.parent is None
+            if not isTopLevel:
                 allChildrenSelected = self.__all_children_selected(parent)
                 parent.checked = allChildrenSelected
 
@@ -82,7 +84,6 @@ class ItemCheckHandler:
         if self.__origin == item:
             self.__origin = None
             self.__upAllowed = False
-            self.__treeModel.blockSignals(False)
 
     @staticmethod
     def __all_children_selected(item: TreeViewItem) -> bool:

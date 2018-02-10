@@ -9,7 +9,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 class GraphWindow(QWidget):
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super(QWidget, self).__init__(parent)
         self.figure = pyplot.figure()
 
         # this is the Canvas Widget that displays the `figure`

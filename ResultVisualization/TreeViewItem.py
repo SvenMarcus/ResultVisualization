@@ -9,9 +9,8 @@ class TreeViewItem:
 
 class TreeViewItem:
 
-    checkStateChanged = Event()
-
     def __init__(self, text: str = None):
+        self.checkStateChanged = Event()
         self.__text = text
         self.__children: List[TreeViewItem] = []
         self.__parent = None
