@@ -1,15 +1,20 @@
 from typing import List, Dict
 
+from QtResultVisualization.FilterView import FilterView
 from ResultVisualization.Filter import Filter
 from ResultVisualization.TreeItem import TreeItem
 
 
 class FilterDialogPresenter:
 
-    def __init__(self):
+    def __init__(self, view: FilterView):
+        self.__view = view
         self.__projectFilter: str = ""
         self.__experimentFilter: str = ""
         self.__resultFilter: str = ""
+
+    def showDialog(self):
+        self.__view.show()
 
     def setProjectFilter(self, name: str) -> None:
         self.__projectFilter = name

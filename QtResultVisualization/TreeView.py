@@ -1,7 +1,9 @@
 from PyQt5.QtCore import QModelIndex
 from PyQt5.QtWidgets import QWidget, QTreeView, QVBoxLayout, QPushButton
 
+from QtResultVisualization.FilterView import FilterView
 from QtResultVisualization.TreeModel import TreeModel
+from ResultVisualization.FilterDialogPresenter import FilterDialogPresenter
 from ResultVisualization.TreeViewItem import TreeViewItem
 
 
@@ -38,9 +40,15 @@ class TreeView(QWidget):
 
         self.__filterButton = QPushButton()
         self.__filterButton.setText("Filter")
+        self.__filterButton.clicked.connect(self.createFilterDialog().showDialog)
 
         vBox.addWidget(self.__filterButton)
 
+    def createFilterDialog(self) -> FilterDialogPresenter:
+        view: FilterView = FilterView()
+        presenter: FilterDialogPresenter = FilterDialogPresenter(view)
+        view.setPresenter(presenter)
+        return presenter
 
 class ItemCheckHandler:
 
