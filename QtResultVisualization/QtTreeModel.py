@@ -2,10 +2,10 @@ from typing import Any
 
 from PyQt5.QtCore import QAbstractItemModel, QModelIndex, Qt, QVariant
 
-from ResultVisualization.TreeViewItem import TreeViewItem
+from QtResultVisualization.TreeViewItem import TreeViewItem
 
 
-class TreeModel(QAbstractItemModel):
+class QtTreeModel(QAbstractItemModel):
     def __init__(self):
         super().__init__()
         self.__root: TreeViewItem = TreeViewItem()
@@ -78,7 +78,7 @@ class TreeModel(QAbstractItemModel):
             self.dataChanged.emit(QModelIndex(), index)
             return True
         
-        return super(TreeModel, self).setData(index, value)
+        return super(QtTreeModel, self).setData(index, value)
 
     def __getBoolFromCheckState(self, value) -> bool:
         if value == Qt.Checked:

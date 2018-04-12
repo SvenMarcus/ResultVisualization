@@ -2,12 +2,12 @@ from PyQt5.QtCore import QModelIndex
 from PyQt5.QtWidgets import QWidget, QTreeView, QVBoxLayout, QPushButton
 
 from QtResultVisualization.FilterView import FilterView
-from QtResultVisualization.TreeModel import TreeModel
+from QtResultVisualization.QtTreeModel import QtTreeModel
+from QtResultVisualization.TreeViewItem import TreeViewItem
 from ResultVisualization.FilterDialogPresenter import FilterDialogPresenter
-from ResultVisualization.TreeViewItem import TreeViewItem
 
 
-class TreeView(QWidget):
+class QtTreeView(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -21,8 +21,8 @@ class TreeView(QWidget):
         i1.insert(subItem, 0)
 
         self.__treeView: QTreeView = QTreeView()
-        treeModel = TreeModel()
-        self.__itemChangedHandler = ItemCheckHandler(treeModel, self.__treeView)
+        treeModel = QtTreeModel()
+        self.__itemChangedHandler = ItemCheckHandler()
         self.__itemChangedHandler.addToTreeItem(i1)
         self.__itemChangedHandler.addToTreeItem(subItem)
         self.__itemChangedHandler.addToTreeItem(i2)
@@ -40,23 +40,30 @@ class TreeView(QWidget):
 
         self.__filterButton = QPushButton()
         self.__filterButton.setText("Filter")
-        self.__filterButton.clicked.connect(self.createFilterDialog().showDialog)
+        self.__filterButton.clicked.connect(self.__showFilterDialog)
 
         vBox.addWidget(self.__filterButton)
 
-    def createFilterDialog(self) -> FilterDialogPresenter:
+    def insertItem(self, index):
+        pass
+
+    def __showFilterDialog(self) -> None:
+        presenter: FilterDialogPresenter = self.__createFilterDialog()
+        presenter.showDialog()
+
+    @staticmethod
+    def __createFilterDialog() -> FilterDialogPresenter:
         view: FilterView = FilterView()
         presenter: FilterDialogPresenter = FilterDialogPresenter(view)
         view.setPresenter(presenter)
         return presenter
 
+
 class ItemCheckHandler:
 
-    def __init__(self, treeModel: TreeModel, treeView: QTreeView):
-        self.__treeModel = treeModel
+    def __init__(self):
         self.__origin: TreeViewItem = None
         self.__upAllowed: bool = False
-        self.__treeView: QTreeView = treeView
 
     def addToTreeItem(self, item: TreeViewItem):
         item.checkStateChanged.append(self.__item_changed_handler)

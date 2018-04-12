@@ -1,6 +1,7 @@
 from typing import List, Dict
 
 from QtResultVisualization.FilterView import FilterView
+from ResultVisualization.DialogResult import DialogResult
 from ResultVisualization.Filter import Filter
 from ResultVisualization.TreeItem import TreeItem
 
@@ -12,9 +13,11 @@ class FilterDialogPresenter:
         self.__projectFilter: str = ""
         self.__experimentFilter: str = ""
         self.__resultFilter: str = ""
+        self.__dialogResult = DialogResult.Cancel
 
-    def showDialog(self):
+    def showDialog(self) -> DialogResult:
         self.__view.show()
+        return self.__dialogResult
 
     def setProjectFilter(self, name: str) -> None:
         self.__projectFilter = name
@@ -25,6 +28,15 @@ class FilterDialogPresenter:
     def setResultFilter(self, name: str) -> None:
         self.__resultFilter = name
 
+    def handleAccept(self):
+        if self.__validateFilter():
+            self.__dialogResult = DialogResult.Ok
+            self.__view.close()
+
+    def handleCancel(self):
+        self.__dialogResult = DialogResult.Cancel
+        self.__view.close()
+
     def getFilter(self) -> Filter[TreeItem]:
         filterList: List[Dict[str, str]] = [
             {"tag": "Project", "text": self.__projectFilter},
@@ -33,6 +45,9 @@ class FilterDialogPresenter:
         ]
 
         return TreeNodeFilter(filterList)
+
+    def __validateFilter(self) -> bool:
+        return bool(self.__projectFilter or self.__experimentFilter or self.__resultFilter)
 
 
 class TreeNodeFilter(Filter[TreeItem]):
@@ -47,3 +62,4 @@ class TreeNodeFilter(Filter[TreeItem]):
             if (arg.tag == tag) and (text in arg.text):
                 return True
         return False
+

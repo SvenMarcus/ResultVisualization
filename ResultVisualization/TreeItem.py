@@ -3,7 +3,7 @@ from typing import Dict
 
 class TreeItem:
 
-    def __init__(self, text: str, tag: str = None):
+    def __init__(self, text: str = None, tag: str = None):
         self.__text = text
         self.__tag = tag
 
@@ -26,7 +26,7 @@ class TreeItem:
 
 class ResultTreeItem(TreeItem):
 
-    def __init__(self, text: str, tag: str = None):
+    def __init__(self, text: str = None, tag: str = None):
         super().__init__(text, tag)
         self.__results: Dict[str, float] = {}
 
