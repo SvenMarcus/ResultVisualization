@@ -1,62 +1,31 @@
 from PyQt5.QtCore import QModelIndex
-from PyQt5.QtWidgets import QWidget, QTreeView, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QTreeView, QVBoxLayout
 
-from QtResultVisualization.FilterView import FilterView
 from QtResultVisualization.QtTreeModel import QtTreeModel
 from QtResultVisualization.TreeViewItem import TreeViewItem
-from ResultVisualization.FilterDialogPresenter import FilterDialogPresenter
+from ResultVisualization.TreeItem import TreeItem
+from ResultVisualization.TreeView import TreeView, TreeIndex
 
 
-class QtTreeView(QWidget):
+class QtTreeView(TreeView, QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
         vBox: QVBoxLayout = QVBoxLayout()
 
-        i1: TreeViewItem = TreeViewItem("A")
-        i2: TreeViewItem = TreeViewItem("B")
-        i3: TreeViewItem = TreeViewItem("C")
-        subItem: TreeViewItem = TreeViewItem("A2")
-
-        i1.insert(subItem, 0)
-
         self.__treeView: QTreeView = QTreeView()
-        treeModel = QtTreeModel()
-        self.__itemChangedHandler = ItemCheckHandler()
-        self.__itemChangedHandler.addToTreeItem(i1)
-        self.__itemChangedHandler.addToTreeItem(subItem)
-        self.__itemChangedHandler.addToTreeItem(i2)
-        self.__itemChangedHandler.addToTreeItem(i3)
-
-        treeModel.insertItem(i1, QModelIndex(), 0)
-        treeModel.insertItem(i2, QModelIndex(), 1)
-        treeModel.insertItem(i3, QModelIndex(), 2)
-
+        self.__treeModel = QtTreeModel()
         self.setLayout(vBox)
-
-        self.__treeView.setModel(treeModel)
+        self.__treeView.setModel(self.__treeModel)
 
         vBox.addWidget(self.__treeView)
 
-        self.__filterButton = QPushButton()
-        self.__filterButton.setText("Filter")
-        self.__filterButton.clicked.connect(self.__showFilterDialog)
+    def insertItem(self, item: TreeItem, index: TreeIndex, childPos: int):
+        qModelIndex: QModelIndex = self.__treeModel.convertToQModelIndex(index)
+        self.__treeModel.insertItem(TreeViewItem(item.text), qModelIndex, childPos)
 
-        vBox.addWidget(self.__filterButton)
-
-    def insertItem(self, index):
+    def deleteItem(self, index: TreeIndex):
         pass
-
-    def __showFilterDialog(self) -> None:
-        presenter: FilterDialogPresenter = self.__createFilterDialog()
-        presenter.showDialog()
-
-    @staticmethod
-    def __createFilterDialog() -> FilterDialogPresenter:
-        view: FilterView = FilterView()
-        presenter: FilterDialogPresenter = FilterDialogPresenter(view)
-        view.setPresenter(presenter)
-        return presenter
 
 
 class ItemCheckHandler:

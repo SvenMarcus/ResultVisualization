@@ -3,6 +3,7 @@ from typing import Any
 from PyQt5.QtCore import QAbstractItemModel, QModelIndex, Qt, QVariant
 
 from QtResultVisualization.TreeViewItem import TreeViewItem
+from ResultVisualization.TreeView import TreeIndex
 
 
 class QtTreeModel(QAbstractItemModel):
@@ -91,3 +92,15 @@ class QtTreeModel(QAbstractItemModel):
             return self.__root
 
         return index.internalPointer()
+
+    def convertToQModelIndex(self, index: TreeIndex) -> QModelIndex:
+        if index is not None:
+            parentIndex: TreeIndex = index.getParent()
+            parentQModelIndex: QModelIndex = self.convertToQModelIndex(parentIndex)
+            # return self.index(index.getRow(), 0, parentQModelIndex)
+            return self.createIndex(index.getRow(), 0, childItem)
+        else:
+            return QModelIndex()
+
+    def convertToTreeIndex(self, index: QModelIndex) -> TreeIndex:
+        return TreeIndex(self.convertToTreeIndex(index.parent()), index.row())
