@@ -24,7 +24,7 @@ from QtResultVisualization.QtTreeView import QtTreeView
 #
 # # graphWindow.show()
 # sys.exit(app.exec_())
-from ResultVisualization.TreeItem import TreeItem
+from ResultVisualization.TreeItem import TreeItem, CategoryItem
 from ResultVisualization.TreeView import TreeIndex
 from ResultVisualization.TreeViewController import TreeViewController
 
@@ -35,9 +35,12 @@ treeView = QtTreeView()
 treeViewController: TreeViewController = TreeViewController(treeView)
 treeView.show()
 
-item: TreeItem = TreeItem("Test")
+item: TreeItem = CategoryItem("Test")
 index: TreeIndex = TreeIndex()
 
+subItem: TreeItem = TreeItem("SubTest")
+subIndex: TreeIndex = TreeIndex(index, 0)
 
-treeViewController.insertItem(item, index, 0)
+treeViewController.insertItem(item, index)
+treeViewController.insertItem(subItem, subIndex)
 sys.exit(app.exec_())

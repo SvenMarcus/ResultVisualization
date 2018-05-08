@@ -1,6 +1,5 @@
-from typing import Any
-
 from PyQt5.QtCore import QAbstractItemModel, QModelIndex, Qt, QVariant
+from typing import Any
 
 from QtResultVisualization.TreeViewItem import TreeViewItem
 from ResultVisualization.TreeView import TreeIndex
@@ -97,8 +96,11 @@ class QtTreeModel(QAbstractItemModel):
         if index is not None:
             parentIndex: TreeIndex = index.getParent()
             parentQModelIndex: QModelIndex = self.convertToQModelIndex(parentIndex)
-            # return self.index(index.getRow(), 0, parentQModelIndex)
-            return self.createIndex(index.getRow(), 0, childItem)
+            parentTreeViewItem: TreeViewItem = parentQModelIndex.internalPointer()
+            if parentTreeViewItem is not None:
+                return self.createIndex(index.getRow(), 0, parentTreeViewItem)
+            else:
+                return QModelIndex()
         else:
             return QModelIndex()
 
