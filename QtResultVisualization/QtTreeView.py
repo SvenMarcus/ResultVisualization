@@ -17,12 +17,15 @@ class QtTreeView(TreeView, QWidget):
         self.__treeModel = QtTreeModel()
         self.setLayout(vBox)
         self.__treeView.setModel(self.__treeModel)
+        self.__itemCheckHandler: ItemCheckHandler = ItemCheckHandler()
 
         vBox.addWidget(self.__treeView)
 
     def insertItem(self, item: TreeItem, index: TreeIndex, childPos: int):
         qModelIndex: QModelIndex = self.__treeModel.convertToQModelIndex(index)
-        self.__treeModel.insertItem(TreeViewItem(item.text), qModelIndex, childPos)
+        tree_view_item = TreeViewItem(item.text)
+        self.__itemCheckHandler.addToTreeItem(tree_view_item)
+        self.__treeModel.insertItem(tree_view_item, qModelIndex, index.getRow())
 
     def deleteItem(self, index: TreeIndex):
         pass

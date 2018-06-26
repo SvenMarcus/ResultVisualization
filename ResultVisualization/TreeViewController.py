@@ -17,9 +17,9 @@ class TreeViewController:
         self.__root: CategoryItem = CategoryItem()
 
     def insertItem(self, item: TreeItem, parentIndex: TreeIndex) -> None:
-        self.__treeView.insertItem(item, parentIndex, parentIndex.getRow())
         parentItem: CategoryItem = self.__getParentItem(parentIndex)
         parentItem.addChild(item)
+        self.__treeView.insertItem(item, parentIndex, parentIndex.getRow())
 
     def deleteItem(self, index: TreeIndex) -> None:
         self.__treeView.deleteItem(index)
