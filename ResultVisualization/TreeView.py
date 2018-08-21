@@ -1,3 +1,4 @@
+from ResultVisualization.Event import Event
 from ResultVisualization.TreeItem import TreeItem
 
 
@@ -19,6 +20,9 @@ class TreeIndex:
 
 
 class TreeView:
+
+    def __init__(self):
+        self.itemChecked: Event = Event()
 
     def insertItem(self, item: TreeItem, index: TreeIndex, childPos: int) -> None:
         raise NotImplementedError("TreeView operation insertItem not implemented")

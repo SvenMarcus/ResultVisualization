@@ -10,14 +10,16 @@ from ResultVisualization.TreeView import TreeView, TreeIndex
 class QtTreeView(TreeView, QWidget):
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        TreeView.__init__(self)
+        QWidget.__init__(self, parent)
+
         vBox: QVBoxLayout = QVBoxLayout()
 
         self.__treeView: QTreeView = QTreeView()
         self.__treeModel = QtTreeModel()
         self.setLayout(vBox)
         self.__treeView.setModel(self.__treeModel)
-        self.__itemCheckHandler: ItemCheckHandler = ItemCheckHandler()
+        self.__itemCheckHandler: ItemCheckHandler = ItemCheckHandler(self)
 
         vBox.addWidget(self.__treeView)
 
@@ -31,9 +33,11 @@ class QtTreeView(TreeView, QWidget):
         pass
 
 
+
 class ItemCheckHandler:
 
-    def __init__(self):
+    def __init__(self, treeView: TreeView):
+        self.__treeView = treeView
         self.__origin: TreeViewItem = None
         self.__upAllowed: bool = False
 
@@ -41,6 +45,7 @@ class ItemCheckHandler:
         item.checkStateChanged.append(self.__item_changed_handler)
 
     def __item_changed_handler(self, item: TreeViewItem, checkState: bool) -> None:
+        self.__treeView.itemChecked(item, checkState)
         self.__set_origin(item)
         self.__check_children(item)
         self.__check_parents(item)
@@ -54,7 +59,8 @@ class ItemCheckHandler:
         if not self.__upAllowed:
             for i in range(0, item.getChildCount()):
                 child: TreeViewItem = item.getChild(i)
-                child.checked = item.checked
+                if child.checked != item.checked:
+                    child.checked = item.checked
 
     def __check_parents(self, item: TreeViewItem) -> None:
         if self.__origin == item:
@@ -65,7 +71,8 @@ class ItemCheckHandler:
             isTopLevel = parent.parent is None
             if not isTopLevel:
                 allChildrenSelected = self.__all_children_selected(parent)
-                parent.checked = allChildrenSelected
+                if parent.checked != allChildrenSelected:
+                    parent.checked = allChildrenSelected
 
     def __reset_check_helpers(self, item) -> None:
         if self.__origin == item:

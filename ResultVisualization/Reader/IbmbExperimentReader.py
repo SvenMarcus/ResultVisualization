@@ -13,8 +13,8 @@ class IbmbExperimentReader:
 
     def __init__(self):
         self.__ignore: str = '#'
-        self.__categories = ['Org.', 'Serie', 'Version', 'Test', 'Nr.', "Messfühler"]
-        self.__values: Set[str] = {"PEAK", "PEACOCK", "Median_EXP", "Median_SIM"}
+        self.__categories = ['Org.', 'Serie', 'Version', 'Test', 'Nr.']
+        self.__values: Set[str] = {"Messfühler", "PEAK", "PEACOCK", "Median_EXP", "Median_SIM"}
 
     def read(self, filepath: str) -> Dict:
         import csv
@@ -23,21 +23,27 @@ class IbmbExperimentReader:
             dictReader = csv.DictReader(csvfile, dialect=SemiColonDialect())
 
             finalDict: dict = {}
-            currentDict: dict
+
             for orderedDict in dictReader:
-                currentDict = finalDict
-                for key in self.__categories:
+                currentItem = finalDict
+                for i in range(0, len(self.__categories)):
+                    key = self.__categories[i]
                     if key in orderedDict:
-                        if not orderedDict[key] in currentDict:
-                            currentDict[orderedDict[key]] = {}
 
-                        currentDict = currentDict[orderedDict[key]]
+                        if not orderedDict[key] in currentItem:
+                            if i < len(self.__categories) - 1:
+                                currentItem[orderedDict[key]] = {}
+                            else:
+                                currentItem[orderedDict[key]] = []
 
+                        currentItem = currentItem[orderedDict[key]]
+
+                resultDict = {}
                 for key in self.__values:
-                    currentDict[key] = orderedDict[key]
+                    resultDict[key] = orderedDict[key]
+                currentItem.append(resultDict)
 
         return finalDict
-
 
     def readMany(self, filepaths: list) -> Dict:
         finalDict: dict = {}
@@ -46,8 +52,7 @@ class IbmbExperimentReader:
             self.__merge(finalDict, tmpDict)
         return finalDict
 
-
-    def __merge(self, finalDict, partialDict):
+    def __merge(self, finalDict, partialDict: Dict) -> None:
         for key in partialDict:
             if not key in finalDict:
                 finalDict[key] = partialDict[key]
