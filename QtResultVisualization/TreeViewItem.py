@@ -1,6 +1,6 @@
 from typing import List
 
-from ResultVisualization.Event import Event
+from ResultVisualization.Events import Event, InvokableEvent
 
 
 class TreeViewItem:
@@ -10,11 +10,15 @@ class TreeViewItem:
 class TreeViewItem:
 
     def __init__(self, text: str = None):
-        self.checkStateChanged = Event()
+        self.__checkStateChanged = InvokableEvent()
         self.__text = text
         self.__children: List[TreeViewItem] = []
         self.__parent = None
         self.__checked = False
+
+    @property
+    def checkStateChanged(self) -> Event:
+        return self.__checkStateChanged
 
     @property
     def text(self) -> str:
@@ -39,7 +43,7 @@ class TreeViewItem:
     @checked.setter
     def checked(self, value: bool) -> None:
         self.__checked = value
-        self.checkStateChanged(self, value)
+        self.__checkStateChanged(self, value)
 
     def getChildCount(self) -> int:
         return len(self.__children)

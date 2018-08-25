@@ -1,4 +1,4 @@
-from ResultVisualization.Event import Event
+from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.TreeItem import TreeItem
 
 
@@ -22,7 +22,11 @@ class TreeIndex:
 class TreeView:
 
     def __init__(self):
-        self.itemChecked: Event = Event()
+        self.__itemChecked: Event = InvokableEvent()
+
+    @property
+    def itemChecked(self) -> Event:
+        return self.__itemChecked
 
     def insertItem(self, item: TreeItem, index: TreeIndex, childPos: int) -> None:
         raise NotImplementedError("TreeView operation insertItem not implemented")

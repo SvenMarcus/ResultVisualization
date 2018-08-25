@@ -8,8 +8,9 @@ from ResultVisualization.TreeView import TreeView, TreeIndex
 
 
 class QtTreeView(TreeView, QWidget):
+    """Qt Implementation of the TreeView Interface"""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget = None):
         TreeView.__init__(self)
         QWidget.__init__(self, parent)
 
@@ -27,11 +28,11 @@ class QtTreeView(TreeView, QWidget):
         qModelIndex: QModelIndex = self.__treeModel.convertToQModelIndex(index)
         tree_view_item = TreeViewItem(item.text)
         self.__itemCheckHandler.addToTreeItem(tree_view_item)
-        self.__treeModel.insertItem(tree_view_item, qModelIndex, index.getRow())
+        self.__treeModel.insertItem(
+            tree_view_item, qModelIndex, index.getRow())
 
     def deleteItem(self, index: TreeIndex):
         pass
-
 
 
 class ItemCheckHandler:

@@ -1,6 +1,6 @@
 from typing import List
 
-from ResultVisualization.Event import Event
+from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.TreeItem import CategoryItem, TreeItem
 from ResultVisualization.TreeView import TreeView, TreeIndex
 
@@ -12,12 +12,17 @@ class NonCategoryItemInPathError(Exception):
 
 
 class TreeViewController:
+    """Provides view independent logic for TreeView behaviour"""
 
     def __init__(self, treeView: TreeView):
-        self.itemChecked = Event()
+        self.__itemChecked = InvokableEvent()
         self.__treeView = treeView
         self.__treeView.itemChecked.append(self.__onItemChecked)
         self.__root: CategoryItem = CategoryItem()
+
+    @property
+    def itemChecked(self) -> Event:
+        return self.__itemChecked
 
     def insertItem(self, item: TreeItem, parentIndex: TreeIndex) -> None:
         parentItem: CategoryItem = self.__getParentItem(parentIndex)
