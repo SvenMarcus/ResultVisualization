@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from ResultVisualization.Events import Event, InvokableEvent
-from ResultVisualization.Dialogs import ChooseFolderDialog, DialogFactory
+from ResultVisualization.Dialogs import ChooseFolderDialog, DialogFactory, DialogResult
 
 
 class Action(ABC):
@@ -23,8 +23,12 @@ class ChooseFolderAction(Action):
 
     @property
     def onChooseFolder(self) -> Event:
+        """This Event is triggered when the user selects a folder."""
+        
         return self.__onChooseFolder
 
     def execute(self) -> None:
         dialog: ChooseFolderDialog = self.__dialogFactory.makeChooseFolderDialog()
-        dialog.show()
+        result: DialogResult = dialog.show()
+        if result == DialogResult.Ok:
+            self.__onChooseFolder(self, dialog.getSelectedFolder())
