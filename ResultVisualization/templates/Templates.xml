@@ -1,0 +1,14 @@
+<Templates>
+    <Template>
+        <Name>Ibmb_Project</Name>
+        <File>
+            <Name>Results/Results_Export.csv</Name>
+            <Categories>
+                Org., Serie, Version, Test, Nr.
+            </Categories>
+            <Values>
+                Messfühler, PEAK, PEACOCK, Median_EXP, Median_SIM
+            </Values>
+        </File>
+    </Template>
+</Templates>

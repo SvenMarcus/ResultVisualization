@@ -12,6 +12,11 @@ from ResultVisualization.Actions import ChooseFolderAction
 path1 = "./Experiments/PRS1_Door3_FDS607/Results/Results_Export.csv"
 path2 = "./Experiments/PRS1_Door4_FDS607/Results/Results_Export.csv"
 
+def chooseFolderListener(sender, path: str) -> None:
+    import os
+    files: list = os.listdir(path)
+    if "Results_Export.csv" in files:
+        loader.readFile(path + "/Results_Export.csv")
 
 app = QApplication(sys.argv)
 mainWindow: QMainWindow = QMainWindow()
@@ -22,7 +27,7 @@ treeView.setMinimumWidth(300)
 
 treeViewController: TreeViewController = TreeViewController(treeView)
 loader: TreeViewFileLoader = TreeViewFileLoader(treeViewController)
-loader.readFiles([path1, path2])
+# loader.readFiles([path1, path2])
 
 menuBar: QMenuBar = QMenuBar(mainWindow)
 fileMenu: QMenu = QMenu("File", menuBar)
@@ -32,7 +37,7 @@ menuBar.addMenu(fileMenu)
 dialogFactory: QtDialogFactory = QtDialogFactory()
 
 chooseFolderAction: ChooseFolderAction = ChooseFolderAction(dialogFactory)
-
+chooseFolderAction.onChooseFolder.append(chooseFolderListener)
 qtChooseFolderAction: QAction = QAction("Choose Folder")
 qtChooseFolderAction.triggered.connect(chooseFolderAction.execute)
 

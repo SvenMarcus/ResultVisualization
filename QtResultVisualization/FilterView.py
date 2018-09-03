@@ -1,7 +1,7 @@
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QDialog, QLayout, QLineEdit, QDialogButtonBox, QGridLayout, QLabel
 
-from ResultVisualization.DialogResult import DialogResult
+from ResultVisualization.Dialogs import DialogResult
 
 
 class FilterView(QDialog):

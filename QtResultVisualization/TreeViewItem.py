@@ -10,11 +10,12 @@ class TreeViewItem:
 class TreeViewItem:
 
     def __init__(self, text: str = None):
-        self.__checkStateChanged = InvokableEvent()
-        self.__text = text
+        self.__checkStateChanged: InvokableEvent = InvokableEvent()
+        self.__text: str = text
         self.__children: List[TreeViewItem] = []
-        self.__parent = None
+        self.__parent: TreeViewItem = None
         self.__checked = False
+        self.__checkable = False
 
     @property
     def checkStateChanged(self) -> Event:
@@ -35,6 +36,14 @@ class TreeViewItem:
     @parent.setter
     def parent(self, parent: TreeViewItem) -> None:
         self.__parent = parent
+
+    @property
+    def checkable(self) -> bool:
+        return self.__checkable
+
+    @checkable.setter
+    def checkable(self, value: bool) -> None:
+        self.__checkable = value
 
     @property
     def checked(self) -> bool:
