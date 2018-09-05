@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Dict
 
 
 class DialogResult(Enum):
@@ -33,11 +34,27 @@ class ChooseFolderDialog(Dialog, ABC):
         raise NotImplementedError()
 
 
+class DataChooserDialog(Dialog, ABC):
+    """Interface for a dialog to choose data"""
+
+    @abstractmethod
+    def getChosenData(self) -> Dict[str, float]:
+        """Returns the data chosen in the dialog as dictionary of strings and floats."""
+
+        raise NotImplementedError()
+
+
 class DialogFactory(ABC):
     """Interface for a factory to create dialogs"""
 
     @abstractmethod
     def makeChooseFolderDialog(self) -> ChooseFolderDialog:
         """Creates and returns a ChooseFolderDialog."""
+
+        raise NotImplementedError()
+
+    @abstractmethod
+    def makeDataChooserDialog(self) -> DataChooserDialog:
+        """Creates and returns a DataChooserDialog."""
 
         raise NotImplementedError()

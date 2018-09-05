@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QFileDialog, QWidget
 
-from ResultVisualization.Dialogs import (ChooseFolderDialog, DialogFactory,
+from ResultVisualization.Dialogs import (ChooseFolderDialog, DataChooserDialog, DialogFactory,
                                          DialogResult)
 
 
@@ -38,3 +38,6 @@ class QtDialogFactory(DialogFactory):
 
     def makeChooseFolderDialog(self) -> ChooseFolderDialog:
         return QtChooseFolderDialog(self.__parent)
+
+    def makeDataChooserDialog(self) -> DataChooserDialog:
+        pass
