@@ -30,5 +30,5 @@ class PlotConfig:
 
 
 class LinePlotConfig:
-
-    def __init__()
+    pass
+    # def __init__()

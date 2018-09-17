@@ -18,7 +18,7 @@ if hasattr(QStyleFactory, 'AA_UseHighDpiPixmaps'):
 config: PlotConfig = PlotConfig(plotType=PlotType.Line)
 config.xValues = [1, 2, 3, 4, 5, 6, 7, 8]
 config.yValues = [1, 2, 3, 4, 5, 6, 7, 8]
-config.confidenceBand = 0.1
+config.confidenceBand = 0.5
 
 mainWindow: QWidget = QWidget()
 layout: QHBoxLayout = QHBoxLayout()

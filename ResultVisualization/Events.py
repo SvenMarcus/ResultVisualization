@@ -20,6 +20,6 @@ class InvokableEvent(Event):
     def __init__(self):
         Event.__init__(self)
 
-    def __call__(self, sender, args):
+    def __call__(self, sender, args=None):
         for callback in self:
             callback(sender, args)
