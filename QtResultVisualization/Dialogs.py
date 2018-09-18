@@ -56,6 +56,7 @@ class QtChooseFileDialog(ChooseFileDialog):
 
         return DialogResult.Cancel
 
+
 class QtLineSeriesDialog(LineSeriesDialog):
     """Qt implementation of LineSeriesDialog"""
 
@@ -88,11 +89,13 @@ class QtLineSeriesDialog(LineSeriesDialog):
         self.__layout.addWidget(self.__okButton, 2, 0)
         self.__layout.addWidget(self.__cancelButton, 2, 1)
 
-        self.__layout.addWidget(self._spreadsheetView.getTableWidget(), 3, 0, -1, -1)
+        self.__layout.addWidget(
+            self._spreadsheetView.getTableWidget(), 3, 0, -1, -1)
 
         self.__inEditMode: bool = False
         self.__editState: Dict[str, bool] = {"x": False, "y": False}
-        self.__buttonDict: Dict[str, QPushButton] = {"x": self.__xValuesButton, "y": self.__yValuesButton}
+        self.__buttonDict: Dict[str, QPushButton] = {
+            "x": self.__xValuesButton, "y": self.__yValuesButton}
         self.__xValuesButton.clicked.connect(
             lambda: self.__handleDataSelectionButton(self.__xValuesButton, "x"))
         self.__yValuesButton.clicked.connect(
@@ -109,34 +112,6 @@ class QtLineSeriesDialog(LineSeriesDialog):
 
     def _getConfidenceBand(self) -> float:
         return self._tryConvertToFloat(self.__confidenceBandInput.text())
-
-    def _highlight(self, cells: List[Tuple[int, int]]) -> None:
-        if len(cells) == 0:
-            return
-
-        print(cells)
-
-        tableWidget: QTableWidget = self._spreadsheetView.getTableWidget()
-        tableWidget.selectionModel().clearSelection()
-
-        minRow: int = tableWidget.rowCount() + 1
-        minColumn: int = tableWidget.columnCount() + 1
-        maxRow: int = -1
-        maxColumn: int = -1
-
-        for cell in cells:
-            if cell[0] < minRow:
-                minRow = cell[0]
-            if cell[0] > maxRow:
-                maxRow = cell[0]
-
-            if cell[1] < minColumn:
-                minColumn = cell[1]
-            if cell[1] > maxColumn:
-                maxColumn = cell[1]
-
-        selectionRange: QTableWidgetSelectionRange = QTableWidgetSelectionRange(minRow, minColumn, maxRow, maxColumn)
-        tableWidget.setRangeSelected(selectionRange, True)
 
     def _makeChooseFileDialog(self) -> ChooseFileDialog:
         return QtChooseFileDialog(self.__dialog)
@@ -172,6 +147,7 @@ class QtLineSeriesDialog(LineSeriesDialog):
     @staticmethod
     def __getOtherCoordinate(coordinate: str) -> str:
         return "x" if coordinate == "y" else "y"
+
 
 class QtDialogFactory(DialogFactory):
     """Qt Implementation of DialogFactory. Creates Qt implementations of Dialogs."""

@@ -1,5 +1,4 @@
 from abc import ABC, abstractclassmethod, abstractmethod
-from builtins import NotImplementedError
 from enum import Enum
 from numbers import Number
 from typing import Any, Dict, List, Set, Tuple
@@ -73,14 +72,15 @@ class LineSeriesDialog(Dialog, ABC):
         config: PlotConfig = PlotConfig()
         config.xValues = self.__getSelectedItemsForCoordinate("x")
         config.yValues = self.__getSelectedItemsForCoordinate("y")
-        config.confidenceBand = self._getConfidenceBand()
+        config.confidenceBand = self._getConfidenceBand() if self._getConfidenceBand() else 0
         return config
 
     def _confirm(self) -> None:
         if not self.__isValidData():
-            self._showMessage("Invalid Data. Select same amount of x and y values. Must be at least one.")
+            self._showMessage(
+                "Invalid Data. Select same amount of x and y values. Must be at least one.")
             return
-        
+
         self._result = DialogResult.Ok
         self._close()
 
@@ -89,13 +89,14 @@ class LineSeriesDialog(Dialog, ABC):
         result: DialogResult = dialog.show()
         if result == DialogResult.Ok:
             file: str = dialog.getSelectedFile()
-            data: List[List[str]] = csvReader.readFile(file, csvReader.semicolon)
+            data: List[List[str]] = csvReader.readFile(
+                file, csvReader.semicolon)
             self.__spreadsheet.setData(data)
 
     def _startListeningForDataSelection(self, coordinate: str) -> None:
         self.__editedCoordinate = coordinate
         if len(self.__selectedCells[coordinate]) > 0:
-            self._highlight(self.__selectedCells[coordinate])
+            self.__spreadsheet.highlight(self.__selectedCells[coordinate])
 
     def _stopListeningForDataSelection(self) -> None:
         if self.__editedCoordinate:
@@ -118,10 +119,6 @@ class LineSeriesDialog(Dialog, ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def _highlight(self, cells: List[Tuple[int, int]]) -> None:
-        raise NotImplementedError()
-
-    @abstractmethod
     def _makeSpreadsheetView(self) -> SpreadsheetView:
         raise NotImplementedError()
 
@@ -139,7 +136,8 @@ class LineSeriesDialog(Dialog, ABC):
         return numXValues == numYValues and numXValues > 0
 
     def __getSelectedCells(self, sender: Any = None, args: Any = None) -> None:
-        self.__selectedCells[self.__editedCoordinate] = list(self.__spreadsheet.selectedCells())
+        self.__selectedCells[self.__editedCoordinate] = list(
+            self.__spreadsheet.selectedCells())
 
     def __getSelectedItemsForCoordinate(self, coordinate: str) -> List[Number]:
         items: List = list()

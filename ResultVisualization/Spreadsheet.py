@@ -30,6 +30,10 @@ class SpreadsheetView(ABC):
     def setCell(self, row: int, column: int, value: Any) -> None:
         raise NotImplementedError()
 
+    @abstractmethod
+    def highlight(self, cells: List[Tuple[int, int]]) -> None:
+        raise NotImplementedError()
+
 
 class Spreadsheet:
 
@@ -61,6 +65,9 @@ class Spreadsheet:
             for columnIndex in range(0, len(row)):
                 columnItem: Any = row[columnIndex]
                 self.__view.setCell(rowIndex, columnIndex, columnItem)
+
+    def highlight(self, cells: List[Tuple[int, int]]) -> None:
+        self.__view.highlight(cells)
 
     def rows(self) -> int:
         return self.__rows

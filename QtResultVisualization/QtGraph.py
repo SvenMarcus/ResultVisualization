@@ -1,3 +1,5 @@
+import itertools
+
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvas, \
     NavigationToolbar2QT as NavigationToolbar
@@ -25,10 +27,13 @@ class QtGraph(Graph):
         if config.confidenceBand > 0:
             y1Values = [y * (1 - config.confidenceBand) for y in config.yValues]
             y2Values = [y * (1 + config.confidenceBand) for y in config.yValues]
-            
+
             self.__canvas.figure.add_subplot(111).fill_between(config.xValues, y1Values, y2Values, alpha=0.3, edgecolor='#CC4F1B', facecolor='#FF9848')
 
-        self.__canvas.figure.add_subplot(111).plot(config.xValues, config.yValues)
+        zipped = zip(config.xValues, config.yValues)
+        new_x, new_y = list(zip(*sorted(zipped)))
+
+        self.__canvas.figure.add_subplot(111).plot(new_x, new_y)
 
     def getWidget(self) -> QWidget:
         return self.__widget
