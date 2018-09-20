@@ -57,10 +57,10 @@ class ChooseFileDialog(Dialog, ABC):
 
 class LineSeriesDialog(Dialog, ABC):
 
-    def __init__(self):
-        self._spreadsheetView: SpreadsheetView = self._makeSpreadsheetView()
+    def __init__(self, config: PlotConfig = PlotConfig()):
         self._result: DialogResult = DialogResult.Cancel
 
+        self._spreadsheetView: SpreadsheetView = self._makeSpreadsheetView()
         self.__spreadsheet: Spreadsheet = Spreadsheet(self._spreadsheetView)
         self._spreadsheetView.setSpreadsheet(self.__spreadsheet)
 
@@ -69,18 +69,16 @@ class LineSeriesDialog(Dialog, ABC):
             "y": list()
         }
 
-        self.__data: Dict = {"x": [], "y": []}
-
         self.__editedCoordinate: str = ""
-
-        self.__plotConfig: PlotConfig = PlotConfig()
+        self.__plotConfig: PlotConfig = config
+        self.__setInitialPlotConfig(config)
 
     def getPlotConfig(self) -> PlotConfig:
         config: PlotConfig = self.__plotConfig
-        config.title = self._getTitle()
+        config.title = self._getTitleFromView()
         config.xValues = self.__getSelectedItemsForCoordinate("x")
         config.yValues = self.__getSelectedItemsForCoordinate("y")
-        config.confidenceBand = self._getConfidenceBand() if self._getConfidenceBand() else 0
+        config.confidenceBand = self._getConfidenceBandFromView() if self._getConfidenceBandFromView() else 0
         return config
 
     def _confirm(self) -> None:
@@ -124,11 +122,19 @@ class LineSeriesDialog(Dialog, ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def _getConfidenceBand(self) -> float:
+    def _getConfidenceBandFromView(self) -> float:
         raise NotImplementedError()
 
     @abstractmethod
-    def _getTitle(self) -> str:
+    def _setConfidenceBandInView(self, value: float) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _getTitleFromView(self) -> str:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _setTitleInView(self, value: str):
         raise NotImplementedError()
 
     @abstractmethod
@@ -164,6 +170,17 @@ class LineSeriesDialog(Dialog, ABC):
     @staticmethod
     def __isNumber(obj: Any) -> bool:
         return isinstance(obj, (int, float))
+
+    def __setInitialPlotConfig(self, config: PlotConfig) -> None:
+        self._setTitleInView(config.title)
+        self._setConfidenceBandInView(config.confidenceBand)
+        values: List[List] = self.__transposePlotConfigData(config)
+        self.__spreadsheet.setData(values)
+
+    @staticmethod
+    def __transposePlotConfigData(config: PlotConfig) -> List[List]:
+        data: List[List] = [config.xValues, config.yValues]
+        return list(map(list, zip(*data)))
 
 
 class DataChooserDialog(Dialog, ABC):

@@ -6,6 +6,7 @@ from typing import Dict
 from QtResultVisualization.QtSpreadsheet import QtSpreadsheet
 from ResultVisualization.Dialogs import ChooseFileDialog, ChooseFolderDialog, \
     DataChooserDialog, DialogFactory, DialogResult, LineSeriesDialog
+from ResultVisualization.Graph import PlotConfig
 from ResultVisualization.Spreadsheet import SpreadsheetView
 
 
@@ -57,28 +58,28 @@ class QtChooseFileDialog(ChooseFileDialog):
 class QtLineSeriesDialog(LineSeriesDialog):
     """Qt implementation of LineSeriesDialog"""
 
-    def __init__(self, parent: QWidget = None):
-        super(QtLineSeriesDialog, self).__init__()
+    def __init__(self, config: PlotConfig = None, parent: QWidget = None):
+        self.__confidenceBandInput: QLineEdit = QLineEdit()
+        self.__titleInput = QLineEdit()
+
+        super(QtLineSeriesDialog, self).__init__(config)
         self.__dialog: QDialog = QDialog(parent)
         self.__layout: QGridLayout = QGridLayout(self.__dialog)
         self.__dialog.setLayout(self.__layout)
 
         self.__loadFileButton: QPushButton = QPushButton("Load csv file")
         self.__loadFileButton.clicked.connect(self._handleLoadFile)
-        self.__layout.addWidget(self.__loadFileButton, 0, 0, 1, 2)
+        self.__layout.addWidget(self.__loadFileButton, 1, 0, 1, 2)
 
         self.__xValuesButton: QPushButton = QPushButton("Select x values")
         self.__yValuesButton: QPushButton = QPushButton("Select y values")
-        self.__layout.addWidget(self.__xValuesButton, 1, 0)
-        self.__layout.addWidget(self.__yValuesButton, 1, 1)
+        self.__layout.addWidget(self.__xValuesButton, 2, 0)
+        self.__layout.addWidget(self.__yValuesButton, 2, 1)
 
         self.__layout.addWidget(QLabel("Title"), 0, 2)
-        self.__titleInput = QLineEdit()
         self.__layout.addWidget(self.__titleInput, 1, 2)
 
         self.__layout.addWidget(QLabel("Confidence Interval:"), 2, 2)
-
-        self.__confidenceBandInput: QLineEdit = QLineEdit()
         self.__layout.addWidget(self.__confidenceBandInput, 3, 2)
 
         self.__okButton: QPushButton = QPushButton("Ok")
@@ -88,11 +89,11 @@ class QtLineSeriesDialog(LineSeriesDialog):
         self.__cancelButton: QPushButton = QPushButton("Cancel")
         self.__cancelButton.clicked.connect(self.__dialog.close)
 
-        self.__layout.addWidget(self.__okButton, 2, 0)
-        self.__layout.addWidget(self.__cancelButton, 2, 1)
+        self.__layout.addWidget(self.__okButton, 3, 0)
+        self.__layout.addWidget(self.__cancelButton, 3, 1)
 
         self.__layout.addWidget(
-            self._spreadsheetView.getTableWidget(), 3, 0, -1, -1)
+            self._spreadsheetView.getTableWidget(), 4, 0, -1, -1)
 
         self.__inEditMode: bool = False
         self.__editState: Dict[str, bool] = {"x": False, "y": False}
@@ -112,11 +113,17 @@ class QtLineSeriesDialog(LineSeriesDialog):
     def _close(self) -> None:
         self.__dialog.done(0)
 
-    def _getConfidenceBand(self) -> float:
+    def _getConfidenceBandFromView(self) -> float:
         return self._tryConvertToFloat(self.__confidenceBandInput.text())
 
-    def _getTitle(self) -> str:
+    def _setConfidenceBandInView(self, value: float) -> None:
+        self.__confidenceBandInput.setText(str(value))
+
+    def _getTitleFromView(self) -> str:
         return self.__titleInput.text()
+
+    def _setTitleInView(self, value: str) -> None:
+        self.__titleInput.setText(value)
 
     def _makeChooseFileDialog(self) -> ChooseFileDialog:
         return QtChooseFileDialog(self.__dialog)
