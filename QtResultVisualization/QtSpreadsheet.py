@@ -1,8 +1,6 @@
-import sys
-from typing import Any, List, Set, Tuple
-
-from PyQt5.QtWidgets import QAbstractItemView, QTableWidget, QTableWidgetItem, \
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, \
     QWidget, QTableWidgetSelectionRange
+from typing import Any, List, Tuple
 
 from ResultVisualization.Spreadsheet import Spreadsheet, SpreadsheetView
 
@@ -13,9 +11,10 @@ class QtSpreadsheet(SpreadsheetView):
         self.__widget: QTableWidget = QTableWidget(parent)
         self.__widget.setMinimumHeight(400)
         self.__widget.setMinimumWidth(400)
-        self.__widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # self.__widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.__widget.setSelectionBehavior(QTableWidget.SelectColumns)
         self.__widget.itemSelectionChanged.connect(self.__onSelectionChanged)
-        self.__widget.__spreadsheet: Spreadsheet = None
+        self.__spreadsheet: Spreadsheet = None
 
     def setSpreadsheet(self, spreadsheet: Spreadsheet) -> None:
         self.__spreadsheet = spreadsheet
@@ -42,13 +41,10 @@ class QtSpreadsheet(SpreadsheetView):
         if len(cells) == 0:
             return
 
-        print(cells)
+        self.__widget.selectionModel().clearSelection()
 
-        tableWidget: QTableWidget = self.__widget
-        tableWidget.selectionModel().clearSelection()
-
-        minRow: int = tableWidget.rowCount() + 1
-        minColumn: int = tableWidget.columnCount() + 1
+        minRow: int = self.__widget.rowCount() + 1
+        minColumn: int = self.__widget.columnCount() + 1
         maxRow: int = -1
         maxColumn: int = -1
 
@@ -65,8 +61,8 @@ class QtSpreadsheet(SpreadsheetView):
 
         selectionRange: QTableWidgetSelectionRange = QTableWidgetSelectionRange(
             minRow, minColumn, maxRow, maxColumn)
-        tableWidget.setRangeSelected(selectionRange, True)
-        tableWidget.repaint(0, 0, tableWidget.width(), tableWidget.height())
+        self.__widget.setRangeSelected(selectionRange, True)
+        self.__widget.repaint(0, 0, self.__widget.width(), self.__widget.height())
 
     def __onSelectionChanged(self) -> None:
         selectedIndeces: List[Tuple[int, int]] = list()

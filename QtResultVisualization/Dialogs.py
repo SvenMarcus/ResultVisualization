@@ -1,15 +1,12 @@
-
-from typing import Dict, List, Set, Tuple
-
-from PyQt5.QtWidgets import QDialog, QFileDialog, QGridLayout, QHBoxLayout, \
-    QLabel, QLineEdit, QMessageBox, QPushButton, QTableWidget, \
-    QTableWidgetSelectionRange, QWidget
-from matplotlib.pyplot import show
+from PyQt5.QtWidgets import QDialog, QFileDialog, QGridLayout, \
+    QLabel, QLineEdit, QMessageBox, QPushButton, \
+    QWidget
+from typing import Dict
 
 from QtResultVisualization.QtSpreadsheet import QtSpreadsheet
 from ResultVisualization.Dialogs import ChooseFileDialog, ChooseFolderDialog, \
     DataChooserDialog, DialogFactory, DialogResult, LineSeriesDialog
-from ResultVisualization.Spreadsheet import Spreadsheet, SpreadsheetView
+from ResultVisualization.Spreadsheet import SpreadsheetView
 
 
 class QtChooseFolderDialog(ChooseFolderDialog):
@@ -75,16 +72,21 @@ class QtLineSeriesDialog(LineSeriesDialog):
         self.__layout.addWidget(self.__xValuesButton, 1, 0)
         self.__layout.addWidget(self.__yValuesButton, 1, 1)
 
-        self.__layout.addWidget(QLabel("Confidence Interval:"), 0, 2)
+        self.__layout.addWidget(QLabel("Title"), 0, 2)
+        self.__titleInput = QLineEdit()
+        self.__layout.addWidget(self.__titleInput, 1, 2)
+
+        self.__layout.addWidget(QLabel("Confidence Interval:"), 2, 2)
 
         self.__confidenceBandInput: QLineEdit = QLineEdit()
-        self.__layout.addWidget(self.__confidenceBandInput, 1, 2)
+        self.__layout.addWidget(self.__confidenceBandInput, 3, 2)
 
         self.__okButton: QPushButton = QPushButton("Ok")
         self.__okButton.clicked.connect(self._confirm)
         self.__okButton.setMinimumWidth(150)
+        self.__okButton.setDefault(True)
         self.__cancelButton: QPushButton = QPushButton("Cancel")
-        self.__cancelButton.clicked.connect(lambda: self.__dialog.close())
+        self.__cancelButton.clicked.connect(self.__dialog.close)
 
         self.__layout.addWidget(self.__okButton, 2, 0)
         self.__layout.addWidget(self.__cancelButton, 2, 1)
@@ -97,9 +99,9 @@ class QtLineSeriesDialog(LineSeriesDialog):
         self.__buttonDict: Dict[str, QPushButton] = {
             "x": self.__xValuesButton, "y": self.__yValuesButton}
         self.__xValuesButton.clicked.connect(
-            lambda: self.__handleDataSelectionButton(self.__xValuesButton, "x"))
+            lambda: self.__handleDataSelectionButton("x"))
         self.__yValuesButton.clicked.connect(
-            lambda: self.__handleDataSelectionButton(self.__yValuesButton, "y"))
+            lambda: self.__handleDataSelectionButton("y"))
 
     def show(self) -> DialogResult:
         self.__dialog.setModal(True)
@@ -113,6 +115,9 @@ class QtLineSeriesDialog(LineSeriesDialog):
     def _getConfidenceBand(self) -> float:
         return self._tryConvertToFloat(self.__confidenceBandInput.text())
 
+    def _getTitle(self) -> str:
+        return self.__titleInput.text()
+
     def _makeChooseFileDialog(self) -> ChooseFileDialog:
         return QtChooseFileDialog(self.__dialog)
 
@@ -123,7 +128,7 @@ class QtLineSeriesDialog(LineSeriesDialog):
     def _showMessage(self, msg: str) -> None:
         QMessageBox.information(self.__dialog, "Error", msg)
 
-    def __handleDataSelectionButton(self, button: QPushButton, coordinate: str) -> None:
+    def __handleDataSelectionButton(self, coordinate: str) -> None:
         inEditMode: bool = self.__editState[coordinate]
         otherCoordinate: str = self.__getOtherCoordinate(coordinate)
         self.__turnOffEditMode(otherCoordinate)
@@ -135,14 +140,25 @@ class QtLineSeriesDialog(LineSeriesDialog):
     def __turnOnEditMode(self, coordinate: str) -> None:
         self.__editState[coordinate] = True
         button: QPushButton = self.__buttonDict[coordinate]
-        button.setText("Confirm Data Selection")
+        self.__setInputWidgetsEnabled(False)
+        button.setEnabled(True)
+        button.setText("Confirm Selection")
         self._startListeningForDataSelection(coordinate)
 
     def __turnOffEditMode(self, coordinate: str) -> None:
         self.__editState[coordinate] = False
         button: QPushButton = self.__buttonDict[coordinate]
+        self.__setInputWidgetsEnabled(True)
         button.setText("Select " + coordinate + " values")
         self._stopListeningForDataSelection()
+
+    def __setInputWidgetsEnabled(self, value: bool) -> None:
+        self.__loadFileButton.setEnabled(value)
+        self.__okButton.setEnabled(value)
+        self.__cancelButton.setEnabled(value)
+        self.__xValuesButton.setEnabled(value)
+        self.__yValuesButton.setEnabled(value)
+        self.__confidenceBandInput.setEnabled(value)
 
     @staticmethod
     def __getOtherCoordinate(coordinate: str) -> str:

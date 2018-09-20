@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Set, Tuple
+from typing import Any, List, Tuple
 
 from ResultVisualization.Events import Event, InvokableEvent
 
@@ -7,15 +7,15 @@ from ResultVisualization.Events import Event, InvokableEvent
 class SpreadsheetView(ABC):
 
     @abstractmethod
-    def setSpreadsheet(self) -> None:
+    def setSpreadsheet(self, spreadsheet) -> None:
         raise NotImplementedError()
 
     @abstractmethod
-    def setColumnCount(self, count: int) -> None:
+    def setColumnCount(self, columns: int) -> None:
         raise NotImplementedError()
 
     @abstractmethod
-    def setRowCount(self, count: int) -> None:
+    def setRowCount(self, rows: int) -> None:
         raise NotImplementedError()
 
     @abstractmethod

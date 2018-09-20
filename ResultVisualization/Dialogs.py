@@ -1,7 +1,7 @@
-from abc import ABC, abstractclassmethod, abstractmethod
+from abc import ABC, abstractmethod
 from enum import Enum
 from numbers import Number
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Tuple
 
 import Reader.CsvReader as csvReader
 from ResultVisualization.Graph import PlotConfig
@@ -59,17 +59,25 @@ class LineSeriesDialog(Dialog, ABC):
 
     def __init__(self):
         self._spreadsheetView: SpreadsheetView = self._makeSpreadsheetView()
-        self.__spreadsheet: Spreadsheet = Spreadsheet(self._spreadsheetView)
-        self._spreadsheetView.setSpreadsheet(self.__spreadsheet)
-        self.__selectedCells: Dict[str, List[Tuple[int, int]]] = {
-            "x": list(), "y": list()}
-        self.__data: Dict = {"x": [], "y": []}
-        self.__editedCoordinate: str = ""
-
         self._result: DialogResult = DialogResult.Cancel
 
+        self.__spreadsheet: Spreadsheet = Spreadsheet(self._spreadsheetView)
+        self._spreadsheetView.setSpreadsheet(self.__spreadsheet)
+
+        self.__selectedCells: Dict[str, List[Tuple[int, int]]] = {
+            "x": list(),
+            "y": list()
+        }
+
+        self.__data: Dict = {"x": [], "y": []}
+
+        self.__editedCoordinate: str = ""
+
+        self.__plotConfig: PlotConfig = PlotConfig()
+
     def getPlotConfig(self) -> PlotConfig:
-        config: PlotConfig = PlotConfig()
+        config: PlotConfig = self.__plotConfig
+        config.title = self._getTitle()
         config.xValues = self.__getSelectedItemsForCoordinate("x")
         config.yValues = self.__getSelectedItemsForCoordinate("y")
         config.confidenceBand = self._getConfidenceBand() if self._getConfidenceBand() else 0
@@ -95,6 +103,7 @@ class LineSeriesDialog(Dialog, ABC):
 
     def _startListeningForDataSelection(self, coordinate: str) -> None:
         self.__editedCoordinate = coordinate
+
         if len(self.__selectedCells[coordinate]) > 0:
             self.__spreadsheet.highlight(self.__selectedCells[coordinate])
 
@@ -119,6 +128,10 @@ class LineSeriesDialog(Dialog, ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def _getTitle(self) -> str:
+        raise NotImplementedError()
+
+    @abstractmethod
     def _makeSpreadsheetView(self) -> SpreadsheetView:
         raise NotImplementedError()
 
@@ -135,7 +148,7 @@ class LineSeriesDialog(Dialog, ABC):
         numYValues = len(self.__selectedCells["y"])
         return numXValues == numYValues and numXValues > 0
 
-    def __getSelectedCells(self, sender: Any = None, args: Any = None) -> None:
+    def __getSelectedCells(self) -> None:
         self.__selectedCells[self.__editedCoordinate] = list(
             self.__spreadsheet.selectedCells())
 
