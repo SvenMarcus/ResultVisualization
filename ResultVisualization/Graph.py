@@ -1,6 +1,10 @@
+import uuid
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Iterable
+from uuid import UUID
+
+from ResultVisualization.util import isNumber
 
 
 class PlotType(Enum):
@@ -19,6 +23,7 @@ class PlotConfig:
     """A data class containing data for plot configuration"""
 
     def __init__(self, plotType: PlotType = PlotType.Line):
+        self.__id: UUID = uuid.uuid4()
         self.__title: str = ""
         self.__plotType: PlotType = plotType
         self.__xValues = []
@@ -28,32 +33,52 @@ class PlotConfig:
         self.__confidenceBand: float = 0
 
     @property
+    def id(self) -> UUID:
+        """Universal unique identifier for the PlotConfig."""
+
+        return self.__id
+
+    @property
     def title(self) -> str:
+        """Returns the title of the series."""
+
         return self.__title
 
     @title.setter
     def title(self, value: str) -> None:
+        """Sets the title of the series to the given value."""
+
         self.__title = value
 
     @property
-    def plotType(self):
+    def plotType(self) -> PlotType:
+        """Returns the PlotType of the series."""
+
         return self.__plotType
 
     @property
     def xValues(self) -> list:
+        """Returns the x values for the series."""
+
         return self.__xValues
 
     @xValues.setter
     def xValues(self, value: list) -> None:
+        """Sets the x values for the series."""
+
         self.__assertAllEntriesAreNumbers(value)
         self.__xValues = value
 
     @property
     def yValues(self) -> list:
+        """Returns the y values for the series."""
+
         return self.__yValues
 
     @yValues.setter
     def yValues(self, value: list) -> None:
+        """Sets the y values for the series."""
+
         self.__assertAllEntriesAreNumbers(value)
         self.__yValues = value
 
@@ -77,20 +102,20 @@ class PlotConfig:
 
     @property
     def confidenceBand(self) -> float:
+        """Returns the confidence band value for the series. Percentage based on y values."""
+
         return self.__confidenceBand
 
     @confidenceBand.setter
     def confidenceBand(self, value: float) -> None:
+        """Sets the confidence band value for the series. Percentage based on y values."""
+
         self.__confidenceBand = value
 
     def __assertAllEntriesAreNumbers(self, collection: Iterable):
         for item in collection:
-            if not self.__isNumber(item):
+            if not isNumber(item):
                 raise NonNumberInPlotConfigError()
-
-    @staticmethod
-    def __isNumber(obj) -> bool:
-        return isinstance(obj, (int, float))
 
 
 class Graph(ABC):
@@ -108,8 +133,13 @@ class Graph(ABC):
 
         raise NotImplementedError()
 
+    def updatePlot(self, config: PlotConfig):
+        """Updates the plot with the given PlotConfig in the graph."""
+
+        raise NotImplementedError()
+
     @abstractmethod
-    def removePlot(self, index: int) -> None:
+    def removePlot(self, config: PlotConfig) -> None:
         """Removes the plot at the given index from the Graph area."""
 
         raise NotImplementedError()

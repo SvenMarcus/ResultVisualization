@@ -5,9 +5,10 @@ from typing import Dict
 
 from QtResultVisualization.QtSpreadsheet import QtSpreadsheet
 from ResultVisualization.Dialogs import ChooseFileDialog, ChooseFolderDialog, \
-    DataChooserDialog, DialogFactory, DialogResult, LineSeriesDialog
+    DialogResult, LineSeriesDialog
 from ResultVisualization.Graph import PlotConfig
 from ResultVisualization.Spreadsheet import SpreadsheetView
+from ResultVisualization.util import tryConvertToFloat
 
 
 class QtChooseFolderDialog(ChooseFolderDialog):
@@ -58,7 +59,7 @@ class QtChooseFileDialog(ChooseFileDialog):
 class QtLineSeriesDialog(LineSeriesDialog):
     """Qt implementation of LineSeriesDialog"""
 
-    def __init__(self, config: PlotConfig = None, parent: QWidget = None):
+    def __init__(self, config: PlotConfig = PlotConfig(), parent: QWidget = None):
         self.__confidenceBandInput: QLineEdit = QLineEdit()
         self.__titleInput = QLineEdit()
 
@@ -114,7 +115,7 @@ class QtLineSeriesDialog(LineSeriesDialog):
         self.__dialog.done(0)
 
     def _getConfidenceBandFromView(self) -> float:
-        return self._tryConvertToFloat(self.__confidenceBandInput.text())
+        return tryConvertToFloat(self.__confidenceBandInput.text())
 
     def _setConfidenceBandInView(self, value: float) -> None:
         self.__confidenceBandInput.setText(str(value))
@@ -137,8 +138,6 @@ class QtLineSeriesDialog(LineSeriesDialog):
 
     def __handleDataSelectionButton(self, coordinate: str) -> None:
         inEditMode: bool = self.__editState[coordinate]
-        otherCoordinate: str = self.__getOtherCoordinate(coordinate)
-        self.__turnOffEditMode(otherCoordinate)
         if not inEditMode:
             self.__turnOnEditMode(coordinate)
         else:
@@ -147,19 +146,17 @@ class QtLineSeriesDialog(LineSeriesDialog):
     def __turnOnEditMode(self, coordinate: str) -> None:
         self.__editState[coordinate] = True
         button: QPushButton = self.__buttonDict[coordinate]
-        self.__setInputWidgetsEnabled(False)
-        button.setEnabled(True)
         button.setText("Confirm Selection")
-        self._startListeningForDataSelection(coordinate)
+        self._toggleEditMode(coordinate)
+        button.setEnabled(True)
 
     def __turnOffEditMode(self, coordinate: str) -> None:
         self.__editState[coordinate] = False
         button: QPushButton = self.__buttonDict[coordinate]
-        self.__setInputWidgetsEnabled(True)
         button.setText("Select " + coordinate + " values")
-        self._stopListeningForDataSelection()
+        self._toggleEditMode(coordinate)
 
-    def __setInputWidgetsEnabled(self, value: bool) -> None:
+    def _setUnneededInputWidgetsEnabled(self, value: bool) -> None:
         self.__loadFileButton.setEnabled(value)
         self.__okButton.setEnabled(value)
         self.__cancelButton.setEnabled(value)
@@ -167,23 +164,3 @@ class QtLineSeriesDialog(LineSeriesDialog):
         self.__yValuesButton.setEnabled(value)
         self.__confidenceBandInput.setEnabled(value)
 
-    @staticmethod
-    def __getOtherCoordinate(coordinate: str) -> str:
-        return "x" if coordinate == "y" else "y"
-
-
-class QtDialogFactory(DialogFactory):
-    """Qt Implementation of DialogFactory. Creates Qt implementations of Dialogs."""
-
-    def __init__(self, parent: QWidget = None):
-        self.__parent: QWidget = parent
-
-    def setParent(self, parent: QWidget):
-        """Sets the parent widget for created dialogs"""
-        self.__parent = parent
-
-    def makeChooseFolderDialog(self) -> ChooseFolderDialog:
-        return QtChooseFolderDialog(self.__parent)
-
-    def makeDataChooserDialog(self) -> DataChooserDialog:
-        pass

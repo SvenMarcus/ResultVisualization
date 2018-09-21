@@ -32,7 +32,7 @@ class LinearGraphView(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def _makeLineSeriesDialog(self, data: List[List] = None) -> LineSeriesDialog:
+    def _makeLineSeriesDialog(self, data: PlotConfig = None) -> LineSeriesDialog:
         """Creates and returns an instance of LineSeriesDialog"""
         raise NotImplementedError()
 
@@ -51,18 +51,21 @@ class LinearGraphView(ABC):
 
     def _editSeries(self, index: int) -> None:
         """Opens a LineSeriesDialog with the PlotConfig at the given index"""
+
         config: PlotConfig = self.__series[index]
         dialog: LineSeriesDialog = self._makeLineSeriesDialog(config)
         result: DialogResult = dialog.show()
 
         if result == DialogResult.Ok:
             config: PlotConfig = dialog.getPlotConfig()
+            self._graph.updatePlot(config)
             self._setEntryInListView(index, config.title)
-
 
     def _removeSeries(self, index: int) -> None:
         """Removes the series at the given index from the Graph"""
-        self._graph.removePlot(index)
+
+        config: PlotConfig = self.__series.pop(index)
+        self._graph.removePlot(config)
         self._removeEntryFromListView(index)
 
     @staticmethod

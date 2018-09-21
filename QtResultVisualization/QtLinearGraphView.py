@@ -52,7 +52,7 @@ class QtLinearGraphView(LinearGraphView):
     def _makeGraph(self) -> Graph:
         return QtGraph()
 
-    def _makeLineSeriesDialog(self, config: PlotConfig=PlotConfig()) -> LineSeriesDialog:
+    def _makeLineSeriesDialog(self, config: PlotConfig = None) -> LineSeriesDialog:
         return QtLineSeriesDialog(config, self.__window)
 
     def _addEntryToListView(self, title: str) -> None:
@@ -65,6 +65,7 @@ class QtLinearGraphView(LinearGraphView):
 
     def _removeEntryFromListView(self, index: int) -> None:
         self.__seriesTable.removeRow(index)
+        self.__seriesTable.clearSelection()
 
     def __onEditClicked(self) -> None:
         row = self.__getSelectedRow()
