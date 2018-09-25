@@ -23,20 +23,15 @@ class PlotConfig:
     """A data class containing data for plot configuration"""
 
     def __init__(self, plotType: PlotType = PlotType.Line):
-        self.__id: UUID = uuid.uuid4()
         self.__title: str = ""
         self.__plotType: PlotType = plotType
+        self.__xLabel: str = ""
+        self.__yLabel: str = ""
         self.__xValues = []
         self.__yValues = []
         self.__xLimits = ()
         self.__yLimits = ()
         self.__confidenceBand: float = 0
-
-    @property
-    def id(self) -> UUID:
-        """Universal unique identifier for the PlotConfig."""
-
-        return self.__id
 
     @property
     def title(self) -> str:
@@ -55,6 +50,22 @@ class PlotConfig:
         """Returns the PlotType of the series."""
 
         return self.__plotType
+
+    @property
+    def xLabel(self) -> str:
+        return self.__xLabel
+
+    @xLabel.setter
+    def xLabel(self, value: str) -> None:
+        self.__xLabel = value
+
+    @property
+    def yLabel(self) -> str:
+        return self.__yLabel
+
+    @yLabel.setter
+    def yLabel(self, value: str) -> None:
+        self.__yLabel = value
 
     @property
     def xValues(self) -> list:

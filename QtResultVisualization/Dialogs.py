@@ -60,50 +60,77 @@ class QtLineSeriesDialog(LineSeriesDialog):
     """Qt implementation of LineSeriesDialog"""
 
     def __init__(self, config: PlotConfig = PlotConfig(), parent: QWidget = None):
-        self.__confidenceBandInput: QLineEdit = QLineEdit()
-        self.__titleInput = QLineEdit()
+        self.__dialog: QDialog = None
+        self.__loadFileButton: QPushButton = None
+        self.__xValuesButton: QPushButton = None
+        self.__yValuesButton: QPushButton = None
+        self.__okButton: QPushButton = None
+        self.__cancelButton: QPushButton = None
+        self.__confidenceBandInput: QLineEdit = None
+        self.__titleInput: QLineEdit = None
+
+        self.__initUI(parent)
 
         super(QtLineSeriesDialog, self).__init__(config)
-        self.__dialog: QDialog = QDialog(parent)
-        self.__layout: QGridLayout = QGridLayout(self.__dialog)
-        self.__dialog.setLayout(self.__layout)
 
-        self.__loadFileButton: QPushButton = QPushButton("Load csv file")
-        self.__loadFileButton.clicked.connect(self._handleLoadFile)
-        self.__layout.addWidget(self.__loadFileButton, 1, 0, 1, 2)
-
-        self.__xValuesButton: QPushButton = QPushButton("Select x values")
-        self.__yValuesButton: QPushButton = QPushButton("Select y values")
-        self.__layout.addWidget(self.__xValuesButton, 2, 0)
-        self.__layout.addWidget(self.__yValuesButton, 2, 1)
-
-        self.__layout.addWidget(QLabel("Title"), 0, 2)
-        self.__layout.addWidget(self.__titleInput, 1, 2)
-
-        self.__layout.addWidget(QLabel("Confidence Interval:"), 2, 2)
-        self.__layout.addWidget(self.__confidenceBandInput, 3, 2)
-
-        self.__okButton: QPushButton = QPushButton("Ok")
-        self.__okButton.clicked.connect(self._confirm)
-        self.__okButton.setMinimumWidth(150)
-        self.__okButton.setDefault(True)
-        self.__cancelButton: QPushButton = QPushButton("Cancel")
-        self.__cancelButton.clicked.connect(self.__dialog.close)
-
-        self.__layout.addWidget(self.__okButton, 3, 0)
-        self.__layout.addWidget(self.__cancelButton, 3, 1)
-
-        self.__layout.addWidget(
+        self.__dialog.layout().addWidget(
             self._spreadsheetView.getTableWidget(), 4, 0, -1, -1)
 
-        self.__inEditMode: bool = False
-        self.__editState: Dict[str, bool] = {"x": False, "y": False}
+        self.__editState: Dict[str, bool] = {
+            "x": False,
+            "y": False
+        }
+
         self.__buttonDict: Dict[str, QPushButton] = {
-            "x": self.__xValuesButton, "y": self.__yValuesButton}
+            "x": self.__xValuesButton,
+            "y": self.__yValuesButton
+        }
+
+    def __initUI(self, parent: QWidget) -> None:
+        self.__dialog = QDialog(parent)
+
+        self.__confidenceBandInput = QLineEdit()
+        self.__titleInput = QLineEdit()
+
+        self.__loadFileButton = QPushButton("Load csv file")
+        self.__loadFileButton.clicked.connect(self._handleLoadFile)
+
+        self.__xValuesButton = QPushButton("Select x values")
+        self.__yValuesButton = QPushButton("Select y values")
         self.__xValuesButton.clicked.connect(
             lambda: self.__handleDataSelectionButton("x"))
         self.__yValuesButton.clicked.connect(
             lambda: self.__handleDataSelectionButton("y"))
+
+        self.__okButton = QPushButton("Ok")
+        self.__okButton.clicked.connect(self._confirm)
+        self.__okButton.setMinimumWidth(150)
+        self.__okButton.setDefault(True)
+
+        self.__cancelButton = QPushButton("Cancel")
+        self.__cancelButton.clicked.connect(self.__dialog.close)
+
+        searchColumnHeaderInput: QLineEdit = QLineEdit()
+        searchColumnHeaderInput.setPlaceholderText("Search Column Headers...")
+        searchColumnHeaderInput.textChanged.connect(self._applyFilter)
+
+        layout: QGridLayout = QGridLayout(self.__dialog)
+        self.__dialog.setLayout(layout)
+
+        layout.addWidget(self.__loadFileButton, 0, 0, 1, 2)
+        layout.addWidget(searchColumnHeaderInput, 1, 0, 1, 2)
+
+        layout.addWidget(self.__xValuesButton, 2, 0)
+        layout.addWidget(self.__yValuesButton, 2, 1)
+
+        layout.addWidget(QLabel("Title"), 0, 2)
+        layout.addWidget(self.__titleInput, 1, 2)
+
+        layout.addWidget(self.__okButton, 3, 0)
+        layout.addWidget(self.__cancelButton, 3, 1)
+
+        layout.addWidget(QLabel("Confidence Interval:"), 2, 2)
+        layout.addWidget(self.__confidenceBandInput, 3, 2)
 
     def show(self) -> DialogResult:
         self.__dialog.setModal(True)
@@ -135,6 +162,9 @@ class QtLineSeriesDialog(LineSeriesDialog):
 
     def _showMessage(self, msg: str) -> None:
         QMessageBox.information(self.__dialog, "Error", msg)
+
+    def _setWindowTitle(self, value: str) -> None:
+        self.__dialog.setWindowTitle(value)
 
     def __handleDataSelectionButton(self, coordinate: str) -> None:
         inEditMode: bool = self.__editState[coordinate]

@@ -31,6 +31,7 @@ class QtLinearGraphView(LinearGraphView):
         hLayout: QHBoxLayout = QHBoxLayout()
 
         self.__newSeriesButton: QPushButton = QPushButton("Add")
+        self.__newSeriesButton.setDefault(True)
         self.__newSeriesButton.clicked.connect(lambda: self._addSeries())
 
         self.__editSeriesButton: QPushButton = QPushButton("Edit")

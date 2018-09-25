@@ -80,6 +80,9 @@ class LineSeriesDialog(Dialog, ABC):
 
         config: PlotConfig = self.__plotConfig
         config.title = self._getTitleFromView()
+        config.xLabel = self.__tryDeterminingHeaderForCoordinate("x")
+        config.yLabel = self.__tryDeterminingHeaderForCoordinate("y")
+        print(config.xLabel, config.yLabel)
         config.xValues = self.__getSelectedItemsForCoordinate("x")
         config.yValues = self.__getSelectedItemsForCoordinate("y")
         config.confidenceBand = self._getConfidenceBandFromView() if self._getConfidenceBandFromView() else 0
@@ -105,6 +108,7 @@ class LineSeriesDialog(Dialog, ABC):
         result: DialogResult = dialog.show()
         if result == DialogResult.Ok:
             file: str = dialog.getSelectedFile()
+            self._setWindowTitle(file)
             data: List[List[str]] = csvReader.readFile(
                 file, csvReader.semicolon)
             self.__spreadsheet.setData(data)
@@ -121,12 +125,16 @@ class LineSeriesDialog(Dialog, ABC):
 
         self._setUnneededInputWidgetsEnabled(not bool(self.__editedCoordinate))
 
+    def _applyFilter(self, columnFilter: str) -> None:
+        self.__spreadsheet.filterByColumnHeader(columnFilter)
+
     @abstractmethod
-    def _setUnneededInputWidgetsEnabled(self, value: bool) -> bool:
+    def _setUnneededInputWidgetsEnabled(self, value: bool) -> None:
         raise NotImplementedError()
 
     def __highlightSelectedCells(self, coordinate):
         """Highlights selected cells in the Spreadsheet."""
+
         if len(self.__selectedCells[coordinate]) > 0:
             self.__spreadsheet.highlight(self.__selectedCells[coordinate])
 
@@ -178,6 +186,12 @@ class LineSeriesDialog(Dialog, ABC):
 
         raise NotImplementedError()
 
+    @abstractmethod
+    def _setWindowTitle(self, value: str) -> None:
+        """Sets the Window title to the given value."""
+
+        raise NotImplementedError()
+
     def __isValidData(self) -> bool:
         """Checks if the data selected by the user is valid.
         The number of x and y values must be equal and greater than 0."""
@@ -190,6 +204,18 @@ class LineSeriesDialog(Dialog, ABC):
         """Saves the indices of cells selected by the user."""
 
         self.__selectedCells[coordinate] = self.__spreadsheet.selectedCells()
+
+    def __tryDeterminingHeaderForCoordinate(self, coordinate: str) -> str:
+        """Tries to determine the header for a column. If first row is not a number assumes it is a column header."""
+
+        for cell in self.__selectedCells[coordinate]:
+            isFirstRow: bool = cell[0] == 0
+            cellContent: Any = self.__spreadsheet.cell(cell[0], cell[1])
+            if isFirstRow:
+                if not isNumber(cellContent):
+                    print(cellContent)
+                    return str(cellContent)
+                return ""
 
     def __getSelectedItemsForCoordinate(self, coordinate: str) -> List[Number]:
         """Returns the items for the given coordinate based on the selected Spreadsheet cells."""
@@ -210,7 +236,9 @@ class LineSeriesDialog(Dialog, ABC):
 
         self._setTitleInView(config.title)
         self._setConfidenceBandInView(config.confidenceBand)
+        firstRow: List[str] = [config.xLabel, config.yLabel]
         values: List[List] = self.__transposePlotConfigData(config)
+        values.insert(0, firstRow)
         self.__spreadsheet.setData(values)
         self.__setSelectedIndices(values)
 

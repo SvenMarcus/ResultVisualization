@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, \
+from PyQt5.QtWidgets import QAbstractItemView, QTableWidget, QTableWidgetItem, \
     QWidget, QTableWidgetSelectionRange
 from typing import Any, List, Tuple
 
@@ -11,7 +11,7 @@ class QtSpreadsheet(SpreadsheetView):
         self.__widget: QTableWidget = QTableWidget(parent)
         self.__widget.setMinimumHeight(400)
         self.__widget.setMinimumWidth(400)
-        # self.__widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.__widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.__widget.setSelectionBehavior(QTableWidget.SelectColumns)
         self.__widget.itemSelectionChanged.connect(self.__onSelectionChanged)
         self.__spreadsheet: Spreadsheet = None
@@ -63,6 +63,9 @@ class QtSpreadsheet(SpreadsheetView):
             minRow, minColumn, maxRow, maxColumn)
         self.__widget.setRangeSelected(selectionRange, True)
         self.__widget.repaint(0, 0, self.__widget.width(), self.__widget.height())
+
+    def setColumnVisible(self, column: int, visible: bool) -> None:
+        self.__widget.setColumnHidden(column, not visible)
 
     def __onSelectionChanged(self) -> None:
         selectedIndeces: List[Tuple[int, int]] = list()

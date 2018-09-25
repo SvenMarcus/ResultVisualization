@@ -34,6 +34,10 @@ class SpreadsheetView(ABC):
     def highlight(self, cells: List[Tuple[int, int]]) -> None:
         raise NotImplementedError()
 
+    @abstractmethod
+    def setColumnVisible(self, column: int, visible: bool) -> None:
+        raise NotImplementedError()
+
 
 class Spreadsheet:
 
@@ -61,10 +65,26 @@ class Spreadsheet:
             if len(row) > self.__columns:
                 self.__columns = len(row)
                 self.__view.setColumnCount(self.__columns)
-            
+
             for columnIndex in range(0, len(row)):
                 columnItem: Any = row[columnIndex]
                 self.__view.setCell(rowIndex, columnIndex, columnItem)
+
+    def filterByColumnHeader(self, value: str) -> None:
+        if len(self.__data) == 0:
+            return
+
+        columnHeaders: List[Any] = self.__data[0]
+
+        for columnIndex in range(0, len(columnHeaders)):
+            column: Any = columnHeaders[columnIndex]
+            strHeader: str = str(column)
+
+            visible: bool = False
+            if value.lower() in strHeader.lower():
+                visible = True
+
+            self.__view.setColumnVisible(columnIndex, visible)
 
     def highlight(self, cells: List[Tuple[int, int]]) -> None:
         self.__view.highlight(cells)
