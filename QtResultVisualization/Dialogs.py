@@ -5,8 +5,8 @@ from typing import Dict
 
 from QtResultVisualization.QtSpreadsheet import QtSpreadsheet
 from ResultVisualization.Dialogs import ChooseFileDialog, ChooseFolderDialog, \
-    DialogResult, LineSeriesDialog
-from ResultVisualization.Graph import PlotConfig
+    DialogResult, LineSeriesDialog, SeriesDialog, SeriesDialogFactory
+from ResultVisualization.plot import LineSeries, Series
 from ResultVisualization.Spreadsheet import SpreadsheetView
 from ResultVisualization.util import tryConvertToFloat
 
@@ -59,7 +59,7 @@ class QtChooseFileDialog(ChooseFileDialog):
 class QtLineSeriesDialog(LineSeriesDialog):
     """Qt implementation of LineSeriesDialog"""
 
-    def __init__(self, config: PlotConfig = PlotConfig(), parent: QWidget = None):
+    def __init__(self, series: LineSeries = LineSeries(), parent: QWidget = None):
         self.__dialog: QDialog = None
         self.__loadFileButton: QPushButton = None
         self.__xValuesButton: QPushButton = None
@@ -71,7 +71,7 @@ class QtLineSeriesDialog(LineSeriesDialog):
 
         self.__initUI(parent)
 
-        super(QtLineSeriesDialog, self).__init__(config)
+        super(QtLineSeriesDialog, self).__init__(series)
 
         self.__dialog.layout().addWidget(
             self._spreadsheetView.getTableWidget(), 4, 0, -1, -1)
@@ -194,3 +194,8 @@ class QtLineSeriesDialog(LineSeriesDialog):
         self.__yValuesButton.setEnabled(value)
         self.__confidenceBandInput.setEnabled(value)
 
+
+class QtLineSeriesDialogFactory(SeriesDialogFactory):
+
+    def makeSeriesDialog(self, initialSeries: Series = None) -> SeriesDialog:
+        return QtLineSeriesDialog(initialSeries)

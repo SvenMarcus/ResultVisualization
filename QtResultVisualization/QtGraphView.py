@@ -1,18 +1,16 @@
-from PyQt5.QtWidgets import QHBoxLayout, QHeaderView, \
-    QMainWindow, QPushButton, QSplitter, QTableWidget, QTableWidgetItem, \
-    QVBoxLayout, QWidget
+from PyQt5.QtWidgets import (QHBoxLayout, QHeaderView, QMainWindow,
+                             QPushButton, QSplitter, QTableWidget,
+                             QTableWidgetItem, QVBoxLayout, QWidget)
 
-from QtResultVisualization.Dialogs import QtLineSeriesDialog
 from QtResultVisualization.QtGraph import QtGraph
-from ResultVisualization.Dialogs import LineSeriesDialog
-from ResultVisualization.Graph import Graph, PlotConfig
-from ResultVisualization.LinearGraphView import LinearGraphView
+from ResultVisualization.Dialogs import SeriesDialogFactory
+from ResultVisualization.GraphView import GraphView
+from ResultVisualization.plot import Graph
 
+class QtGraphView(GraphView):
 
-class QtLinearGraphView(LinearGraphView):
-
-    def __init__(self):
-        super(QtLinearGraphView, self).__init__()
+    def __init__(self, seriesDialogFactory: SeriesDialogFactory):
+        super(QtGraphView, self).__init__(seriesDialogFactory)
         self.__window: QMainWindow = QMainWindow()
         self.__window.setMinimumWidth(300)
         self.__window.setMinimumHeight(300)
@@ -52,9 +50,6 @@ class QtLinearGraphView(LinearGraphView):
 
     def _makeGraph(self) -> Graph:
         return QtGraph()
-
-    def _makeLineSeriesDialog(self, config: PlotConfig = None) -> LineSeriesDialog:
-        return QtLineSeriesDialog(config, self.__window)
 
     def _addEntryToListView(self, title: str) -> None:
         rows: int = self.__seriesTable.rowCount()

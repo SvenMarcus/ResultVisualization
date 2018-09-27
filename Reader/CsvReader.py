@@ -3,7 +3,7 @@ from typing import List
 
 class semicolon(csv.excel):
     """An excel csv dialect using semicolons as delimiters."""
-    
+
     delimiter = ";"
 
     def __init__(self):

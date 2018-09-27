@@ -1,5 +1,7 @@
 from abc import abstractmethod
-from typing import TypeVar, Generic
+from numbers import Number
+from typing import Generic, TypeVar
+
 
 T = TypeVar("T")
 

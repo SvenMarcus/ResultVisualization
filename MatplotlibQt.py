@@ -1,9 +1,12 @@
 import sys
-from PyQt5 import QtWidgets as QtGui
+
 import matplotlib
 import matplotlib.figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from PyQt5 import QtWidgets as QtGui
+from matplotlib.backends.backend_qt4agg import , \
+    FigureCanvasQTAgg as FigureCanvas, \
+    NavigationToolbar2QT as NavigationToolbar
+from matplotlib.lines import Line2D
 
 
 class PrettyWidget(QtGui.QWidget):
@@ -58,13 +61,14 @@ class PrettyWidget(QtGui.QWidget):
         y = [i**0.5 for i in x]
         ax3.plot(x, y, 'r.-')
         ax3.set_title('Square Root Plot')
-        self.canvas.draw_idle()
+        self.canvas.draw_idle()  
 
     def center(self):
         qr = self.frameGeometry()
         cp = QtGui.QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+
 
 app = QtGui.QApplication(sys.argv)
 app.aboutToQuit.connect(app.deleteLater)

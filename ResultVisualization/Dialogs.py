@@ -4,8 +4,8 @@ from numbers import Number
 from typing import Any, Dict, List, Tuple
 
 import Reader.CsvReader as csvReader
-from ResultVisualization.Graph import PlotConfig
 from ResultVisualization.Spreadsheet import Spreadsheet, SpreadsheetView
+from ResultVisualization.plot import LineSeries, Series
 from ResultVisualization.util import isNumber, tryConvertToFloat
 
 
@@ -56,10 +56,17 @@ class ChooseFileDialog(Dialog, ABC):
         raise NotImplementedError()
 
 
-class LineSeriesDialog(Dialog, ABC):
+class SeriesDialog(ABC):
+
+    @abstractmethod
+    def getSeries(self) -> Series:
+        raise NotImplementedError()
+
+
+class LineSeriesDialog(SeriesDialog, ABC):
     """Abstract class for a Dialog to select data for a line series using a Spreadsheet"""
 
-    def __init__(self, config: PlotConfig = None):
+    def __init__(self, series: LineSeries = None):
         self._result: DialogResult = DialogResult.Cancel
 
         self._spreadsheetView: SpreadsheetView = self._makeSpreadsheetView()
@@ -72,21 +79,20 @@ class LineSeriesDialog(Dialog, ABC):
         }
 
         self.__editedCoordinate: str = ""
-        self.__plotConfig: PlotConfig = config or PlotConfig()
-        self.__setInitialPlotConfig(self.__plotConfig)
+        self.__series: LineSeries = series or LineSeries()
+        self.__setInitialSeries(self.__series)
 
-    def getPlotConfig(self) -> PlotConfig:
-        """Returns a PlotConfig object based on the data entered and selected by the user."""
+    def getSeries(self) -> Series:
+        """Returns a Series object based on the data entered and selected by the user."""
 
-        config: PlotConfig = self.__plotConfig
-        config.title = self._getTitleFromView()
-        config.xLabel = self.__tryDeterminingHeaderForCoordinate("x")
-        config.yLabel = self.__tryDeterminingHeaderForCoordinate("y")
-        print(config.xLabel, config.yLabel)
-        config.xValues = self.__getSelectedItemsForCoordinate("x")
-        config.yValues = self.__getSelectedItemsForCoordinate("y")
-        config.confidenceBand = self._getConfidenceBandFromView() if self._getConfidenceBandFromView() else 0
-        return config
+        series: LineSeries = self.__series
+        series.title = self._getTitleFromView()
+        # series.xLabel = self.__tryDeterminingHeaderForCoordinate("x")
+        # series.yLabel = self.__tryDeterminingHeaderForCoordinate("y")
+        # series.xValues = self.__getSelectedItemsForCoordinate("x")
+        # series.yValues = self.__getSelectedItemsForCoordinate("y")
+        series.confidenceBand = self._getConfidenceBandFromView() if self._getConfidenceBandFromView() else 0
+        return series
 
     def _confirm(self) -> None:
         """Called when the 'Ok' button is clicked. Displays an error message when the entered data is not valid.
@@ -118,9 +124,16 @@ class LineSeriesDialog(Dialog, ABC):
 
         if not self.__editedCoordinate:
             self.__editedCoordinate = coordinate
-            self.__highlightSelectedCells(coordinate)
+            # self.__highlightSelectedCells(coordinate)
         else:
             self.__saveSelectedCellIndices(coordinate)
+            
+            label: str = self.__tryDeterminingHeaderForCoordinate(self.__editedCoordinate)
+            self.__assignLabelForCoordinate(self.__editedCoordinate, label)
+            
+            items: List[Number] = self.__getSelectedItemsForCoordinate(self.__editedCoordinate)
+            self.__assignItemsForCoordinate(self.__editedCoordinate, items)
+            
             self.__editedCoordinate = ""
 
         self._setUnneededInputWidgetsEnabled(not bool(self.__editedCoordinate))
@@ -131,6 +144,18 @@ class LineSeriesDialog(Dialog, ABC):
     @abstractmethod
     def _setUnneededInputWidgetsEnabled(self, value: bool) -> None:
         raise NotImplementedError()
+
+    def __assignItemsForCoordinate(self, coordinate: str, items: List[Number]) -> None:
+        if coordinate == "x":
+            self.__series.xValues = self.__getSelectedItemsForCoordinate(coordinate)
+        else:
+            self.__series.yValues = self.__getSelectedItemsForCoordinate(coordinate)
+
+    def __assignLabelForCoordinate(self, coordinate: str, label: str) -> None:
+        if coordinate == "x":
+            self.__series.xLabel = label
+        else:
+            self.__series.yLabel = label
 
     def __highlightSelectedCells(self, coordinate):
         """Highlights selected cells in the Spreadsheet."""
@@ -228,7 +253,7 @@ class LineSeriesDialog(Dialog, ABC):
                 items.append(num)
         return items
 
-    def __setInitialPlotConfig(self, config: PlotConfig) -> None:
+    def __setInitialSeries(self, config: LineSeries) -> None:
         """Sets data from a given PlotConfig in the view."""
 
         if len(config.xValues) == 0:
@@ -250,8 +275,15 @@ class LineSeriesDialog(Dialog, ABC):
             self.__selectedCells["y"].append((rowIndex, 1))
 
     @staticmethod
-    def __transposePlotConfigData(config: PlotConfig) -> List[List]:
+    def __transposePlotConfigData(series: LineSeries) -> List[List]:
         """Transposes x and y values from a PlotConfig into column format."""
 
-        data: List[List] = [config.xValues, config.yValues]
+        data: List[List] = [series.xValues, series.yValues]
         return list(map(list, zip(*data)))
+
+
+class SeriesDialogFactory(ABC):
+
+    @abstractmethod
+    def makeSeriesDialog(self, initialSeries: Series = None) -> SeriesDialog:
+        raise NotImplementedError()
