@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Iterable, List
 
+from ResultVisualization.Filter import RowFilter
 from ResultVisualization.util import isNumber
 
 
@@ -32,10 +33,17 @@ class Plotter(ABC):
 class Series(ABC):
 
     def __init__(self):
-        self.__title: str = ""
-        self.__xLabel: str = ""
-        self.__yLabel: str = ""
+        self._title: str = ""
+        self._xLabel: str = ""
+        self._yLabel: str = ""
+        self._metaData: List[str] = list()
+        self._filters: List[RowFilter] = list()
 
+    def addFilter(self, rowFilter: RowFilter) -> None:
+        self._filters.append(rowFilter)
+
+    def removeFilter(self, rowFilter: RowFilter) -> None:
+        self._filters.remove(rowFilter)
 
     @abstractmethod
     def plot(self, plotter: Plotter) -> None:
@@ -45,29 +53,39 @@ class Series(ABC):
     def title(self) -> str:
         """Returns the title of the series."""
 
-        return self.__title
+        return self._title
 
     @title.setter
     def title(self, value: str) -> None:
         """Sets the title of the series to the given value."""
 
-        self.__title = value
+        self._title = value
 
     @property
     def xLabel(self) -> str:
-        return self.__xLabel
+        return self._xLabel
 
     @xLabel.setter
     def xLabel(self, value: str) -> None:
-        self.__xLabel = value
+        self._xLabel = value
 
     @property
     def yLabel(self) -> str:
-        return self.__yLabel
+        return self._yLabel
 
     @yLabel.setter
     def yLabel(self, value: str) -> None:
-        self.__yLabel = value
+        self._yLabel = value
+
+    @property
+    def metaData(self) -> List[str]:
+        """Returns a list with meta data for the plot."""
+
+        return self._metaData
+
+    @metaData.setter
+    def metaData(self, value: List[str]) -> None:
+        self._metaData = value
 
 
 class Graph(ABC):
@@ -95,6 +113,7 @@ class Graph(ABC):
 class LineSeries(Series):
 
     def __init__(self):
+        super().__init__()
         self.__title: str = ""
         self.__xLabel: str = ""
         self.__yLabel: str = ""
@@ -104,11 +123,27 @@ class LineSeries(Series):
         self.__yLimits = ()
         self.__confidenceBand: float = 0
 
+        self.__filteredX = list()
+        self.__filteredY = list()
+
     def plot(self, plotter: Plotter) -> None:
-        print(self.__xValues, self.yValues, sep="\n")
         self.__sortValuesByX()
+        self.__filterValues()
         self.__plotConfidenceBand(plotter)
-        plotter.lineSeries(self.__xValues, self.__yValues)
+        plotter.lineSeries(self.__filteredX, self.__filteredY)
+
+    def __filterValues(self) -> None:
+        self.__filteredX = list()
+        self.__filteredY = list()
+
+        for i in range(len(self.metaData)):
+            shouldAdd: bool = True
+            for rowFilter in self._filters:
+                shouldAdd = shouldAdd and rowFilter.appliesToRow(self, i)
+
+            if shouldAdd:
+                self.__filteredX.append(self.xValues[i])
+                self.__filteredY.append(self.yValues[i])
 
     def __plotConfidenceBand(self, plotter: Plotter) -> None:
         if self.__confidenceBand > 0:
@@ -118,8 +153,13 @@ class LineSeries(Series):
             plotter.fillArea(self.__xValues, lower, upper)
 
     def __sortValuesByX(self) -> None:
-        zipped = zip(self.__xValues, self.__yValues)
-        self.__xValues, self.__yValues = list(zip(*sorted(zipped)))
+        zipped = None
+        if len(self.metaData) > 0:
+            zipped = zip(self.__xValues, self.__yValues, self.metaData)
+            self.__xValues, self.__yValues, self.metaData = list(zip(*sorted(zipped)))
+        else:
+            zipped = zip(self.__xValues, self.__yValues)
+            self.__xValues, self.__yValues = list(zip(*sorted(zipped)))
 
     @property
     def xValues(self) -> list:

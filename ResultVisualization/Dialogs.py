@@ -75,7 +75,8 @@ class LineSeriesDialog(SeriesDialog, ABC):
 
         self.__selectedCells: Dict[str, List[Tuple[int, int]]] = {
             "x": list(),
-            "y": list()
+            "y": list(),
+            "meta": list()
         }
 
         self.__editedCoordinate: str = ""
@@ -127,13 +128,13 @@ class LineSeriesDialog(SeriesDialog, ABC):
             # self.__highlightSelectedCells(coordinate)
         else:
             self.__saveSelectedCellIndices(coordinate)
-            
+
             label: str = self.__tryDeterminingHeaderForCoordinate(self.__editedCoordinate)
             self.__assignLabelForCoordinate(self.__editedCoordinate, label)
-            
+
             items: List[Number] = self.__getSelectedItemsForCoordinate(self.__editedCoordinate)
             self.__assignItemsForCoordinate(self.__editedCoordinate, items)
-            
+
             self.__editedCoordinate = ""
 
         self._setUnneededInputWidgetsEnabled(not bool(self.__editedCoordinate))
@@ -146,10 +147,13 @@ class LineSeriesDialog(SeriesDialog, ABC):
         raise NotImplementedError()
 
     def __assignItemsForCoordinate(self, coordinate: str, items: List[Number]) -> None:
+        items: List[Any] = self.__getSelectedItemsForCoordinate(coordinate)
         if coordinate == "x":
-            self.__series.xValues = self.__getSelectedItemsForCoordinate(coordinate)
-        else:
-            self.__series.yValues = self.__getSelectedItemsForCoordinate(coordinate)
+            self.__series.xValues = items
+        elif coordinate == "y":
+            self.__series.yValues = items
+        elif coordinate == "meta":
+            self.__series.metaData = items
 
     def __assignLabelForCoordinate(self, coordinate: str, label: str) -> None:
         if coordinate == "x":
@@ -248,6 +252,10 @@ class LineSeriesDialog(SeriesDialog, ABC):
         items: List = list()
         for cell in self.__selectedCells[coordinate]:
             item: Any = self.__spreadsheet.cell(cell[0], cell[1])
+            if coordinate == "meta":
+                items.append(str(item))
+                continue
+
             num: float = tryConvertToFloat(item)
             if isNumber(num):
                 items.append(num)

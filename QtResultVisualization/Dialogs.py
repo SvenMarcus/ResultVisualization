@@ -64,6 +64,7 @@ class QtLineSeriesDialog(LineSeriesDialog):
         self.__loadFileButton: QPushButton = None
         self.__xValuesButton: QPushButton = None
         self.__yValuesButton: QPushButton = None
+        self.__metaColumnButton: QPushButton = None
         self.__okButton: QPushButton = None
         self.__cancelButton: QPushButton = None
         self.__confidenceBandInput: QLineEdit = None
@@ -74,16 +75,24 @@ class QtLineSeriesDialog(LineSeriesDialog):
         super(QtLineSeriesDialog, self).__init__(series)
 
         self.__dialog.layout().addWidget(
-            self._spreadsheetView.getTableWidget(), 4, 0, -1, -1)
+            self._spreadsheetView.getTableWidget(), 5, 0, -1, -1)
 
         self.__editState: Dict[str, bool] = {
             "x": False,
-            "y": False
+            "y": False,
+            "meta": False
+        }
+
+        self.__buttonTitles: Dict[str, str] = {
+            "x": "Select X values",
+            "y": "Select Y values",
+            "meta": "Select Meta Column"
         }
 
         self.__buttonDict: Dict[str, QPushButton] = {
             "x": self.__xValuesButton,
-            "y": self.__yValuesButton
+            "y": self.__yValuesButton,
+            "meta": self.__metaColumnButton
         }
 
     def __initUI(self, parent: QWidget) -> None:
@@ -101,6 +110,9 @@ class QtLineSeriesDialog(LineSeriesDialog):
             lambda: self.__handleDataSelectionButton("x"))
         self.__yValuesButton.clicked.connect(
             lambda: self.__handleDataSelectionButton("y"))
+
+        self.__metaColumnButton = QPushButton("Select Meta Column")
+        self.__metaColumnButton.clicked.connect(lambda: self.__handleDataSelectionButton("meta"))
 
         self.__okButton = QPushButton("Ok")
         self.__okButton.clicked.connect(self._confirm)
@@ -120,14 +132,16 @@ class QtLineSeriesDialog(LineSeriesDialog):
         layout.addWidget(self.__loadFileButton, 0, 0, 1, 2)
         layout.addWidget(searchColumnHeaderInput, 1, 0, 1, 2)
 
-        layout.addWidget(self.__xValuesButton, 2, 0)
-        layout.addWidget(self.__yValuesButton, 2, 1)
+        layout.addWidget(self.__metaColumnButton, 2, 0, 1, 2)
+
+        layout.addWidget(self.__xValuesButton, 3, 0)
+        layout.addWidget(self.__yValuesButton, 3, 1)
 
         layout.addWidget(QLabel("Title"), 0, 2)
         layout.addWidget(self.__titleInput, 1, 2)
 
-        layout.addWidget(self.__okButton, 3, 0)
-        layout.addWidget(self.__cancelButton, 3, 1)
+        layout.addWidget(self.__okButton, 4, 0)
+        layout.addWidget(self.__cancelButton, 4, 1)
 
         layout.addWidget(QLabel("Confidence Interval:"), 2, 2)
         layout.addWidget(self.__confidenceBandInput, 3, 2)
@@ -179,11 +193,12 @@ class QtLineSeriesDialog(LineSeriesDialog):
         button.setText("Confirm Selection")
         self._toggleEditMode(coordinate)
         button.setEnabled(True)
+        button.repaint()
 
     def __turnOffEditMode(self, coordinate: str) -> None:
         self.__editState[coordinate] = False
         button: QPushButton = self.__buttonDict[coordinate]
-        button.setText("Select " + coordinate + " values")
+        button.setText(self.__buttonTitles[coordinate])
         self._toggleEditMode(coordinate)
 
     def _setUnneededInputWidgetsEnabled(self, value: bool) -> None:
@@ -193,6 +208,14 @@ class QtLineSeriesDialog(LineSeriesDialog):
         self.__xValuesButton.setEnabled(value)
         self.__yValuesButton.setEnabled(value)
         self.__confidenceBandInput.setEnabled(value)
+        self.__metaColumnButton.setEnabled(value)
+        self.__loadFileButton.repaint()
+        self.__okButton.repaint()
+        self.__cancelButton.repaint()
+        self.__xValuesButton.repaint()
+        self.__yValuesButton.repaint()
+        self.__confidenceBandInput.repaint()
+        self.__metaColumnButton.repaint()
 
 
 class QtLineSeriesDialogFactory(SeriesDialogFactory):
