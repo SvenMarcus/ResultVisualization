@@ -64,3 +64,9 @@ class GraphView(ABC):
         series: Series = self.__series.pop(index)
         self._graph.removePlot(series)
         self._removeEntryFromListView(index)
+
+    def _showFilterView(self, index: int) -> None:
+        """Shows a view to configure Filters for a series"""
+
+        series: Series = self.__series[index]
+        

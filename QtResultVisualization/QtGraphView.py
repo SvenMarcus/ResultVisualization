@@ -1,11 +1,12 @@
-from PyQt5.QtWidgets import (QHBoxLayout, QHeaderView, QMainWindow,
-                             QPushButton, QSplitter, QTableWidget,
-                             QTableWidgetItem, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import QHBoxLayout, QHeaderView, QMainWindow, \
+    QPushButton, QSplitter, QTableWidget, QTableWidgetItem, QVBoxLayout, \
+    QWidget
 
 from QtResultVisualization.QtGraph import QtGraph
 from ResultVisualization.Dialogs import SeriesDialogFactory
 from ResultVisualization.GraphView import GraphView
 from ResultVisualization.plot import Graph
+
 
 class QtGraphView(GraphView):
 
@@ -38,11 +39,15 @@ class QtGraphView(GraphView):
         self.__removeSeriesButton: QPushButton = QPushButton("Remove")
         self.__removeSeriesButton.clicked.connect(self.__onRemoveClicked)
 
+        self.__filtersButton: QPushButton = QPushButton("Filters")
+
         hLayout.addWidget(self.__newSeriesButton)
         hLayout.addWidget(self.__editSeriesButton)
         hLayout.addWidget(self.__removeSeriesButton)
-
+        
         layout.addLayout(hLayout)
+
+        layout.addWidget(self.__filtersButton)
 
         self.__window.setCentralWidget(self.__splitter)
         self.__splitter.addWidget(self.__leftWidget)

@@ -49,7 +49,6 @@ class QtChooseFileDialog(ChooseFileDialog):
     def show(self) -> DialogResult:
         self.__selectedFile = QFileDialog.getOpenFileName(
             self.__parent, "Select File", filter="*.csv")[0]
-        print(self.__selectedFile)
         if self.__selectedFile and isinstance(self.__selectedFile, str):
             return DialogResult.Ok
 

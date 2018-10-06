@@ -15,5 +15,4 @@
 
 
 # printOut(1)
-l = ["a", "b"]
-print("b" in l)
+print("a" == "a")

@@ -130,9 +130,14 @@ class LineSeries(Series):
         self.__sortValuesByX()
         self.__filterValues()
         self.__plotConfidenceBand(plotter)
-        plotter.lineSeries(self.__filteredX, self.__filteredY)
+        plotter.lineSeries(self.__filteredX, self.__filteredY, xLabel=self._xLabel, yLabel=self._yLabel, title=self._title)
 
     def __filterValues(self) -> None:
+        if len(self._filters) == 0:
+            self.__filteredX = self.__xValues
+            self.__filteredY = self.__yValues
+            return
+
         self.__filteredX = list()
         self.__filteredY = list()
 

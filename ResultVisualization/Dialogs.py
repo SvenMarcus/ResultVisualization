@@ -86,14 +86,9 @@ class LineSeriesDialog(SeriesDialog, ABC):
     def getSeries(self) -> Series:
         """Returns a Series object based on the data entered and selected by the user."""
 
-        series: LineSeries = self.__series
-        series.title = self._getTitleFromView()
-        # series.xLabel = self.__tryDeterminingHeaderForCoordinate("x")
-        # series.yLabel = self.__tryDeterminingHeaderForCoordinate("y")
-        # series.xValues = self.__getSelectedItemsForCoordinate("x")
-        # series.yValues = self.__getSelectedItemsForCoordinate("y")
-        series.confidenceBand = self._getConfidenceBandFromView() if self._getConfidenceBandFromView() else 0
-        return series
+        self.__series.title = self._getTitleFromView()
+        self.__series.confidenceBand = self._getConfidenceBandFromView() if self._getConfidenceBandFromView() else 0
+        return self.__series
 
     def _confirm(self) -> None:
         """Called when the 'Ok' button is clicked. Displays an error message when the entered data is not valid.
@@ -158,7 +153,7 @@ class LineSeriesDialog(SeriesDialog, ABC):
     def __assignLabelForCoordinate(self, coordinate: str, label: str) -> None:
         if coordinate == "x":
             self.__series.xLabel = label
-        else:
+        elif coordinate == "y":
             self.__series.yLabel = label
 
     def __highlightSelectedCells(self, coordinate):
@@ -242,7 +237,6 @@ class LineSeriesDialog(SeriesDialog, ABC):
             cellContent: Any = self.__spreadsheet.cell(cell[0], cell[1])
             if isFirstRow:
                 if not isNumber(cellContent):
-                    print(cellContent)
                     return str(cellContent)
                 return ""
 
@@ -261,16 +255,16 @@ class LineSeriesDialog(SeriesDialog, ABC):
                 items.append(num)
         return items
 
-    def __setInitialSeries(self, config: LineSeries) -> None:
+    def __setInitialSeries(self, series: LineSeries) -> None:
         """Sets data from a given PlotConfig in the view."""
 
-        if len(config.xValues) == 0:
+        if len(series.xValues) == 0:
             return
 
-        self._setTitleInView(config.title)
-        self._setConfidenceBandInView(config.confidenceBand)
-        firstRow: List[str] = [config.xLabel, config.yLabel]
-        values: List[List] = self.__transposePlotConfigData(config)
+        self._setTitleInView(series.title)
+        self._setConfidenceBandInView(series.confidenceBand)
+        firstRow: List[str] = [series.xLabel, series.yLabel]
+        values: List[List] = self.__transposePlotConfigData(series)
         values.insert(0, firstRow)
         self.__spreadsheet.setData(values)
         self.__setSelectedIndices(values)

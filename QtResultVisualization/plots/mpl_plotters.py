@@ -17,7 +17,32 @@ class MatplotlibPlotter(Plotter):
         self.__axes.clear()
 
     def lineSeries(self, xValues: Iterable, yValues: Iterable, **kwargs) -> None:
-        self.__axes.plot(xValues, yValues)
+        title: str = ""
+        for key, value in kwargs.items():
+            if key == "xLabel":
+                xLabel: str = self.__axes.get_xlabel()
+                xLabel = self.__buildLabel(xLabel, value)
+                self.__axes.set_xlabel(xLabel)
+            elif key == "yLabel":
+                yLabel: str = self.__axes.get_ylabel()
+                yLabel = self.__buildLabel(yLabel, value)
+                self.__axes.set_ylabel(yLabel)
+            elif key == "title":
+                title = value
+
+        self.__axes.plot(xValues, yValues, label=title)
+
+    def __buildLabel(self, currentLabel: str, newValue: str) -> str:
+        if currentLabel is None:
+            currentLabel = ""
+
+        if currentLabel == newValue:
+            return currentLabel
+
+        if len(currentLabel) > 0:
+            currentLabel += " // "
+
+        return currentLabel + newValue
 
     def fillArea(self, xValues: Iterable, lowerYValues: Iterable, upperYValues: Iterable) -> None:
         self.__axes.fill_between(xValues, lowerYValues, upperYValues)
