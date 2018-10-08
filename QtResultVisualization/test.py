@@ -15,4 +15,3 @@
 
 
 # printOut(1)
-print("a" == "a")

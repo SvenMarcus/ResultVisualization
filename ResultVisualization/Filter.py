@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import List
 
 
-class RowFilter:
+class ListFilter:
 
     def __init__(self):
         self.__title: str = ""
@@ -16,20 +16,20 @@ class RowFilter:
         self.__title = value
 
     @abstractmethod
-    def appliesToRow(self, sourceSeries, row: int) -> bool:
+    def appliesToIndex(self, sourceSeries, index: int) -> bool:
         raise NotImplementedError()
 
 
-class RowMetaDataContainsFilter(RowFilter):
+class RowMetaDataContainsFilter(ListFilter):
 
     def __init__(self, requiredValue: str):
         self.__requiredValue: str = requiredValue
 
-    def appliesToRow(self, sourceSeries, row: int) -> bool:
-        return self.__requiredValue in sourceSeries.metaData[row]
+    def appliesToIndex(self, sourceSeries, index: int) -> bool:
+        return self.__requiredValue in sourceSeries.metaData[index]
 
 
-class ExactMetaDataMatchesInAllSeriesFilter(RowFilter):
+class ExactMetaDataMatchesInAllSeriesFilter(ListFilter):
 
     def __init__(self, seriesList: List):
         self.__seriesList: List = seriesList
@@ -40,8 +40,8 @@ class ExactMetaDataMatchesInAllSeriesFilter(RowFilter):
     def removeSeries(self, series) -> None:
         self.__seriesList.remove(series)
 
-    def appliesToRow(self, sourceSeries, row: int) -> bool:
-        value: str = sourceSeries.metaData[row]
+    def appliesToIndex(self, sourceSeries, index: int) -> bool:
+        value: str = sourceSeries.metaData[index]
 
         for series in self.__seriesList:
             if sourceSeries is series:

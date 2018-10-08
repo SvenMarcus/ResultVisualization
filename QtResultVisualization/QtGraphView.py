@@ -44,7 +44,7 @@ class QtGraphView(GraphView):
         hLayout.addWidget(self.__newSeriesButton)
         hLayout.addWidget(self.__editSeriesButton)
         hLayout.addWidget(self.__removeSeriesButton)
-        
+
         layout.addLayout(hLayout)
 
         layout.addWidget(self.__filtersButton)

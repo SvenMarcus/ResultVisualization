@@ -1,68 +1,91 @@
-import PyQt5
-import PyQt5.Qt as Qt
-from PyQt5.QtWidgets import (QDialog, QHBoxLayout, QHeaderView, QLabel,
-                             QLineEdit, QPushButton, QTableWidget, QVBoxLayout,
-                             QWidget)
+from typing import List
+
+from PyQt5.QtWidgets import (QDialog, QGridLayout, QHBoxLayout, QHeaderView,
+                             QLabel, QLineEdit, QPushButton, QTableWidget,
+                             QTableWidgetItem, QVBoxLayout, QWidget)
+
+from ResultVisualization.Dialogs import DialogResult
+from ResultVisualization.FilterDialog import FilterDialog
+from ResultVisualization.FilterRepository import FilterRepository
+from ResultVisualization.plot import Series
 
 
-class QtRowContainsFilterWidget(QDialog):
+class QtFilterWidget(FilterDialog):
 
-    def __init__(self, parent: QWidget = None):
-        super(QtRowContainsFilterWidget, self).__init__(parent)
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-
-        self.__textBox: QLineEdit = QLineEdit()
-        self.__acceptButton: QPushButton = QPushButton("OK")
-        self.__cancelButton: QPushButton = QPushButton("Cancel")
-
-        self.layout().addWidget(QLabel("Filter by content:"))
-        self.layout().addWidget(self.__textBox)
-
-        buttonBar: QHBoxLayout = QHBoxLayout()
-        self.layout().addLayout(buttonBar)
-        buttonBar.addWidget(self.__acceptButton)
-        buttonBar.addWidget(self.__cancelButton)
-
-        self.setFixedSize(300, 150)
-        self.setModal(True)
-
-    def getText(self) -> str:
-        return self.__textBox.text()
-
-
-class QtFilterWidget:
-
-    def __init__(self, parent: QWidget = None):
-        self.__widget: QWidget = QWidget(parent)
-        self.__currentFilters: QTableWidget = QTableWidget()
-        self.__currentFilters.setColumnCount(1)
-        self.__currentFilters.setHorizontalHeaderLabels(["Filters"])
-        self.__currentFilters.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-
-        self.__addFilterButton: QPushButton = QPushButton("Add")
-        self.__removeFilterButton: QPushButton = QPushButton("Remove")
-
-        self.__widget.setLayout(QVBoxLayout())
-
-        dialogHeader: QLabel = QLabel("Series Title")
-        dialogHeader.setFont(PyQt5.QtGui.QFont("Arial", 16))
-        dialogHeader.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
-        self.__widget.layout().addWidget(dialogHeader)
-        self.__widget.layout().addWidget(self.__currentFilters)
-        self.__widget.layout().addWidget(self.__addFilterButton)
-        self.__widget.layout().addWidget(self.__removeFilterButton)
+    def __init__(self, series: Series, filterRepo: FilterRepository, parent: QWidget = None):
+        self.__parent: QWidget = parent
+        super(QtFilterWidget, self).__init__(series, filterRepo)
 
     def getWidget(self) -> QWidget:
-        return self.__widget
+        return self.__dialog
 
+    def _initUI(self):
+        self.__dialog: QDialog = QDialog(self.__parent)
+        self.__activeFilters: QTableWidget = QTableWidget()
+        self.__activeFilters.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.__activeFilters.setColumnCount(1)
+        self.__activeFilters.setHorizontalHeaderLabels(["Active Filters"])
+        self.__activeFilters.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
-app: Qt.QApplication = Qt.QApplication([])
+        self.__availableFilters: QTableWidget = QTableWidget()
+        self.__availableFilters.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.__availableFilters.setColumnCount(1)
+        self.__availableFilters.setHorizontalHeaderLabels(["Available Filters"])
+        self.__availableFilters.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
-widget = QtFilterWidget().getWidget()
-widget.show()
+        self.__addFilterButton: QPushButton = QPushButton("<<")
+        self.__removeFilterButton: QPushButton = QPushButton(">>")
 
-dialog = QtRowContainsFilterWidget(widget)
-dialog.show()
+        self.__addFilterButton.clicked.connect(lambda: self.__onAddButtonClicked())
+        self.__removeFilterButton.clicked.connect(lambda: self.__onRemoveButtonClicked())
 
-app.exec_()
+        self.__dialog.setLayout(QGridLayout())
+
+        self.__dialog.layout().addWidget(self.__activeFilters, 0, 0, 4, 1)
+        self.__dialog.layout().addWidget(self.__addFilterButton, 1, 1)
+        self.__dialog.layout().addWidget(self.__removeFilterButton, 2, 1)
+        self.__dialog.layout().addWidget(self.__availableFilters, 0, 2, 4, 1)
+
+    def show(self) -> DialogResult:
+        self.__dialog.setModal(True)
+        self.__dialog.exec()
+
+        return self._result
+
+    def _close(self) -> None:
+        self.__dialog.done(0)
+
+    def _addFilterToActiveFiltersTable(self, filterName) -> None:
+        rows: int = self.__activeFilters.rowCount()
+        self.__activeFilters.setRowCount(rows + 1)
+        self.__activeFilters.setItem(rows, 0, QTableWidgetItem(filterName))
+
+    def _addFilterToAvailableFiltersTable(self, filterName) -> None:
+        rows: int = self.__availableFilters.rowCount()
+        self.__availableFilters.setRowCount(rows + 1)
+        self.__availableFilters.setItem(rows, 0, QTableWidgetItem(filterName))
+
+    def _removeFilterFromActiveFiltersTable(self, index):
+        self.__activeFilters.removeRow(index)
+        self.__activeFilters.clearSelection()
+
+    def _removeFilterFromAvailableFiltersTable(self, index):
+        self.__availableFilters.removeRow(index)
+        self.__availableFilters.clearSelection()
+
+    def __onAddButtonClicked(self) -> None:
+        rows: List[int] = self.__getSelectedRows(self.__availableFilters)
+        if len(rows) > 0:
+            self._addToActiveFilters(rows)
+
+    def __onRemoveButtonClicked(self) -> None:
+        rows: List[int] = self.__getSelectedRows(self.__activeFilters)
+        if len(rows) > 0:
+            self._removeFromActiveFilters(rows)
+
+    def __getSelectedRows(self, table: QTableWidget) -> List[int]:
+        indexes = table.selectedIndexes()
+        if len(indexes) == 0:
+            return list()
+
+        return [index.row() for index in indexes]

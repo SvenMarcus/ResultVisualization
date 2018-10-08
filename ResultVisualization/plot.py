@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Iterable, List
 
-from ResultVisualization.Filter import RowFilter
+from ResultVisualization.Filter import ListFilter
 from ResultVisualization.util import isNumber
 
 
@@ -37,13 +37,16 @@ class Series(ABC):
         self._xLabel: str = ""
         self._yLabel: str = ""
         self._metaData: List[str] = list()
-        self._filters: List[RowFilter] = list()
+        self._filters: List[ListFilter] = list()
 
-    def addFilter(self, rowFilter: RowFilter) -> None:
-        self._filters.append(rowFilter)
+    def addFilter(self, listFilter: ListFilter) -> None:
+        self._filters.append(listFilter)
 
-    def removeFilter(self, rowFilter: RowFilter) -> None:
-        self._filters.remove(rowFilter)
+    def removeFilter(self, listFilter: ListFilter) -> None:
+        self._filters.remove(listFilter)
+
+    def clearFilters(self) -> None:
+        self._filters.clear()
 
     @abstractmethod
     def plot(self, plotter: Plotter) -> None:
@@ -86,6 +89,14 @@ class Series(ABC):
     @metaData.setter
     def metaData(self, value: List[str]) -> None:
         self._metaData = value
+
+    @property
+    def filters(self) -> List[ListFilter]:
+        return self._filters
+
+    @filters.setter
+    def filters(self, value: List[ListFilter]) -> None:
+        self._filters = value
 
 
 class Graph(ABC):
@@ -144,7 +155,7 @@ class LineSeries(Series):
         for i in range(len(self.metaData)):
             shouldAdd: bool = True
             for rowFilter in self._filters:
-                shouldAdd = shouldAdd and rowFilter.appliesToRow(self, i)
+                shouldAdd = shouldAdd and rowFilter.appliesToIndex(self, i)
 
             if shouldAdd:
                 self.__filteredX.append(self.xValues[i])
