@@ -3,18 +3,22 @@ import sys
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
 
+from ResultVisualization.FilterRepository import FilterRepository
+
 from QtResultVisualization.Dialogs import QtLineSeriesDialogFactory
 from QtResultVisualization.QtGraphView import QtGraphView
+from QtResultVisualization.QtGraphViewFactory import QtGraphViewFactory
 
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    app.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
+    app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+    app.setApplicationName("Simple Graphs")
 
-# if __name__ == "__main__":
-#     app = QApplication(sys.argv)
-#     app.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
-#     app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-#     app.setApplicationName("Simple Graphs")
-#     window = QtGraphView(QtLineSeriesDialogFactory()).getWindow()
-#     window.show()
-#     sys.exit(app.exec_())
+    factory = QtGraphViewFactory()
+    window = factory.makeGraphView("linear").getWindow()
+    window.show()
+    sys.exit(app.exec_())
 
 # from QtResultVisualization.QtGraph import QtGraph
 # from ResultVisualization.plot import LineSeries
@@ -43,40 +47,39 @@ from QtResultVisualization.QtGraphView import QtGraphView
 
 # app.exec_()
 
-from ResultVisualization.Filter import RowMetaDataContainsFilter
-from ResultVisualization.FilterRepository import FilterRepository
-from ResultVisualization.plot import LineSeries
+# from ResultVisualization.Filter import RowMetaDataContainsFilter
+# from ResultVisualization.plot import LineSeries
 
-from QtResultVisualization.QtFilterDialog import QtFilterWidget
-from QtResultVisualization.QtCreateFilterDialog import QtCreateFilterDialog, QtCreateFilterDialogSubViewFactory
+# from QtResultVisualization.QtFilterDialog import QtFilterWidget
+# from QtResultVisualization.QtCreateFilterDialog import QtCreateFilterDialog, QtCreateFilterDialogSubViewFactory
 
-f1 = RowMetaDataContainsFilter("")
-f1.title = "F1"
+# f1 = RowMetaDataContainsFilter("")
+# f1.title = "F1"
 
-f2 = RowMetaDataContainsFilter("")
-f2.title = "F2"
+# f2 = RowMetaDataContainsFilter("")
+# f2.title = "F2"
 
-f3 = RowMetaDataContainsFilter("")
-f3.title = "F3"
+# f3 = RowMetaDataContainsFilter("")
+# f3.title = "F3"
 
-f4 = RowMetaDataContainsFilter("")
-f4.title = "F4"
+# f4 = RowMetaDataContainsFilter("")
+# f4.title = "F4"
 
-s = LineSeries()
-s.filters.append(f1)
+# s = LineSeries()
+# s.filters.append(f1)
 
-repo = FilterRepository()
-repo.addFilter(f1)
-repo.addFilter(f2)
-repo.addFilter(f3)
-repo.addFilter(f4)
+# repo = FilterRepository()
+# repo.addFilter(f1)
+# repo.addFilter(f2)
+# repo.addFilter(f3)
+# repo.addFilter(f4)
 
-factory = QtCreateFilterDialogSubViewFactory()
+# factory = QtCreateFilterDialogSubViewFactory()
 
-app: QApplication = QApplication([])
+# app: QApplication = QApplication([])
 
-# widget = QtFilterWidget(s, repo).getWidget()
-widget = QtCreateFilterDialog(repo, factory, None).getWidget()
-widget.show()
+# # widget = QtFilterWidget(s, repo).getWidget()
+# widget = QtCreateFilterDialog(repo, factory, None).getWidget()
+# widget.show()
 
-app.exec_()
+# app.exec_()

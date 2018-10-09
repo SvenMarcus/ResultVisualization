@@ -6,7 +6,7 @@ from ResultVisualization.Filter import ListFilter
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.plot import Series
 
-class FilterDialog(Dialog, ABC):
+class EditSeriesFilterDialog(Dialog, ABC):
 
     def __init__(self, series: Series, filterRepo: FilterRepository):
         self.__series: Series = series
@@ -75,6 +75,7 @@ class FilterDialog(Dialog, ABC):
             self.__series.addFilter(listFilter)
 
         self.__result = DialogResult.Ok
+        self._close()
 
     def _cancel(self) -> None:
         self._close()

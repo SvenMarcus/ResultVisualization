@@ -46,10 +46,17 @@ class RowContainsFilterCreationView(FilterCreationView, ABC):
         return self.__listFilter
 
     def _save(self):
+        isValid: bool = self.__validate()
+
+        if not isValid:
+            self._showMessage("Please enter a title and the required meta data.")
+            return
+
         title: str = self._getTitleFromView()
         requiredMeta: str = self._getRequiredMetaDataFromView()
         self.__listFilter: RowMetaDataContainsFilter = RowMetaDataContainsFilter(requiredMeta)
         self.__listFilter.title = title
+        self.__onSavedEvent(self)
 
     @abstractmethod
     def _getTitleFromView(self) -> str:
@@ -58,6 +65,13 @@ class RowContainsFilterCreationView(FilterCreationView, ABC):
     @abstractmethod
     def _getRequiredMetaDataFromView(self) -> str:
         raise NotImplementedError()
+
+    @abstractmethod
+    def _showMessage(self, message: str) -> None:
+        raise NotImplementedError()
+
+    def __validate(self) -> bool:
+        return self._getTitleFromView() and self._getRequiredMetaDataFromView()
 
 
 class CreateFilterDialogSubViewFactory(ABC):
@@ -114,22 +128,29 @@ class CreateFilterDialog(Dialog, ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def _closeSubView(self, view: FilterCreationView) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def _close(self) -> None:
         raise NotImplementedError()
 
     def _handleFilterOptionSelection(self, filterOption: str) -> None:
         subViewName: str = self.__variantDict[filterOption]
         self.__currentView = self.__subViewFactory.makeView(subViewName)
+        self.__currentView.onFilterSaved().append(self.__handleFilterSaved)
 
         self._showSubView(self.__currentView)
 
     def _confirm(self) -> None:
         for addedFilter in self.__addedFilters:
             self.__repository.addFilter(addedFilter)
+
         self._close()
 
-    def __handleFilterSaved(self) -> None:
+    def __handleFilterSaved(self, sender, args) -> None:
         addedFilter: ListFilter = self.__currentView.getFilter()
         self.__addedFilters.append(addedFilter)
         self.__availableFilters.append(addedFilter)
         self._addFilterToAvailableFiltersTable(addedFilter.title)
+        self._closeSubView(self.__currentView)

@@ -5,16 +5,16 @@ from PyQt5.QtWidgets import (QDialog, QGridLayout, QHBoxLayout, QHeaderView,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 
 from ResultVisualization.Dialogs import DialogResult
-from ResultVisualization.FilterDialog import FilterDialog
+from ResultVisualization.EditSeriesFilterDialog import EditSeriesFilterDialog
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.plot import Series
 
 
-class QtFilterWidget(FilterDialog):
+class QtEditSeriesFilterDialog(EditSeriesFilterDialog):
 
     def __init__(self, series: Series, filterRepo: FilterRepository, parent: QWidget = None):
         self.__parent: QWidget = parent
-        super(QtFilterWidget, self).__init__(series, filterRepo)
+        super(QtEditSeriesFilterDialog, self).__init__(series, filterRepo)
 
     def getWidget(self) -> QWidget:
         return self.__dialog
@@ -36,8 +36,18 @@ class QtFilterWidget(FilterDialog):
         self.__addFilterButton: QPushButton = QPushButton("<<")
         self.__removeFilterButton: QPushButton = QPushButton(">>")
 
+        self.__okButton: QPushButton = QPushButton("Ok")
+        self.__okButton.setDefault(True)
+        self.__okButton.clicked.connect(lambda: self._confirm())
+        self.__cancelButton: QPushButton = QPushButton("Cancel")
+        self.__cancelButton.clicked.connect(lambda: self._cancel())
+
         self.__addFilterButton.clicked.connect(lambda: self.__onAddButtonClicked())
         self.__removeFilterButton.clicked.connect(lambda: self.__onRemoveButtonClicked())
+
+        self.__buttonLayout: QHBoxLayout = QHBoxLayout()
+        self.__buttonLayout.addWidget(self.__okButton)
+        self.__buttonLayout.addWidget(self.__cancelButton)
 
         self.__dialog.setLayout(QGridLayout())
 
@@ -45,6 +55,7 @@ class QtFilterWidget(FilterDialog):
         self.__dialog.layout().addWidget(self.__addFilterButton, 1, 1)
         self.__dialog.layout().addWidget(self.__removeFilterButton, 2, 1)
         self.__dialog.layout().addWidget(self.__availableFilters, 0, 2, 4, 1)
+        self.__dialog.layout().addLayout(self.__buttonLayout, 5, 0)
 
     def show(self) -> DialogResult:
         self.__dialog.setModal(True)

@@ -3,7 +3,7 @@ from typing import Dict
 from PyQt5.QtWidgets import (QComboBox, QDialog, QGridLayout, QHBoxLayout,
                              QHeaderView, QLabel, QLineEdit, QPushButton,
                              QTableWidget, QTableWidgetItem, QVBoxLayout,
-                             QWidget)
+                             QWidget, QMessageBox)
 
 from ResultVisualization.CreateFilterDialog import (CreateFilterDialog,
                                                     CreateFilterDialogSubViewFactory,
@@ -33,6 +33,7 @@ class QtRowContainsFilterWidget(RowContainsFilterCreationView):
         self.__widget.layout().addWidget(self.__requiredDataBox)
 
         self.__widget.layout().addWidget(self.__acceptButton)
+        self.__widget.setMaximumHeight(200)
 
     def getWidget(self) -> QWidget:
         return self.__widget
@@ -42,6 +43,9 @@ class QtRowContainsFilterWidget(RowContainsFilterCreationView):
 
     def _getRequiredMetaDataFromView(self) -> str:
         return self.__requiredDataBox.text()
+
+    def _showMessage(self, message: str):
+        QMessageBox.information(self.__widget, "Error", message)
 
 
 class Dummy:
@@ -88,6 +92,7 @@ class QtCreateFilterDialog(CreateFilterDialog):
 
     def _initUI(self) -> None:
         self.__dialog: QDialog = QDialog(self.__parent)
+        self.__dialog.setWindowTitle("Filter Creator")
         self.__dialog.setLayout(QGridLayout())
 
         self.__availableFilters: QTableWidget = QTableWidget()
@@ -100,9 +105,20 @@ class QtCreateFilterDialog(CreateFilterDialog):
         self.__addFilterButton.clicked.connect(lambda: self._handleFilterOptionSelection(self.__filterTypeComboBox.currentText()))
         self.__filterTypeComboBox: QComboBox = QComboBox()
 
-        self.__dialog.layout().addWidget(self.__availableFilters, 0, 0, 3, 3)
-        self.__dialog.layout().addWidget(self.__addFilterButton, 3, 0)
-        self.__dialog.layout().addWidget(self.__filterTypeComboBox, 3, 1, 1, 2)
+        self.__okButton: QPushButton = QPushButton("Ok")
+        self.__okButton.setDefault(True)
+        self.__okButton.clicked.connect(lambda: self._confirm())
+        self.__cancelButton: QPushButton = QPushButton("Cancel")
+        self.__cancelButton.clicked.connect(lambda: self._close())
+
+        self.__buttonBar: QHBoxLayout = QHBoxLayout()
+        self.__buttonBar.addWidget(self.__okButton)
+        self.__buttonBar.addWidget(self.__cancelButton)
+
+        self.__dialog.layout().addWidget(self.__availableFilters, 0, 0, 4, 1)
+        self.__dialog.layout().addWidget(self.__addFilterButton, 0, 1)
+        self.__dialog.layout().addWidget(self.__filterTypeComboBox, 0, 2, 1, 3)
+        self.__dialog.layout().addLayout(self.__buttonBar, 5, 0)
 
     def _addFilterToAvailableFiltersTable(self, filterName: str) -> None:
         rows: int = self.__availableFilters.rowCount()
@@ -115,10 +131,19 @@ class QtCreateFilterDialog(CreateFilterDialog):
     def _showSubView(self, view: FilterCreationView) -> None:
         if self.__subView is not None:
             self.__subView.setParent(None)
-            del self.__subView
+            self.__subView.deleteLater()
 
         self.__subView = view.getWidget()
-        self.__dialog.layout().addWidget(self.__subView, 1, 4)
+        self.__dialog.layout().addWidget(self.__subView, 1, 1, 2, 3)
+
+    def _closeSubView(self, view: FilterCreationView) -> None:
+        widget = view.getWidget()
+        widget.setParent(None)
+        if widget is self.__subView:
+            self.__subView = None
+
+        widget.deleteLater()
+        self.__dialog.repaint()
 
     def _close(self) -> None:
         self.__dialog.done(0)

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Iterable, List
 
 from ResultVisualization.Filter import ListFilter
+from ResultVisualization.Titled import Titled
 from ResultVisualization.util import isNumber
 
 
@@ -30,7 +31,7 @@ class Plotter(ABC):
         raise NotImplementedError()
 
 
-class Series(ABC):
+class Series(Titled, ABC):
 
     def __init__(self):
         self._title: str = ""

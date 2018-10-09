@@ -15,4 +15,4 @@ class SeriesRepository:
         self.__series.remove(series)
 
     def getSeries(self) -> Iterable[Series]:
-        return self.__filters
+        return self.__series

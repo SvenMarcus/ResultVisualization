@@ -1,17 +1,23 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from ResultVisualization.CreateFilterDialog import CreateFilterDialog
 from ResultVisualization.Dialogs import (DialogResult, SeriesDialog,
                                          SeriesDialogFactory)
+from ResultVisualization.EditSeriesFilterDialog import EditSeriesFilterDialog
+from ResultVisualization.FilterDialogFactory import FilterDialogFactory
 from ResultVisualization.plot import Graph, Series
+from ResultVisualization.SeriesRepository import SeriesRepository
 
 
 class GraphView(ABC):
 
-    def __init__(self, seriesDialogFactory: SeriesDialogFactory):
+    def __init__(self, seriesDialogFactory: SeriesDialogFactory, seriesRepository: SeriesRepository, filterDialogFactory: FilterDialogFactory):
         self._graph: Graph = self._makeGraph()
-        self.__series: List[Series] = list()
-        self.__factory: SeriesDialogFactory = seriesDialogFactory
+        self.__repository: SeriesRepository = seriesRepository
+        self.__series: List[Series] = list(seriesRepository.getSeries())
+        self.__seriesDialogFactory: SeriesDialogFactory = seriesDialogFactory
+        self.__filterDialogFactory: FilterDialogFactory = filterDialogFactory
 
     @abstractmethod
     def _addEntryToListView(self, title: str) -> None:
@@ -37,20 +43,21 @@ class GraphView(ABC):
         """Opens a SeriesDialog that allows the user to configure a new line series.
         The series will be added to the Graph and the series ListView"""
 
-        dialog: SeriesDialog = self.__factory.makeSeriesDialog()
+        dialog: SeriesDialog = self.__seriesDialogFactory.makeSeriesDialog()
         result: DialogResult = dialog.show()
 
         if result == DialogResult.Ok:
             series: Series = dialog.getSeries()
             self._addEntryToListView(series.title)
             self.__series.append(series)
+            self.__repository.addSeries(series)
             self._graph.addPlot(series)
 
     def _editSeries(self, index: int) -> None:
         """Opens a SeriesDialog with the Series at the given index"""
 
         series: Series = self.__series[index]
-        dialog: SeriesDialog = self.__factory.makeSeriesDialog(series)
+        dialog: SeriesDialog = self.__seriesDialogFactory.makeSeriesDialog(series)
         result: DialogResult = dialog.show()
 
         if result == DialogResult.Ok:
@@ -62,11 +69,25 @@ class GraphView(ABC):
         """Removes the series at the given index from the Graph"""
 
         series: Series = self.__series.pop(index)
+        self.__repository.removeSeries(series)
         self._graph.removePlot(series)
         self._removeEntryFromListView(index)
 
-    def _showFilterView(self, index: int) -> None:
-        """Shows a view to configure Filters for a series"""
+    def _showEditFilterView(self, index: int) -> None:
+        """Shows a dialog to configure Filters for a series"""
 
         series: Series = self.__series[index]
-        
+        dialog: EditSeriesFilterDialog = self.__filterDialogFactory.makeEditSeriesFilterDialog(series)
+        result: DialogResult = dialog.show()
+
+        if result == DialogResult.Ok:
+            self._graph.updatePlot()
+
+    def _showCreateFilterView(self) -> None:
+        """Shows a dialog to create new filters"""
+
+        dialog: CreateFilterDialog = self.__filterDialogFactory.makeCreateFilterDialog()
+        result: DialogResult = dialog.show()
+
+        if result == DialogResult.Ok:
+            self._graph.updatePlot()
