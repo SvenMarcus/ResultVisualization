@@ -31,7 +31,7 @@ class RowMetaDataContainsFilter(ListFilter):
 
 class ExactMetaDataMatchesInAllSeriesFilter(ListFilter):
 
-    def __init__(self, seriesList: List):
+    def __init__(self, seriesList: List = list()):
         self.__seriesList: List = seriesList
 
     def addSeries(self, series) -> None:

@@ -3,7 +3,7 @@ from typing import Generic, List, TypeVar
 
 from ResultVisualization.Titled import Titled
 
-T = TypeVar('T', Titled)
+T = TypeVar('T')
 
 class TransferWidget(Generic[T], ABC):
 

@@ -96,6 +96,7 @@ class QtLineSeriesDialog(LineSeriesDialog):
 
     def __initUI(self, parent: QWidget) -> None:
         self.__dialog = QDialog(parent)
+        self.__dialog.setBaseSize(800, 600)
 
         self.__confidenceBandInput = QLineEdit()
         self.__titleInput = QLineEdit()

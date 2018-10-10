@@ -5,6 +5,7 @@ from ResultVisualization.Dialogs import Dialog, DialogResult
 from ResultVisualization.Filter import ListFilter
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.plot import Series
+from ResultVisualization.TransferWidget import TransferWidget
 
 class EditSeriesFilterDialog(Dialog, ABC):
 
@@ -16,11 +17,18 @@ class EditSeriesFilterDialog(Dialog, ABC):
         self._result: DialogResult = DialogResult.Cancel
 
         self._initUI()
-        
+        self.__transferWidget: TransferWidget = self._getTransferWidget()
+        self.__transferWidget.setLeftHeader("Active Filters")
+        self.__transferWidget.setRightHeader("Available Filters")
+
         self.__addInitialFilters(filterRepo, series)
 
     @abstractmethod
     def _initUI(self) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _getTransferWidget(self) -> TransferWidget[ListFilter]:
         raise NotImplementedError()
 
     @abstractmethod
@@ -71,7 +79,8 @@ class EditSeriesFilterDialog(Dialog, ABC):
 
     def _confirm(self) -> None:
         self.__series.clearFilters()
-        for listFilter in self.__activeFilters:
+        # for listFilter in self.__activeFilters:
+        for listFilter in self.__transferWidget.getLeftTableItems():
             self.__series.addFilter(listFilter)
 
         self.__result = DialogResult.Ok
@@ -81,10 +90,15 @@ class EditSeriesFilterDialog(Dialog, ABC):
         self._close()
 
     def __addInitialFilters(self, filterRepo, series):
+        activeFilters = list()
+        availableFilters = list()
         for listFilter in filterRepo.getFilters():
             if listFilter in series.filters:
-                self.__activeFilters.append(listFilter)
-                self._addFilterToActiveFiltersTable(listFilter.title)
+                activeFilters.append(listFilter)
+                # self._addFilterToActiveFiltersTable(listFilter.title)
             else:
-                self.__availableFilters.append(listFilter)
-                self._addFilterToAvailableFiltersTable(listFilter.title)
+                availableFilters.append(listFilter)
+                # self._addFilterToAvailableFiltersTable(listFilter.title)
+
+        self.__transferWidget.setLeftTableItems(activeFilters)
+        self.__transferWidget.setRightTableItems(availableFilters)

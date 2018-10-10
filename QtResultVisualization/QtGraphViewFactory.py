@@ -17,7 +17,7 @@ class QtGraphViewFactory(GraphViewFactory):
             seriesDialogFactory: SeriesDialogFactory = QtLineSeriesDialogFactory()
             seriesRepo: SeriesRepository = SeriesRepository()
             filterRepo: FilterRepository = FilterRepository()
-            filterDialogFactory: FilterDialogFactory = QtFilterDialogFactory(filterRepo)
+            filterDialogFactory: FilterDialogFactory = QtFilterDialogFactory(filterRepo, seriesRepo)
 
             graphView: QtGraphView = QtGraphView(seriesDialogFactory, seriesRepo, filterDialogFactory)
             widget: QWidget = graphView.getWindow()

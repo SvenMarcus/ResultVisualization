@@ -4,8 +4,10 @@ from PyQt5.QtWidgets import (QGridLayout, QHeaderView,
                              QPushButton, QTableWidget,
                              QTableWidgetItem, QWidget)
 
+from ResultVisualization.TransferWidget import TransferWidget
 
-class QtTransferWidget(QWidget):
+
+class QtTransferWidget(TransferWidget):
 
     def __init__(self, parent: QWidget = None):
         self.__parent = parent
@@ -15,10 +17,10 @@ class QtTransferWidget(QWidget):
         return self.__widget
 
     def setLeftHeader(self, header: str) -> None:
-        self.__leftTable.setHorizontalHeaderLabels(header)
+        self.__leftTable.setHorizontalHeaderLabels([header])
 
     def setRightHeader(self, header: str) -> None:
-        self.__rightTable.setHorizontalHeaderLabels(header)
+        self.__rightTable.setHorizontalHeaderLabels([header])
 
     def _initUI(self) -> None:
         self.__widget: QWidget = QWidget(self.__parent)
@@ -64,14 +66,14 @@ class QtTransferWidget(QWidget):
         self.__rightTable.clearSelection()
 
     def __onTransferLeftClicked(self) -> None:
-        rows: List[int] = self.__getSelectedRows(self.__leftTable)
+        rows: List[int] = self.__getSelectedRows(self.__rightTable)
         if len(rows) == 0:
             return
 
         self._moveItemsToLeftTable(rows)
 
     def __onTransferRightClicked(self) -> None:
-        rows: List[int] = self.__getSelectedRows(self.__rightTable)
+        rows: List[int] = self.__getSelectedRows(self.__leftTable)
         if len(rows) == 0:
             return
 

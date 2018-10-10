@@ -1,13 +1,14 @@
 from typing import List
 
-from PyQt5.QtWidgets import (QDialog, QGridLayout, QHBoxLayout, QHeaderView,
-                             QLabel, QLineEdit, QPushButton, QTableWidget,
+from PyQt5.QtWidgets import (QDialog, QHBoxLayout, QPushButton, QTableWidget,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 
+from QtResultVisualization.QtTransferWidget import QtTransferWidget
 from ResultVisualization.Dialogs import DialogResult
 from ResultVisualization.EditSeriesFilterDialog import EditSeriesFilterDialog
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.plot import Series
+from ResultVisualization.TransferWidget import TransferWidget
 
 
 class QtEditSeriesFilterDialog(EditSeriesFilterDialog):
@@ -19,22 +20,10 @@ class QtEditSeriesFilterDialog(EditSeriesFilterDialog):
     def getWidget(self) -> QWidget:
         return self.__dialog
 
-    def _initUI(self):
+    def _initUI(self) -> None:
         self.__dialog: QDialog = QDialog(self.__parent)
-        self.__activeFilters: QTableWidget = QTableWidget()
-        self.__activeFilters.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.__activeFilters.setColumnCount(1)
-        self.__activeFilters.setHorizontalHeaderLabels(["Active Filters"])
-        self.__activeFilters.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
-        self.__availableFilters: QTableWidget = QTableWidget()
-        self.__availableFilters.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.__availableFilters.setColumnCount(1)
-        self.__availableFilters.setHorizontalHeaderLabels(["Available Filters"])
-        self.__availableFilters.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-
-        self.__addFilterButton: QPushButton = QPushButton("<<")
-        self.__removeFilterButton: QPushButton = QPushButton(">>")
+        self.__transferWidget: QtTransferWidget = QtTransferWidget()
 
         self.__okButton: QPushButton = QPushButton("Ok")
         self.__okButton.setDefault(True)
@@ -42,20 +31,17 @@ class QtEditSeriesFilterDialog(EditSeriesFilterDialog):
         self.__cancelButton: QPushButton = QPushButton("Cancel")
         self.__cancelButton.clicked.connect(lambda: self._cancel())
 
-        self.__addFilterButton.clicked.connect(lambda: self.__onAddButtonClicked())
-        self.__removeFilterButton.clicked.connect(lambda: self.__onRemoveButtonClicked())
-
         self.__buttonLayout: QHBoxLayout = QHBoxLayout()
         self.__buttonLayout.addWidget(self.__okButton)
         self.__buttonLayout.addWidget(self.__cancelButton)
 
-        self.__dialog.setLayout(QGridLayout())
+        self.__dialog.setLayout(QVBoxLayout())
 
-        self.__dialog.layout().addWidget(self.__activeFilters, 0, 0, 4, 1)
-        self.__dialog.layout().addWidget(self.__addFilterButton, 1, 1)
-        self.__dialog.layout().addWidget(self.__removeFilterButton, 2, 1)
-        self.__dialog.layout().addWidget(self.__availableFilters, 0, 2, 4, 1)
-        self.__dialog.layout().addLayout(self.__buttonLayout, 5, 0)
+        self.__dialog.layout().addWidget(self.__transferWidget.getWidget())
+        self.__dialog.layout().addLayout(self.__buttonLayout)
+
+    def _getTransferWidget(self) -> TransferWidget:
+        return self.__transferWidget
 
     def show(self) -> DialogResult:
         self.__dialog.setModal(True)

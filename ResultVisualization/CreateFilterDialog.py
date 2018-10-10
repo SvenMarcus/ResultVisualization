@@ -6,6 +6,8 @@ from ResultVisualization.Dialogs import Dialog, DialogResult
 from ResultVisualization.Filter import ExactMetaDataMatchesInAllSeriesFilter, ListFilter, RowMetaDataContainsFilter
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.plot import Series
+from ResultVisualization.SeriesRepository import SeriesRepository
+from ResultVisualization.TransferWidget import TransferWidget
 
 
 class FilterCreationView(ABC):
@@ -20,17 +22,49 @@ class FilterCreationView(ABC):
         raise NotImplementedError()
 
 
-# class MetaDataMatchFilterCreationView(ABC, FilterCreationView):
+class MetaDataMatchFilterCreationView(FilterCreationView, ABC):
 
-#     def __init__(self, series: List[Series]):
-#         self.__onSavedEvent: InvokableEvent = InvokableEvent()
-#         self.__listFilter: ListFilter = None
+    def __init__(self, seriesRepo: SeriesRepository):
+        self.__onSavedEvent: InvokableEvent = InvokableEvent()
+        self.__listFilter: ListFilter = None
+        self._initUI()
+        self.__transferWidget: TransferWidget[Series] = self._getTransferWidget()
+        self.__transferWidget.setLeftHeader("Selected Series")
+        self.__transferWidget.setRightHeader("Available Series")
+        self.__transferWidget.setRightTableItems(seriesRepo.getSeries())
 
-#     def getFilter(self) -> ListFilter:
-#         return self.__listFilter
+    def onFilterSaved(self) -> Event:
+        return self.__onSavedEvent
 
-#     def _save(self):
-#         pass
+    def getFilter(self) -> ListFilter:
+        return self.__listFilter
+
+    def _save(self) -> None:
+        title: str = self._getTitleFromView()
+        if not title:
+            self._showMessage("Please enter a title.")
+            return
+
+        selectedSeries: List[Series] = self.__transferWidget.getLeftTableItems()
+        self.__listFilter = ExactMetaDataMatchesInAllSeriesFilter(selectedSeries)
+        self.__listFilter.title = self._getTitleFromView()
+        self.__onSavedEvent(self)
+
+    @abstractmethod
+    def _initUI(self) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _getTransferWidget(self) -> TransferWidget[Series]:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _getTitleFromView(self) -> str:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _showMessage(self, message: str) -> None:
+        raise NotImplementedError()
 
 
 class RowContainsFilterCreationView(FilterCreationView, ABC):
@@ -76,9 +110,14 @@ class RowContainsFilterCreationView(FilterCreationView, ABC):
 
 class CreateFilterDialogSubViewFactory(ABC):
 
-    @abstractmethod
+    def __init__(self, seriesRepo: SeriesRepository):
+        self._seriesRepo = seriesRepo
+
     def getSubViewVariantDisplayNameToNameDict(self) -> Dict[str, str]:
-        raise NotImplementedError()
+        return {
+            "Match meta data in row": "RowContains",
+            "Meta Data must be in all series": "ExactMetaMatch"
+        }
 
     @abstractmethod
     def makeView(self, kind: str) -> FilterCreationView:

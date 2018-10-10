@@ -2,9 +2,6 @@ from PyQt5.QtWidgets import (QHBoxLayout, QHeaderView, QMainWindow,
                              QPushButton, QSplitter, QTableWidget,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 
-from QtResultVisualization.QtCreateFilterDialog import (QtCreateFilterDialog,
-                                                        QtCreateFilterDialogSubViewFactory)
-
 from QtResultVisualization.QtGraph import QtGraph
 from ResultVisualization.Dialogs import SeriesDialogFactory
 from ResultVisualization.FilterDialogFactory import FilterDialogFactory
@@ -18,11 +15,12 @@ class QtGraphView(GraphView):
     def __init__(self, seriesDialogFactory: SeriesDialogFactory, seriesRepository: SeriesRepository, filterDialogFactory: FilterDialogFactory):
         super(QtGraphView, self).__init__(seriesDialogFactory, seriesRepository, filterDialogFactory)
         self.__window: QMainWindow = QMainWindow()
-        self.__window.setMinimumWidth(300)
-        self.__window.setMinimumHeight(300)
+        self.__window.setMinimumWidth(1280)
+        self.__window.setMinimumHeight(720)
         self.__splitter: QSplitter = QSplitter(self.__window)
         self.__leftWidget: QWidget = QWidget(self.__splitter)
         layout: QVBoxLayout = QVBoxLayout()
+        self.__leftWidget.setMaximumWidth(350)
         self.__leftWidget.setLayout(layout)
 
         self.__seriesTable: QTableWidget = QTableWidget()
@@ -46,7 +44,7 @@ class QtGraphView(GraphView):
 
         self.__editFiltersButton: QPushButton = QPushButton("Edit Series Filters")
         self.__editFiltersButton.clicked.connect(self.__onEditFiltersClicked)
-        
+
         self.__createFiltersButton: QPushButton = QPushButton("Manage Filters")
         self.__createFiltersButton.clicked.connect(lambda: self._showCreateFilterView())
 
