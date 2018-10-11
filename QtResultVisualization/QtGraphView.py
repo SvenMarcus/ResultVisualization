@@ -6,7 +6,7 @@ from QtResultVisualization.QtGraph import QtGraph
 from ResultVisualization.Dialogs import SeriesDialogFactory
 from ResultVisualization.FilterDialogFactory import FilterDialogFactory
 from ResultVisualization.GraphView import GraphView
-from ResultVisualization.plot import Graph
+from ResultVisualization.Plot import Graph
 from ResultVisualization.SeriesRepository import SeriesRepository
 
 

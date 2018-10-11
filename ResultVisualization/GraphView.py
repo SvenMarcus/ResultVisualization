@@ -6,7 +6,7 @@ from ResultVisualization.Dialogs import (DialogResult, SeriesDialog,
                                          SeriesDialogFactory)
 from ResultVisualization.EditSeriesFilterDialog import EditSeriesFilterDialog
 from ResultVisualization.FilterDialogFactory import FilterDialogFactory
-from ResultVisualization.plot import Graph, Series
+from ResultVisualization.Plot import Graph, Series
 from ResultVisualization.SeriesRepository import SeriesRepository
 
 

@@ -3,7 +3,7 @@ from typing import Iterable
 from matplotlib.backends.backend_template import FigureCanvas
 from matplotlib.figure import Axes, Figure
 
-from ResultVisualization.plot import Plotter
+from ResultVisualization.Plot import Plotter
 
 
 class MatplotlibPlotter(Plotter):
@@ -44,8 +44,13 @@ class MatplotlibPlotter(Plotter):
 
         return currentLabel + newValue
 
-    def fillArea(self, xValues: Iterable, lowerYValues: Iterable, upperYValues: Iterable) -> None:
-        self.__axes.fill_between(xValues, lowerYValues, upperYValues)
+    def fillArea(self, xValues: Iterable, lowerYValues: Iterable, upperYValues: Iterable, **kwargs) -> None:
+        alpha = 1
+        for key, value in kwargs.items():
+            if key == "alpha":
+                alpha = value
+
+        self.__axes.fill_between(xValues, lowerYValues, upperYValues, alpha=alpha)
 
     def update(self) -> None:
         self.__canvas.draw_idle()

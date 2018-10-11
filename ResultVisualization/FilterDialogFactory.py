@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from ResultVisualization.CreateFilterDialog import CreateFilterDialog
 from ResultVisualization.EditSeriesFilterDialog import EditSeriesFilterDialog
-from ResultVisualization.plot import Series
+from ResultVisualization.Plot import Series
 
 
 class FilterDialogFactory(ABC):

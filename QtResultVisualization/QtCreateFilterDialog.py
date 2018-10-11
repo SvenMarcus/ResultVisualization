@@ -11,7 +11,7 @@ from ResultVisualization.CreateFilterDialog import (CreateFilterDialog,
                                                     RowContainsFilterCreationView)
 from ResultVisualization.Dialogs import DialogResult
 from ResultVisualization.FilterRepository import FilterRepository
-from ResultVisualization.plot import Series
+from ResultVisualization.Plot import Series
 from ResultVisualization.SeriesRepository import SeriesRepository
 from ResultVisualization.TransferWidget import TransferWidget
 

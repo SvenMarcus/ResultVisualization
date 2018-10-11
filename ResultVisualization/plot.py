@@ -135,48 +135,94 @@ class LineSeries(Series):
         self.__yLimits = ()
         self.__confidenceBand: float = 0
 
-        self.__filteredX = list()
-        self.__filteredY = list()
-
     def plot(self, plotter: Plotter) -> None:
-        self.__sortValuesByX()
-        self.__filterValues()
-        self.__plotConfidenceBand(plotter)
-        plotter.lineSeries(self.__filteredX, self.__filteredY, xLabel=self._xLabel, yLabel=self._yLabel, title=self._title)
+        x, y = self.__getPlotValues()
+        self.__plotConfidenceBand(plotter, x, y)
+        plotter.lineSeries(x, y, xLabel=self._xLabel, yLabel=self._yLabel, title=self._title)
 
-    def __filterValues(self) -> None:
+    def __getPlotValues(self) -> tuple:
+        filteredX, filteredY, filteredMeta = self.__removeNonNumberEntries()
+        if len(filteredX) == 0:
+            return list(), list()
+
+        filteredX, filteredY, filteredMeta = self.__sortValuesByX(filteredX, filteredY, filteredMeta)
+        filteredX, filteredY = self.__filterValues(filteredX, filteredY, filteredMeta)
+        return filteredX, filteredY
+
+    def __removeNonNumberEntries(self) -> tuple:
+        indexesToRemove = self.__determineIndexesToRemove()
+        filteredX = list(self.xValues)
+        filteredY = list(self.yValues)
+        filteredMeta = list(self._metaData)
+        for index in indexesToRemove:
+            if index < len(filteredX):
+                filteredX.pop(index)
+
+            if index < len(filteredY):
+                filteredY.pop(index)
+
+            if index < len(filteredMeta):
+                filteredMeta.pop(index)
+
+        return filteredX, filteredY, filteredMeta
+
+    def __determineIndexesToRemove(self) -> List[int]:
+        xIndexesToRemove = self.__getNonNumberIndexes(self.xValues)
+        yIndexesToRemove = self.__getNonNumberIndexes(self.yValues)
+
+        combinedIndexes = xIndexesToRemove.union(yIndexesToRemove)
+        return list(sorted(combinedIndexes, reverse=True))
+
+    def __getNonNumberIndexes(self, entries: List) -> set:
+        nonNumberEntries = set()
+        for index in range(len(entries)):
+            entry = entries[index]
+            if not isNumber(entry):
+                nonNumberEntries.add(index)
+
+        return nonNumberEntries
+
+    def __filterValues(self, x, y, meta) -> tuple:
         if len(self._filters) == 0:
-            self.__filteredX = self.__xValues
-            self.__filteredY = self.__yValues
-            return
+            filteredX = x
+            filteredY = y
+            return filteredX, filteredY
 
-        self.__filteredX = list()
-        self.__filteredY = list()
+        filteredX = list()
+        filteredY = list()
 
-        for i in range(len(self.metaData)):
+        for i in range(len(meta)):
+            if i >= len(x) or i >= len(y):
+                break
+
             shouldAdd: bool = True
             for rowFilter in self._filters:
                 shouldAdd = shouldAdd and rowFilter.appliesToIndex(self, i)
 
             if shouldAdd:
-                self.__filteredX.append(self.xValues[i])
-                self.__filteredY.append(self.yValues[i])
+                filteredX.append(x[i])
+                filteredY.append(y[i])
 
-    def __plotConfidenceBand(self, plotter: Plotter) -> None:
+        return filteredX, filteredY
+
+    def __plotConfidenceBand(self, plotter: Plotter, xValues: list, yValues: list) -> None:
         if self.__confidenceBand > 0:
-            lower = [y * (1 - self.__confidenceBand) for y in self.__yValues]
-            upper = [y * (1 + self.__confidenceBand) for y in self.__yValues]
+            lower = [y * (1 - self.__confidenceBand) for y in yValues]
+            upper = [y * (1 + self.__confidenceBand) for y in yValues]
 
-            plotter.fillArea(self.__xValues, lower, upper)
+            plotter.fillArea(xValues, lower, upper, alpha=0.3)
 
-    def __sortValuesByX(self) -> None:
+    def __sortValuesByX(self, x, y, meta) -> tuple:
         zipped = None
-        if len(self.metaData) > 0:
-            zipped = zip(self.__xValues, self.__yValues, self.metaData)
-            self.__xValues, self.__yValues, self.metaData = list(zip(*sorted(zipped)))
+        sortedX, sortedY, sortedMeta = (list(), list(), list())
+        if len(meta) > 0:
+            zipped = zip(x, y, meta)
+            sortedX, sortedY, sortedMeta = list(zip(*sorted(zipped)))
         else:
-            zipped = zip(self.__xValues, self.__yValues)
-            self.__xValues, self.__yValues = list(zip(*sorted(zipped)))
+            zipped = zip(x, y)
+            sortedX, sortedY = list(zip(*sorted(zipped)))
+
+        return sortedX, sortedY, sortedMeta
 
     @property
     def xValues(self) -> list:
@@ -188,7 +234,6 @@ class LineSeries(Series):
     def xValues(self, value: list) -> None:
         """Sets the x values for the series."""
 
-        self.__assertAllEntriesAreNumbers(value)
         self.__xValues = value
 
     @property
@@ -201,7 +246,6 @@ class LineSeries(Series):
     def yValues(self, value: list) -> None:
         """Sets the y values for the series."""
 
-        self.__assertAllEntriesAreNumbers(value)
         self.__yValues = value
 
     @property

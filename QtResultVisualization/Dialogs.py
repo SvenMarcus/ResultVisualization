@@ -6,7 +6,7 @@ from typing import Dict
 from QtResultVisualization.QtSpreadsheet import QtSpreadsheet
 from ResultVisualization.Dialogs import ChooseFileDialog, ChooseFolderDialog, \
     DialogResult, LineSeriesDialog, SeriesDialog, SeriesDialogFactory
-from ResultVisualization.plot import LineSeries, Series
+from ResultVisualization.Plot import LineSeries, Series
 from ResultVisualization.Spreadsheet import SpreadsheetView
 from ResultVisualization.util import tryConvertToFloat
 

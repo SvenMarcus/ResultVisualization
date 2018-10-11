@@ -5,7 +5,7 @@ from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.Dialogs import Dialog, DialogResult
 from ResultVisualization.Filter import ExactMetaDataMatchesInAllSeriesFilter, ListFilter, RowMetaDataContainsFilter
 from ResultVisualization.FilterRepository import FilterRepository
-from ResultVisualization.plot import Series
+from ResultVisualization.Plot import Series
 from ResultVisualization.SeriesRepository import SeriesRepository
 from ResultVisualization.TransferWidget import TransferWidget
 
@@ -148,7 +148,7 @@ class CreateFilterDialog(Dialog, ABC):
 
         self._handleFilterOptionSelection(firstOption)
 
-        self._result: DialogResult = DialogResult.Ok
+        self._result: DialogResult = DialogResult.Cancel
 
     @abstractmethod
     def _initUI(self) -> None:

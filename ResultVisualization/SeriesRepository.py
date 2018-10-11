@@ -1,6 +1,6 @@
 from typing import Iterable, Set
 
-from ResultVisualization.plot import Series
+from ResultVisualization.Plot import Series
 
 
 class SeriesRepository:

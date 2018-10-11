@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 from numbers import Number
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 import Reader.CsvReader as csvReader
 from ResultVisualization.Spreadsheet import Spreadsheet, SpreadsheetView
-from ResultVisualization.plot import LineSeries, Series
+from ResultVisualization.Plot import LineSeries, Series
 from ResultVisualization.util import isNumber, tryConvertToFloat
 
 
@@ -77,6 +77,11 @@ class LineSeriesDialog(SeriesDialog, ABC):
             "x": list(),
             "y": list(),
             "meta": list()
+        }
+
+        self.__ignoredRows: Set[int] = {
+            "x": set(),
+            "y": set()
         }
 
         self.__editedCoordinate: str = ""
@@ -243,6 +248,9 @@ class LineSeriesDialog(SeriesDialog, ABC):
     def __getSelectedItemsForCoordinate(self, coordinate: str) -> List[Number]:
         """Returns the items for the given coordinate based on the selected Spreadsheet cells."""
 
+        if coordinate != "meta":
+            self.__ignoredRows[coordinate].clear()
+
         items: List = list()
         for cell in self.__selectedCells[coordinate]:
             item: Any = self.__spreadsheet.cell(cell[0], cell[1])
@@ -253,6 +261,9 @@ class LineSeriesDialog(SeriesDialog, ABC):
             num: float = tryConvertToFloat(item)
             if isNumber(num):
                 items.append(num)
+            else:
+                items.append(str(item))
+
         return items
 
     def __setInitialSeries(self, series: LineSeries) -> None:
@@ -263,9 +274,7 @@ class LineSeriesDialog(SeriesDialog, ABC):
 
         self._setTitleInView(series.title)
         self._setConfidenceBandInView(series.confidenceBand)
-        firstRow: List[str] = [series.xLabel, series.yLabel]
         values: List[List] = self.__transposePlotConfigData(series)
-        values.insert(0, firstRow)
         self.__spreadsheet.setData(values)
         self.__setSelectedIndices(values)
 

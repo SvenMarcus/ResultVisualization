@@ -5,7 +5,7 @@ from matplotlib.figure import Figure
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
 
 from QtResultVisualization.plots.mpl_plotters import MatplotlibPlotter
-from ResultVisualization.plot import Graph
+from ResultVisualization.Plot import Graph
 
 
 class DuplicatePlotConfigError(RuntimeError):

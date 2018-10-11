@@ -7,7 +7,7 @@ from QtResultVisualization.QtTransferWidget import QtTransferWidget
 from ResultVisualization.Dialogs import DialogResult
 from ResultVisualization.EditSeriesFilterDialog import EditSeriesFilterDialog
 from ResultVisualization.FilterRepository import FilterRepository
-from ResultVisualization.plot import Series
+from ResultVisualization.Plot import Series
 from ResultVisualization.TransferWidget import TransferWidget
 
 

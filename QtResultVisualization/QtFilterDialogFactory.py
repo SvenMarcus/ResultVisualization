@@ -6,7 +6,7 @@ from QtResultVisualization.QtEditSeriesFilterDialog import QtEditSeriesFilterDia
 from ResultVisualization.CreateFilterDialog import CreateFilterDialog
 from ResultVisualization.FilterDialogFactory import FilterDialogFactory
 from ResultVisualization.FilterRepository import FilterRepository
-from ResultVisualization.plot import Series
+from ResultVisualization.Plot import Series
 from ResultVisualization.SeriesRepository import SeriesRepository
 
 

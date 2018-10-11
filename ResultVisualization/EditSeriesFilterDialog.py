@@ -4,7 +4,7 @@ from typing import List
 from ResultVisualization.Dialogs import Dialog, DialogResult
 from ResultVisualization.Filter import ListFilter
 from ResultVisualization.FilterRepository import FilterRepository
-from ResultVisualization.plot import Series
+from ResultVisualization.Plot import Series
 from ResultVisualization.TransferWidget import TransferWidget
 
 class EditSeriesFilterDialog(Dialog, ABC):
@@ -79,11 +79,10 @@ class EditSeriesFilterDialog(Dialog, ABC):
 
     def _confirm(self) -> None:
         self.__series.clearFilters()
-        # for listFilter in self.__activeFilters:
         for listFilter in self.__transferWidget.getLeftTableItems():
             self.__series.addFilter(listFilter)
 
-        self.__result = DialogResult.Ok
+        self._result = DialogResult.Ok
         self._close()
 
     def _cancel(self) -> None:
@@ -95,10 +94,8 @@ class EditSeriesFilterDialog(Dialog, ABC):
         for listFilter in filterRepo.getFilters():
             if listFilter in series.filters:
                 activeFilters.append(listFilter)
-                # self._addFilterToActiveFiltersTable(listFilter.title)
             else:
                 availableFilters.append(listFilter)
-                # self._addFilterToAvailableFiltersTable(listFilter.title)
 
         self.__transferWidget.setLeftTableItems(activeFilters)
         self.__transferWidget.setRightTableItems(availableFilters)
