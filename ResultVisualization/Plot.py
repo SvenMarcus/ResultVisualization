@@ -180,7 +180,7 @@ class LineSeries(Series):
         return nonNumberEntries
 
     def __filterValues(self, x, y, meta) -> tuple:
-        if len(self._filters) == 0:
+        if len(self._filters) == 0 or len(meta) == 0:
             filteredX = x
             filteredY = y
             return filteredX, filteredY

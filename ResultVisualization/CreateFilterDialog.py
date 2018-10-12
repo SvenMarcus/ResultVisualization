@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
-from ResultVisualization.Commands import AddFilterToSeriesCommand
+from ResultVisualization.Commands import FilterCommandFactory, Command
 from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.Dialogs import Dialog, DialogResult
 from ResultVisualization.Filter import ExactMetaDataMatchesInAllSeriesFilter, ListFilter, RowMetaDataContainsFilter
@@ -127,13 +127,15 @@ class CreateFilterDialogSubViewFactory(ABC):
 
 class CreateFilterDialog(Dialog, ABC):
 
-    def __init__(self, filterRepository: FilterRepository, subViewFactory: CreateFilterDialogSubViewFactory):
+    def __init__(self, filterRepository: FilterRepository, subViewFactory: CreateFilterDialogSubViewFactory, commandFactory: FilterCommandFactory):
         self.__repository: FilterRepository = filterRepository
         self.__subViewFactory: CreateFilterDialogSubViewFactory = subViewFactory
+        self.__commandFactory: FilterCommandFactory = commandFactory
         self._initUI()
 
         self.__availableFilters: List[ListFilter] = list(self.__repository.getFilters())
         self.__addedFilters: List[ListFilter] = list()
+        self.__commands: List[Command] = list()
 
         for listFilter in self.__availableFilters:
             self._addFilterToAvailableFiltersTable(listFilter.title)
@@ -183,14 +185,19 @@ class CreateFilterDialog(Dialog, ABC):
         self._showSubView(self.__currentView)
 
     def _confirm(self) -> None:
-        for addedFilter in self.__addedFilters:
-            self.__repository.addFilter(addedFilter)
+        # for addedFilter in self.__addedFilters:
+        #     self.__repository.addFilter(addedFilter)
+
+        for cmd in self.__commands:
+            cmd.execute()
 
         self._close()
 
     def __handleFilterSaved(self, sender, args) -> None:
         addedFilter: ListFilter = self.__currentView.getFilter()
         self.__addedFilters.append(addedFilter)
+        cmd: Command = self.__commandFactory.makeRegisterFilterCommand(addedFilter)
+        self.__commands.append(cmd)
         self.__availableFilters.append(addedFilter)
         self._addFilterToAvailableFiltersTable(addedFilter.title)
         self._closeSubView(self.__currentView)

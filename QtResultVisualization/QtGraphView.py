@@ -1,19 +1,18 @@
+from typing import Iterable
+
 from PyQt5.QtWidgets import (QHBoxLayout, QHeaderView, QMainWindow,
                              QPushButton, QSplitter, QTableWidget,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 
 from QtResultVisualization.QtGraph import QtGraph
-from ResultVisualization.Dialogs import SeriesDialogFactory
-from ResultVisualization.FilterDialogFactory import FilterDialogFactory
 from ResultVisualization.GraphView import GraphView
-from ResultVisualization.Plot import Graph
-from ResultVisualization.SeriesRepository import SeriesRepository
+from ResultVisualization.Plot import Graph, Series
 
 
 class QtGraphView(GraphView):
 
-    def __init__(self, seriesDialogFactory: SeriesDialogFactory, seriesRepository: SeriesRepository, filterDialogFactory: FilterDialogFactory):
-        super(QtGraphView, self).__init__(seriesDialogFactory, seriesRepository, filterDialogFactory)
+    def __init__(self, initialSeries: Iterable[Series]):
+        super(QtGraphView, self).__init__(initialSeries)
         self.__window: QMainWindow = QMainWindow()
         self.__window.setMinimumWidth(1280)
         self.__window.setMinimumHeight(720)
@@ -34,19 +33,19 @@ class QtGraphView(GraphView):
 
         self.__newSeriesButton: QPushButton = QPushButton("Add")
         self.__newSeriesButton.setDefault(True)
-        self.__newSeriesButton.clicked.connect(lambda: self._addSeries())
+        self.__newSeriesButton.clicked.connect(lambda: self.addSeriesCommand.execute())
 
         self.__editSeriesButton: QPushButton = QPushButton("Edit")
-        self.__editSeriesButton.clicked.connect(self.__onEditClicked)
+        self.__editSeriesButton.clicked.connect(lambda: self.editSeriesCommand.execute())
 
         self.__removeSeriesButton: QPushButton = QPushButton("Remove")
-        self.__removeSeriesButton.clicked.connect(self.__onRemoveClicked)
+        self.__removeSeriesButton.clicked.connect(lambda: self.removeSeriesCommand.execute())
 
         self.__editFiltersButton: QPushButton = QPushButton("Edit Series Filters")
-        self.__editFiltersButton.clicked.connect(self.__onEditFiltersClicked)
+        self.__editFiltersButton.clicked.connect(lambda: self.editSeriesFilterCommand.execute())
 
         self.__createFiltersButton: QPushButton = QPushButton("Manage Filters")
-        self.__createFiltersButton.clicked.connect(lambda: self._showCreateFilterView())
+        self.__createFiltersButton.clicked.connect(lambda: self.createFilterCommand.execute())
 
         hLayout.addWidget(self.__newSeriesButton)
         hLayout.addWidget(self.__editSeriesButton)
@@ -76,22 +75,7 @@ class QtGraphView(GraphView):
         self.__seriesTable.removeRow(index)
         self.__seriesTable.clearSelection()
 
-    def __onEditClicked(self) -> None:
-        row = self.__getSelectedRow()
-        if row > -1:
-            self._editSeries(row)
-
-    def __onRemoveClicked(self) -> None:
-        row: int = self.__getSelectedRow()
-        if row > -1:
-            self._removeSeries(row)
-
-    def __onEditFiltersClicked(self) -> None:
-        row: int = self.__getSelectedRow()
-        if row > -1:
-            self._showEditFilterView(row)
-
-    def __getSelectedRow(self) -> int:
+    def _getSelectedRow(self) -> int:
         indexes = self.__seriesTable.selectedIndexes()
         if len(indexes) == 0:
             return -1

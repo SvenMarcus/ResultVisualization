@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Iterable
 
 
 class ListFilter(ABC):
@@ -47,6 +47,9 @@ class ExactMetaDataMatchesInAllSeriesFilter(ListFilter):
     def removeSeries(self, series) -> None:
         self.__seriesList.remove(series)
 
+    def getSeries(self) -> Iterable:
+        return iter(self.__seriesList)
+
     def appliesToIndex(self, sourceSeries, index: int) -> bool:
         value: str = sourceSeries.metaData[index]
 
@@ -54,7 +57,8 @@ class ExactMetaDataMatchesInAllSeriesFilter(ListFilter):
             if sourceSeries is series:
                 continue
 
-            if value not in series.metaData:
+            meta: int = series.metaData
+            if value not in meta and len(meta) > 0:
                 return False
 
         return True

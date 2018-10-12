@@ -9,6 +9,7 @@ from ResultVisualization.CreateFilterDialog import (CreateFilterDialog,
                                                     FilterCreationView,
                                                     MetaDataMatchFilterCreationView,
                                                     RowContainsFilterCreationView)
+from ResultVisualization.Commands import FilterCommandFactory
 from ResultVisualization.Dialogs import DialogResult
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.Plot import Series
@@ -107,14 +108,14 @@ class QtCreateFilterDialogSubViewFactory(CreateFilterDialogSubViewFactory):
 
 class QtCreateFilterDialog(CreateFilterDialog):
 
-    def __init__(self, filterRepository: FilterRepository, subViewFactory: CreateFilterDialogSubViewFactory, parent: QWidget):
+    def __init__(self, filterRepository: FilterRepository, subViewFactory: CreateFilterDialogSubViewFactory, commandFactory: FilterCommandFactory, parent: QWidget):
         self.__parent: QWidget = parent
         self.__dialog: QDialog = None
         self.__availableFilters: QTableWidget = None
         self.__addFilterButton: QPushButton = None
         self.__filterTypeComboBox: QComboBox = None
         self.__subView: QWidget = None
-        super(QtCreateFilterDialog, self).__init__(filterRepository, subViewFactory)
+        super(QtCreateFilterDialog, self).__init__(filterRepository, subViewFactory, commandFactory)
 
     def getWidget(self) -> QWidget:
         return self.__dialog
