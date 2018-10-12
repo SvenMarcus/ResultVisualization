@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget
 from QtResultVisualization.QtCreateFilterDialog import QtCreateFilterDialog, QtCreateFilterDialogSubViewFactory
 from QtResultVisualization.QtEditSeriesFilterDialog import QtEditSeriesFilterDialog
 
+from ResultVisualization.Commands import FilterCommandFactory
 from ResultVisualization.CreateFilterDialog import CreateFilterDialog
 from ResultVisualization.FilterDialogFactory import FilterDialogFactory
 from ResultVisualization.FilterRepository import FilterRepository
@@ -25,4 +26,5 @@ class QtFilterDialogFactory(FilterDialogFactory):
         return QtCreateFilterDialog(self.__filterRepo, subViewFactory, self.__parent)
 
     def makeEditSeriesFilterDialog(self, series: Series):
-        return QtEditSeriesFilterDialog(series, self.__filterRepo, self.__parent)
+        commandFactory = FilterCommandFactory()
+        return QtEditSeriesFilterDialog(series, self.__filterRepo, commandFactory, self.__parent)

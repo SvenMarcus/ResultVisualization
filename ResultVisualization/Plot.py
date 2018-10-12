@@ -126,9 +126,6 @@ class LineSeries(Series):
 
     def __init__(self):
         super().__init__()
-        self.__title: str = ""
-        self.__xLabel: str = ""
-        self.__yLabel: str = ""
         self.__xValues = []
         self.__yValues = []
         self.__xLimits = ()

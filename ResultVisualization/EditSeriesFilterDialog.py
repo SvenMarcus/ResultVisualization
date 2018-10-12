@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from ResultVisualization.Commands import Command, FilterCommandFactory
 from ResultVisualization.Dialogs import Dialog, DialogResult
 from ResultVisualization.Filter import ListFilter
 from ResultVisualization.FilterRepository import FilterRepository
@@ -9,10 +10,12 @@ from ResultVisualization.TransferWidget import TransferWidget
 
 class EditSeriesFilterDialog(Dialog, ABC):
 
-    def __init__(self, series: Series, filterRepo: FilterRepository):
+    def __init__(self, series: Series, filterRepo: FilterRepository, commandFactory: FilterCommandFactory):
         self.__series: Series = series
         self.__activeFilters: List[ListFilter] = list()
         self.__availableFilters: List[ListFilter] = list()
+
+        self.__factory: FilterCommandFactory = commandFactory
 
         self._result: DialogResult = DialogResult.Cancel
 
@@ -78,9 +81,14 @@ class EditSeriesFilterDialog(Dialog, ABC):
             self.__activeFilters.remove(listFilter)
 
     def _confirm(self) -> None:
-        self.__series.clearFilters()
+        currentFilters: List[ListFilter] = list(self.__series.filters)
+        for listFilter in currentFilters:
+            cmd: Command = self.__factory.makeRemoveFilterFromSeriesCommand(listFilter, self.__series)
+            cmd.execute()
+
         for listFilter in self.__transferWidget.getLeftTableItems():
-            self.__series.addFilter(listFilter)
+            cmd: Command = self.__factory.makeAddFilterToSeriesCommand(listFilter, self.__series)
+            cmd.execute()
 
         self._result = DialogResult.Ok
         self._close()

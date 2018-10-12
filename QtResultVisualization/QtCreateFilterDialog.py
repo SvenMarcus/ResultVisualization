@@ -40,7 +40,6 @@ class QtRowContainsFilterWidget(RowContainsFilterCreationView):
         self.__widget.layout().addWidget(self.__requiredDataBox, 1)
         self.__widget.layout().addLayout(self.__buttonBar)
         self.__widget.layout().addStretch(2)
-        # self.__widget.setMaximumHeight(200)
 
     def getWidget(self) -> QWidget:
         return self.__widget
@@ -93,6 +92,7 @@ class QtMetaDataMatchFilterCreationView(MetaDataMatchFilterCreationView):
     def _showMessage(self, message: str):
         QMessageBox.information(self.__widget, "Error", message)
 
+
 class QtCreateFilterDialogSubViewFactory(CreateFilterDialogSubViewFactory):
 
     def __init__(self, seriesRepo: SeriesRepository):
@@ -103,6 +103,7 @@ class QtCreateFilterDialogSubViewFactory(CreateFilterDialogSubViewFactory):
             return QtRowContainsFilterWidget()
         elif kind == "ExactMetaMatch":
             return QtMetaDataMatchFilterCreationView(self._seriesRepo)
+
 
 class QtCreateFilterDialog(CreateFilterDialog):
 

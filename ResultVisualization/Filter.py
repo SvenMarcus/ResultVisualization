@@ -1,8 +1,8 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import List
 
 
-class ListFilter:
+class ListFilter(ABC):
 
     def __init__(self):
         self.__title: str = ""
@@ -19,6 +19,10 @@ class ListFilter:
     def appliesToIndex(self, sourceSeries, index: int) -> bool:
         raise NotImplementedError()
 
+    @abstractmethod
+    def accept(self, filterVisitor) -> None:
+        raise NotImplementedError()
+
 
 class RowMetaDataContainsFilter(ListFilter):
 
@@ -27,6 +31,9 @@ class RowMetaDataContainsFilter(ListFilter):
 
     def appliesToIndex(self, sourceSeries, index: int) -> bool:
         return self.__requiredValue in sourceSeries.metaData[index]
+
+    def accept(self, filterVisitor) -> None:
+        filterVisitor.visitRowMetaDataContains(self)
 
 
 class ExactMetaDataMatchesInAllSeriesFilter(ListFilter):
@@ -51,3 +58,17 @@ class ExactMetaDataMatchesInAllSeriesFilter(ListFilter):
                 return False
 
         return True
+
+    def accept(self, filterVisitor) -> None:
+        filterVisitor.visitExactMetaDataMatchesInAllSeries(self)
+
+
+class FilterVisitor(ABC):
+
+    @abstractmethod
+    def visitRowMetaDataContains(self, filter: RowMetaDataContainsFilter) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def visitExactMetaDataMatchesInAllSeries(self, filter: ExactMetaDataMatchesInAllSeriesFilter) -> None:
+        raise NotImplementedError()

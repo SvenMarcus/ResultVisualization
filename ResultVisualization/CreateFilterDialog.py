@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
+from ResultVisualization.Commands import AddFilterToSeriesCommand
 from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.Dialogs import Dialog, DialogResult
 from ResultVisualization.Filter import ExactMetaDataMatchesInAllSeriesFilter, ListFilter, RowMetaDataContainsFilter

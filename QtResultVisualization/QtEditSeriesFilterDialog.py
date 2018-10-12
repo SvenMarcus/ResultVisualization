@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (QDialog, QHBoxLayout, QPushButton, QTableWidget,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 
 from QtResultVisualization.QtTransferWidget import QtTransferWidget
+from ResultVisualization.Commands import FilterCommandFactory
 from ResultVisualization.Dialogs import DialogResult
 from ResultVisualization.EditSeriesFilterDialog import EditSeriesFilterDialog
 from ResultVisualization.FilterRepository import FilterRepository
@@ -13,9 +14,9 @@ from ResultVisualization.TransferWidget import TransferWidget
 
 class QtEditSeriesFilterDialog(EditSeriesFilterDialog):
 
-    def __init__(self, series: Series, filterRepo: FilterRepository, parent: QWidget = None):
+    def __init__(self, series: Series, filterRepo: FilterRepository, commandFactory: FilterCommandFactory, parent: QWidget = None):
         self.__parent: QWidget = parent
-        super(QtEditSeriesFilterDialog, self).__init__(series, filterRepo)
+        super(QtEditSeriesFilterDialog, self).__init__(series, filterRepo, commandFactory)
 
     def getWidget(self) -> QWidget:
         return self.__dialog
