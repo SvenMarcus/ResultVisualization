@@ -185,12 +185,10 @@ class CreateFilterDialog(Dialog, ABC):
         self._showSubView(self.__currentView)
 
     def _confirm(self) -> None:
-        # for addedFilter in self.__addedFilters:
-        #     self.__repository.addFilter(addedFilter)
-
         for cmd in self.__commands:
             cmd.execute()
 
+        self._result = DialogResult.Ok
         self._close()
 
     def __handleFilterSaved(self, sender, args) -> None:

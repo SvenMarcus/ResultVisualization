@@ -13,6 +13,7 @@ class QtSpreadsheet(SpreadsheetView):
         self.__widget.setMinimumWidth(400)
         self.__widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.__widget.setSelectionBehavior(QTableWidget.SelectColumns)
+        self.__widget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.__widget.itemSelectionChanged.connect(self.__onSelectionChanged)
         self.__spreadsheet: Spreadsheet = None
 

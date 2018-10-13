@@ -2,11 +2,14 @@ import sys
 
 import matplotlib
 import matplotlib.figure
-from PyQt5 import QtWidgets as QtGui
-from matplotlib.backends.backend_qt4agg import , \
-    FigureCanvasQTAgg as FigureCanvas, \
+from matplotlib.backends.backend_qt4agg import \
+    FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import \
     NavigationToolbar2QT as NavigationToolbar
 from matplotlib.lines import Line2D
+from matplotlib.figure import Axes
+from PyQt5 import QtWidgets as QtGui
+from PyQt5 import QtCore
 
 
 class PrettyWidget(QtGui.QWidget):
@@ -37,7 +40,6 @@ class PrettyWidget(QtGui.QWidget):
         self.canvas = FigureCanvas(self.figure)
         self.toolbar = NavigationToolbar(self.canvas, self)
         grid.addWidget(self.canvas, 3, 0, 1, 2)
-        # grid.addWidget(self.toolbar, ??)
 
         self.show()
 
@@ -56,10 +58,10 @@ class PrettyWidget(QtGui.QWidget):
 
     def plot2(self):
         self.figure.clf()
-        ax3 = self.figure.add_subplot(111)
+        ax3: Axes = self.figure.add_subplot(111)
         x = [i for i in range(100)]
         y = [i**0.5 for i in x]
-        ax3.plot(x, y, 'r.-')
+        ax3.boxplot(x)
         ax3.set_title('Square Root Plot')
         self.canvas.draw_idle()  
 
@@ -71,6 +73,8 @@ class PrettyWidget(QtGui.QWidget):
 
 
 app = QtGui.QApplication(sys.argv)
+app.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
+app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 app.aboutToQuit.connect(app.deleteLater)
 GUI = PrettyWidget()
 sys.exit(app.exec_())

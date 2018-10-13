@@ -51,20 +51,31 @@ class ShowEditSeriesDialogCommand(Command):
             self.__graphView.updateSeries(series)
 
 
-class RemoveSeriesCommand(Command):
+class RemoveSeriesCommand(Command, FilterVisitor):
 
     def __init__(self, graphView: GraphView, seriesRepo: SeriesRepository):
         self.__graphView: GraphView = graphView
         self.__repository: SeriesRepository = seriesRepo
+        self.__series: Series = None
 
     def execute(self) -> None:
-        series: Series = self.__graphView.getSelectedSeries()
+        self.__series: Series = self.__graphView.getSelectedSeries()
 
-        if series is None:
+        if self.__series is None:
             return
 
-        self.__repository.removeSeries(series)
-        self.__graphView.removeSeries(series)
+        for listFilter in self.__series.filters:
+            listFilter.accept(self)
+
+        self.__repository.removeSeries(self.__series)
+        self.__graphView.removeSeries(self.__series)
+
+    def visitExactMetaDataMatchesInAllSeries(self, filter):
+        if self.__series in filter.getSeries():
+            filter.removeSeries(self.__series)
+
+    def visitRowMetaDataContains(self, filter):
+        pass
 
 
 class ShowEditSeriesFilterDialogCommand(Command):

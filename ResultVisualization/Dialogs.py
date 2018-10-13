@@ -79,11 +79,6 @@ class LineSeriesDialog(SeriesDialog, ABC):
             "meta": list()
         }
 
-        self.__ignoredRows: Set[int] = {
-            "x": set(),
-            "y": set()
-        }
-
         self.__editedCoordinate: str = ""
         self.__series: LineSeries = series or LineSeries()
         self.__setInitialSeries(self.__series)
@@ -116,8 +111,7 @@ class LineSeriesDialog(SeriesDialog, ABC):
         if result == DialogResult.Ok:
             file: str = dialog.getSelectedFile()
             self._setWindowTitle(file)
-            data: List[List[str]] = csvReader.readFile(
-                file, csvReader.semicolon)
+            data: List[List[str]] = csvReader.readFile(file)
             self.__spreadsheet.setData(data)
 
     def _toggleEditMode(self, coordinate: str) -> None:
@@ -125,7 +119,6 @@ class LineSeriesDialog(SeriesDialog, ABC):
 
         if not self.__editedCoordinate:
             self.__editedCoordinate = coordinate
-            # self.__highlightSelectedCells(coordinate)
         else:
             self.__saveSelectedCellIndices(coordinate)
 
@@ -247,9 +240,6 @@ class LineSeriesDialog(SeriesDialog, ABC):
 
     def __getSelectedItemsForCoordinate(self, coordinate: str) -> List[Number]:
         """Returns the items for the given coordinate based on the selected Spreadsheet cells."""
-
-        if coordinate != "meta":
-            self.__ignoredRows[coordinate].clear()
 
         items: List = list()
         for cell in self.__selectedCells[coordinate]:

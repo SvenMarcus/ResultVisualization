@@ -14,12 +14,12 @@ class QtGraphView(GraphView):
     def __init__(self, initialSeries: Iterable[Series]):
         super(QtGraphView, self).__init__(initialSeries)
         self.__window: QMainWindow = QMainWindow()
-        self.__window.setMinimumWidth(1280)
-        self.__window.setMinimumHeight(720)
+        self.__window.setMinimumWidth(1500)
+        self.__window.setMinimumHeight(1000)
         self.__splitter: QSplitter = QSplitter(self.__window)
         self.__leftWidget: QWidget = QWidget(self.__splitter)
         layout: QVBoxLayout = QVBoxLayout()
-        self.__leftWidget.setMaximumWidth(350)
+        self.__leftWidget.setMaximumWidth(500)
         self.__leftWidget.setLayout(layout)
 
         self.__seriesTable: QTableWidget = QTableWidget()

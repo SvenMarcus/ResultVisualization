@@ -23,7 +23,15 @@ class Plotter(ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def boxplot(self, data: Iterable[Iterable], **kwargs) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
     def fillArea(self, xValues: Iterable, lowerYValues: Iterable, upperYValues: Iterable) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def text(self, x: float, y: float, text: str, use_percentage: bool = False) -> None:
         raise NotImplementedError()
 
     @abstractmethod
@@ -108,18 +116,18 @@ class Graph(ABC):
 
     def addPlot(self, series: Series) -> None:
         self.__series.append(series)
-        series.plot(self.__plotter)
-        self.__plotter.update()
+        self.updatePlot()
 
     def removePlot(self, series: Series) -> None:
         self.__series.remove(series)
         self.updatePlot()
 
     def updatePlot(self) -> None:
+        self.__plotter.resetPlotData()
         self.__plotter.clear()
         for series in self.__series:
             series.plot(self.__plotter)
-        self.__plotter.update()
+        self.__plotter.finishPlot()
 
 
 class LineSeries(Series):
@@ -202,13 +210,6 @@ class LineSeries(Series):
 
         return filteredX, filteredY
 
-    def __plotConfidenceBand(self, plotter: Plotter, xValues: list, yValues: list) -> None:
-        if self.__confidenceBand > 0:
-            lower = [y * (1 - self.__confidenceBand) for y in yValues]
-            upper = [y * (1 + self.__confidenceBand) for y in yValues]
-
-            plotter.fillArea(xValues, lower, upper, alpha=0.3)
-
     def __sortValuesByX(self, x, y, meta) -> tuple:
         zipped = None
         sortedX, sortedY, sortedMeta = (list(), list(), list())
@@ -220,6 +221,14 @@ class LineSeries(Series):
             sortedX, sortedY = list(zip(*sorted(zipped)))
 
         return sortedX, sortedY, sortedMeta
+
+    def __plotConfidenceBand(self, plotter: Plotter, xValues: list, yValues: list) -> None:
+        if self.__confidenceBand > 0:
+            lower = [y * (1 - self.__confidenceBand) for y in yValues]
+            upper = [y * (1 + self.__confidenceBand) for y in yValues]
+
+            plotter.fillArea(xValues, lower, upper, alpha=0.3)
+            plotter.text(xValues[len(xValues ) - 1] * 0.9, upper[len(upper) - 1], str(self.__confidenceBand * 100) + "%")
 
     @property
     def xValues(self) -> list:
@@ -279,3 +288,39 @@ class LineSeries(Series):
         for item in collection:
             if not isNumber(item):
                 raise NonNumberInPlotConfigError()
+
+
+class BoxSeries(Series):
+
+    def __init__(self):
+        super(BoxSeries, self).__init__()
+        
+        self.__data: List[List] = list()
+
+    def plot(self, plotter: Plotter):
+        data, meta = self.__filterData()
+        plotter.boxplot(data, xLabels=meta, show_median_values=True)
+
+    def __filterData(self):
+        meta = list(self._metaData)
+        indexesToRemove = set()
+        for index in range(len(meta)):
+            for listFilter in self._filters:
+                if not listFilter.appliesToIndex(self, index):
+                    indexesToRemove.add(index)
+
+        sortedIndexes = list(sorted(indexesToRemove, reverse=True))
+        data = list(self.__data)
+
+        for index in sortedIndexes:
+            meta.pop(index)
+            data.pop(index)
+
+        return data, meta
+    @property
+    def data(self) -> List[List]:
+        return self.__data
+
+    @data.setter
+    def data(self, value: List[List]) -> None:
+        self.__data = value

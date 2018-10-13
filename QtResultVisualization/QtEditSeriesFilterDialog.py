@@ -23,7 +23,7 @@ class QtEditSeriesFilterDialog(EditSeriesFilterDialog):
 
     def _initUI(self) -> None:
         self.__dialog: QDialog = QDialog(self.__parent)
-
+        self.__dialog.setMinimumSize(1000, 600)
         self.__transferWidget: QtTransferWidget = QtTransferWidget()
 
         self.__okButton: QPushButton = QPushButton("Ok")

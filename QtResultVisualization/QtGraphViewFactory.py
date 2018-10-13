@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget
 
+from QtResultVisualization.QtBoxSeriesDialog import QtBoxSeriesDialogFactory
 from QtResultVisualization.Dialogs import QtLineSeriesDialogFactory
 from QtResultVisualization.QtFilterDialogFactory import QtFilterDialogFactory
 from QtResultVisualization.QtGraphView import QtGraphView
@@ -20,21 +21,29 @@ from ResultVisualization.SeriesRepository import SeriesRepository
 class QtGraphViewFactory(GraphViewFactory):
 
     def makeGraphView(self, kind) -> GraphView:
+        graphView: QtGraphView = None
+        seriesDialogFactory: SeriesDialogFactory = None
+        
         if kind == "linear":
             seriesDialogFactory: SeriesDialogFactory = QtLineSeriesDialogFactory()
-            seriesRepo: SeriesRepository = SeriesRepository()
-            filterRepo: FilterRepository = FilterRepository()
-            filterDialogFactory: FilterDialogFactory = QtFilterDialogFactory(filterRepo, seriesRepo)
+        elif kind == "box":
+            seriesDialogFactory = QtBoxSeriesDialogFactory()
+        else:
+            return None
 
-            graphView: QtGraphView = QtGraphView(seriesRepo.getSeries())
+        seriesRepo: SeriesRepository = SeriesRepository()
+        filterRepo: FilterRepository = FilterRepository()
+        filterDialogFactory: FilterDialogFactory = QtFilterDialogFactory(filterRepo, seriesRepo)
 
-            graphView.addSeriesCommand = ShowAddSeriesDialogCommand(graphView, seriesDialogFactory, seriesRepo)
-            graphView.editSeriesCommand = ShowEditSeriesDialogCommand(graphView, seriesDialogFactory)
-            graphView.removeSeriesCommand = RemoveSeriesCommand(graphView, seriesRepo)
-            graphView.editSeriesFilterCommand = ShowEditSeriesFilterDialogCommand(graphView, filterDialogFactory)
-            graphView.createFilterCommand = ShowCreateFilterDialogCommand(graphView, filterDialogFactory)
+        graphView = QtGraphView(seriesRepo.getSeries())
 
-            widget: QWidget = graphView.getWindow()
-            filterDialogFactory.setParent(widget)
+        graphView.addSeriesCommand = ShowAddSeriesDialogCommand(graphView, seriesDialogFactory, seriesRepo)
+        graphView.editSeriesCommand = ShowEditSeriesDialogCommand(graphView, seriesDialogFactory)
+        graphView.removeSeriesCommand = RemoveSeriesCommand(graphView, seriesRepo)
+        graphView.editSeriesFilterCommand = ShowEditSeriesFilterDialogCommand(graphView, filterDialogFactory)
+        graphView.createFilterCommand = ShowCreateFilterDialogCommand(graphView, filterDialogFactory)
 
-            return graphView
+        widget: QWidget = graphView.getWindow()
+        filterDialogFactory.setParent(widget)
+
+        return graphView

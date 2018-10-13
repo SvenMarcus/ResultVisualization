@@ -100,10 +100,16 @@ class QtCreateFilterDialogSubViewFactory(CreateFilterDialogSubViewFactory):
         return super().__init__(seriesRepo)
 
     def makeView(self, kind: str) -> FilterCreationView:
+        filterCreationView: FilterCreationView = None
         if kind == "RowContains":
-            return QtRowContainsFilterWidget()
+            filterCreationView = QtRowContainsFilterWidget()
         elif kind == "ExactMetaMatch":
-            return QtMetaDataMatchFilterCreationView(self._seriesRepo)
+            filterCreationView = QtMetaDataMatchFilterCreationView(self._seriesRepo)
+        else:
+            return None
+
+        filterCreationView.getWidget().setMinimumSize(600, 600)
+        return filterCreationView
 
 
 class QtCreateFilterDialog(CreateFilterDialog):
@@ -123,7 +129,7 @@ class QtCreateFilterDialog(CreateFilterDialog):
     def _initUI(self) -> None:
         self.__dialog: QDialog = QDialog(self.__parent)
         self.__dialog.setWindowTitle("Filter Creator")
-        self.__dialog.setBaseSize(800, 600)
+        self.__dialog.setMinimumSize(1000, 800)
         self.__dialog.setLayout(QGridLayout())
 
         self.__availableFilters: QTableWidget = QTableWidget()

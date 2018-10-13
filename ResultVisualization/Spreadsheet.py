@@ -1,7 +1,18 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Any, List, Tuple
 
 from ResultVisualization.Events import Event, InvokableEvent
+
+
+class SelectionMode(Enum):
+
+    Unrestricted: int = 0
+    SingleCellsOnly: int = 1
+    RowsOnly: int = 2
+    SingleRowsOnly: int = 3
+    ColumnsOnly: int = 4
+    SingleColumnsOnly: int = 5
 
 
 class SpreadsheetView(ABC):
