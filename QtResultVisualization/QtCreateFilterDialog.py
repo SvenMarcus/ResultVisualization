@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QComboBox, QDialog, QGridLayout, QHBoxLayout,
+from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialog, QGridLayout, QHBoxLayout,
                              QHeaderView, QLabel, QLineEdit, QMessageBox,
                              QPushButton, QTableWidget, QTableWidgetItem,
                              QVBoxLayout, QWidget)
@@ -27,6 +27,7 @@ class QtRowContainsFilterWidget(RowContainsFilterCreationView):
 
         self.__titleBox: QLineEdit = QLineEdit()
         self.__requiredDataBox: QLineEdit = QLineEdit()
+        self.__inverseCheckBox: QCheckBox = QCheckBox("Inverse")
         self.__okButton: QPushButton = QPushButton("OK")
         self.__okButton.clicked.connect(lambda: self._save())
 
@@ -39,6 +40,7 @@ class QtRowContainsFilterWidget(RowContainsFilterCreationView):
         self.__widget.layout().addWidget(self.__titleBox, 1)
         self.__widget.layout().addWidget(QLabel("Required meta data:"))
         self.__widget.layout().addWidget(self.__requiredDataBox, 1)
+        self.__widget.layout().addWidget(self.__inverseCheckBox)
         self.__widget.layout().addLayout(self.__buttonBar)
         self.__widget.layout().addStretch(2)
 
@@ -50,6 +52,9 @@ class QtRowContainsFilterWidget(RowContainsFilterCreationView):
 
     def _getRequiredMetaDataFromView(self) -> str:
         return self.__requiredDataBox.text()
+
+    def _getInverseFromView(self) -> bool:
+        return self.__inverseCheckBox.isChecked()
 
     def _showMessage(self, message: str):
         QMessageBox.information(self.__widget, "Error", message)
@@ -139,7 +144,7 @@ class QtCreateFilterDialog(CreateFilterDialog):
         self.__availableFilters.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.__availableFilters.setMaximumWidth(250)
 
-        self.__addFilterButton: QPushButton = QPushButton("Add:")
+        self.__addFilterButton: QPushButton = QPushButton("Select:")
         self.__addFilterButton.clicked.connect(lambda: self._handleFilterOptionSelection(self.__filterTypeComboBox.currentText()))
         self.__filterTypeComboBox: QComboBox = QComboBox()
 

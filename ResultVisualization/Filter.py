@@ -28,9 +28,16 @@ class RowMetaDataContainsFilter(ListFilter):
 
     def __init__(self, requiredValue: str):
         self.__requiredValue: str = requiredValue
+        self.__inverse: bool = False
+
+    def setInverse(self, value: bool) -> None:
+        self.__inverse = value
 
     def appliesToIndex(self, sourceSeries, index: int) -> bool:
-        return self.__requiredValue in sourceSeries.metaData[index]
+        if not self.__inverse:
+            return self.__requiredValue in sourceSeries.metaData[index]
+        else:
+            return self.__requiredValue not in sourceSeries.metaData[index]
 
     def accept(self, filterVisitor) -> None:
         filterVisitor.visitRowMetaDataContains(self)

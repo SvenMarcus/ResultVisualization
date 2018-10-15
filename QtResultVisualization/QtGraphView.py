@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from PyQt5.QtWidgets import (QHBoxLayout, QHeaderView, QMainWindow,
+from PyQt5.QtWidgets import (QHBoxLayout, QHeaderView,
                              QPushButton, QSplitter, QTableWidget,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 
@@ -12,11 +12,10 @@ from ResultVisualization.Plot import Graph, Series
 class QtGraphView(GraphView):
 
     def __init__(self, initialSeries: Iterable[Series]):
-        super(QtGraphView, self).__init__(initialSeries)
-        self.__window: QMainWindow = QMainWindow()
-        self.__window.setMinimumWidth(1500)
-        self.__window.setMinimumHeight(1000)
-        self.__splitter: QSplitter = QSplitter(self.__window)
+        self.__splitter: QSplitter = QSplitter()
+        self.__splitter.setMinimumWidth(1200)
+        self.__splitter.setMinimumHeight(800)
+
         self.__leftWidget: QWidget = QWidget(self.__splitter)
         layout: QVBoxLayout = QVBoxLayout()
         self.__leftWidget.setMaximumWidth(500)
@@ -24,12 +23,16 @@ class QtGraphView(GraphView):
 
         self.__seriesTable: QTableWidget = QTableWidget()
         self.__seriesTable.setSelectionBehavior(QTableWidget.SelectItems)
+        self.__seriesTable.setEditTriggers(QTableWidget.NoEditTriggers)
         self.__seriesTable.setColumnCount(1)
         self.__seriesTable.setHorizontalHeaderLabels(["Series"])
         self.__seriesTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         layout.addWidget(self.__seriesTable)
 
         hLayout: QHBoxLayout = QHBoxLayout()
+
+        self.__saveGraphButton: QPushButton = QPushButton("Save Graph View")
+        self.__saveGraphButton.clicked.connect(lambda: self.saveCommand.execute())
 
         self.__newSeriesButton: QPushButton = QPushButton("Add")
         self.__newSeriesButton.setDefault(True)
@@ -40,6 +43,12 @@ class QtGraphView(GraphView):
 
         self.__removeSeriesButton: QPushButton = QPushButton("Remove")
         self.__removeSeriesButton.clicked.connect(lambda: self.removeSeriesCommand.execute())
+
+        self.__duplicateSeriesButton: QPushButton = QPushButton("Duplicate")
+        self.__duplicateSeriesButton.clicked.connect(lambda: self.duplicateCommand.execute())
+
+        self.__fillAreaButton: QPushButton = QPushButton("Fill Area")
+        self.__fillAreaButton.clicked.connect(lambda: self.fillAreaCommand.execute())
 
         self.__editFiltersButton: QPushButton = QPushButton("Edit Series Filters")
         self.__editFiltersButton.clicked.connect(lambda: self.editSeriesFilterCommand.execute())
@@ -53,12 +62,18 @@ class QtGraphView(GraphView):
 
         layout.addLayout(hLayout)
 
+        layout.addWidget(self.__duplicateSeriesButton)
+        layout.addWidget(self.__fillAreaButton)
         layout.addWidget(self.__editFiltersButton)
         layout.addWidget(self.__createFiltersButton)
 
-        self.__window.setCentralWidget(self.__splitter)
+        super(QtGraphView, self).__init__(initialSeries)
+
         self.__splitter.addWidget(self.__leftWidget)
         self.__splitter.addWidget(self._graph.getWidget())
+
+    def show(self):
+        self.__splitter.show()
 
     def _makeGraph(self) -> Graph:
         return QtGraph()
@@ -83,5 +98,5 @@ class QtGraphView(GraphView):
         row: int = indexes[0].row()
         return row
 
-    def getWindow(self) -> QMainWindow:
-        return self.__window
+    def getWidget(self) -> QWidget:
+        return self.__splitter

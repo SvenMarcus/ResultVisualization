@@ -10,9 +10,16 @@ class GraphView(ABC):
         self._graph: Graph = self._makeGraph()
         self.__series: List[Series] = list(initialSeries)
 
+        for series in self.__series:
+            self._addEntryToListView(series.title)
+            self._graph.addPlot(series)
+
+        self.__saveCommand: 'Command' = None
         self.__addSeriesCommand: 'Command' = None
         self.__editSeriesCommand: 'Command' = None
         self.__removeSeriesCommand: 'Command' = None
+        self.__duplicateCommand: 'Command' = None
+        self.__fillAreaCommand: 'Command' = None
         self.__editSeriesFilterCommand: 'Command' = None
         self.__createFilterCommand: 'Command' = None
 
@@ -52,6 +59,14 @@ class GraphView(ABC):
             return self.__series[selectedRow]
 
     @property
+    def saveCommand(self) -> 'Command':
+        return self.__saveCommand
+
+    @saveCommand.setter
+    def saveCommand(self, value: 'Command') -> None:
+        self.__saveCommand = value
+
+    @property
     def addSeriesCommand(self) -> 'Command':
         return self.__addSeriesCommand
 
@@ -76,6 +91,22 @@ class GraphView(ABC):
         self.__removeSeriesCommand = value
 
     @property
+    def fillAreaCommand(self) -> 'Command':
+        return self.__fillAreaCommand
+
+    @fillAreaCommand.setter
+    def fillAreaCommand(self, value: 'Command') -> None:
+        self.__fillAreaCommand = value
+
+    @property
+    def duplicateCommand(self) -> 'Command':
+        return self.__duplicateCommand
+
+    @duplicateCommand.setter
+    def duplicateCommand(self, value: 'Command') -> None:
+        self.__duplicateCommand = value
+
+    @property
     def editSeriesFilterCommand(self) -> 'Command':
         return self.__editSeriesFilterCommand
 
@@ -98,6 +129,10 @@ class GraphView(ABC):
     @addSeriesCommand.setter
     def addSeriesCommand(self, value: 'Command') -> None:
         self.__addSeriesCommand = value
+
+    @abstractmethod
+    def show(self) -> None:
+        raise NotImplementedError()
 
     @abstractmethod
     def _getSelectedRow(self) -> int:

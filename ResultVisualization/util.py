@@ -13,3 +13,11 @@ def tryConvertToFloat(obj: Any) -> float:
     except:
         return None
 
+
+def tryConvertToInt(obj: Any) -> int:
+    """Tries to convert an object to an integer. Returns None if the conversion failed."""
+
+    try:
+        return int(obj)
+    except:
+        return None

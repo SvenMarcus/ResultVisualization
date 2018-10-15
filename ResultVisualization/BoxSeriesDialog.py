@@ -3,13 +3,14 @@ import Reader.CsvReader as csvReader
 from abc import ABC, abstractmethod
 from typing import Any, List, Tuple
 
-from ResultVisualization.Dialogs import SeriesDialog, DialogResult
+from ResultVisualization.Dialogs import ChooseFileDialog, SeriesDialog, DialogResult
 from ResultVisualization.Plot import BoxSeries, Series
 from ResultVisualization.Spreadsheet import Spreadsheet, SpreadsheetView
 from ResultVisualization.util import isNumber, tryConvertToFloat
 
 
 class BoxSeriesDialog(SeriesDialog, ABC):
+    """Abstract class for a Dialog to select data for a box series using a Spreadsheet"""
 
     def __init__(self, initialSeries: BoxSeries = None):
         self._spreadsheetView: SpreadsheetView = self._makeSpreadsheetView()
@@ -17,21 +18,28 @@ class BoxSeriesDialog(SeriesDialog, ABC):
         self._spreadsheetView.setSpreadsheet(self.__spreadsheet)
 
         self.__series: BoxSeries = initialSeries or BoxSeries()
+        self.__setInitialSeries(self.__series)
 
         self.__selectedData: List[List[Any]] = list()
         self.__inEditMode: bool = False
         self._result: DialogResult = DialogResult.Cancel
 
     def getSeries(self) -> Series:
+        """Returns a Series object based on the data entered and selected by the user."""
+
         return self.__series
 
     def _applyFilter(self, columnFilter: str) -> None:
         self.__spreadsheet.filterByColumnHeader(columnFilter)
 
     def _confirm(self) -> None:
+        """Called when the 'Ok' button is clicked. Displays an error message when the entered data is not valid.
+        Closes the dialog if data is valid."""
+
         self.__series.title = self._getTitleFromView()
 
         if len(self.__series.data) == 0:
+            self._showMessage("Invalid data. No data selected.")
             return
 
         self._result = DialogResult.Ok
@@ -60,8 +68,31 @@ class BoxSeriesDialog(SeriesDialog, ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def _getTitleFromView(self) -> str:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _setTitleInView(self, title: str) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
     def _setUnneededInputWidgetsEnabled(self, value: bool) -> None:
         raise NotImplementedError()
+
+    @abstractmethod
+    def _showMessage(self, msg: str) -> None:
+        """Shows a message box with the given message."""
+
+        raise NotImplementedError()
+
+    def __setInitialSeries(self, series: BoxSeries) -> None:
+        self._setTitleInView(series.title)
+
+        data: List[List] = self.__transposePlotConfigData(series)
+        if len(series.metaData) > 0:
+            data.insert(0, series.metaData)
+
+        self.__spreadsheet.setData(data)
 
     def __assignDataToSeries(self) -> None:
         selectedItems: List[List[Any]] = self.__getSelectedDataItems()
@@ -105,9 +136,15 @@ class BoxSeriesDialog(SeriesDialog, ABC):
             num: float = tryConvertToFloat(item)
             if isNumber(num):
                 column.append(num)
-            # else:
-            #     column.append(str(item))
 
         columns.append(column)
 
         return columns
+
+    @staticmethod
+    def __transposePlotConfigData(series: BoxSeries) -> List[List]:
+        """Transposes x and y values from a PlotConfig into column format."""
+
+        data: List[List] = list(series.data)
+
+        return list(map(list, zip(*data)))

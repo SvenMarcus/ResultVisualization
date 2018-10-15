@@ -1,6 +1,6 @@
-from typing import Dict, List
+from typing import Dict
 
-from PyQt5.QtWidgets import QAbstractItemView, QDialog, QGridLayout, QLabel, QLineEdit, QPushButton, QTableWidget, QWidget
+from PyQt5.QtWidgets import QAbstractItemView, QDialog, QGridLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QTableWidget, QWidget
 
 from QtResultVisualization.Dialogs import QtChooseFileDialog
 from QtResultVisualization.QtSpreadsheet import QtSpreadsheet
@@ -8,10 +8,11 @@ from QtResultVisualization.QtSpreadsheet import QtSpreadsheet
 from ResultVisualization.BoxSeriesDialog import BoxSeriesDialog
 from ResultVisualization.Dialogs import DialogResult, ChooseFileDialog, SeriesDialog, SeriesDialogFactory
 from ResultVisualization.Plot import Series
-from ResultVisualization.Spreadsheet import Spreadsheet, SpreadsheetView
+from ResultVisualization.Spreadsheet import SpreadsheetView
 
 
 class QtBoxSeriesDialog(BoxSeriesDialog):
+    """Qt implementation of BoxSeriesDialog"""
 
     def __init__(self, series: Series = None, parent: QWidget = None):
         self.__dialog: QDialog = None
@@ -73,15 +74,15 @@ class QtBoxSeriesDialog(BoxSeriesDialog):
         self.__dialog.setLayout(layout)
 
         layout.addWidget(self.__loadFileButton, 0, 0, 1, 2)
-        layout.addWidget(searchColumnHeaderInput, 1, 0, 1, 2)
-
-        layout.addWidget(self.__selectColumnsButton, 2, 0, 1, 2)
+        layout.addWidget(self.__selectColumnsButton, 1, 0, 1, 2)
 
         layout.addWidget(QLabel("Title"), 0, 2)
-        layout.addWidget(self.__titleInput, 1, 2)
+        layout.addWidget(self.__titleInput, 0, 3)
 
-        layout.addWidget(self.__okButton, 3, 0)
-        layout.addWidget(self.__cancelButton, 3, 1)
+        layout.addWidget(searchColumnHeaderInput, 1, 2, 1, 2)
+
+        layout.addWidget(self.__okButton, 2, 0)
+        layout.addWidget(self.__cancelButton, 2, 1)
 
     def getWidget(self) -> QWidget:
         return self.__dialog
@@ -102,7 +103,7 @@ class QtBoxSeriesDialog(BoxSeriesDialog):
         self.__titleInput.setText(value)
 
     def _makeChooseFileDialog(self) -> ChooseFileDialog:
-        return QtChooseFileDialog(self.__dialog)
+        return QtChooseFileDialog("*.csv", self.__dialog)
 
     def _makeSpreadsheetView(self) -> SpreadsheetView:
         qtSpreadsheet: QtSpreadsheet = QtSpreadsheet()

@@ -6,24 +6,30 @@ from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.Dialogs import Dialog, DialogResult
 from ResultVisualization.Filter import ExactMetaDataMatchesInAllSeriesFilter, ListFilter, RowMetaDataContainsFilter
 from ResultVisualization.FilterRepository import FilterRepository
-from ResultVisualization.Plot import Series
+from ResultVisualization.Plot import FilterableSeries, Series
 from ResultVisualization.SeriesRepository import SeriesRepository
 from ResultVisualization.TransferWidget import TransferWidget
 
 
 class FilterCreationView(ABC):
+    """Interface for a view that creates a Filter"""
 
     @property
     @abstractmethod
     def onFilterSaved(self) -> Event:
+        """This Event is triggered when the Filter is saved"""
+
         raise NotImplementedError()
 
     @abstractmethod
     def getFilter(self) -> ListFilter:
+        """Returns the Filter created in the view"""
+
         raise NotImplementedError()
 
 
 class MetaDataMatchFilterCreationView(FilterCreationView, ABC):
+    """An abstract view that creates a ExactMetaDataMatchesInAllSeriesFilter"""
 
     def __init__(self, seriesRepo: SeriesRepository):
         self.__onSavedEvent: InvokableEvent = InvokableEvent()
@@ -32,7 +38,9 @@ class MetaDataMatchFilterCreationView(FilterCreationView, ABC):
         self.__transferWidget: TransferWidget[Series] = self._getTransferWidget()
         self.__transferWidget.setLeftHeader("Selected Series")
         self.__transferWidget.setRightHeader("Available Series")
-        self.__transferWidget.setRightTableItems(seriesRepo.getSeries())
+
+        filterableSeries: List[FilterableSeries] = list(filter(lambda series: isinstance(series, FilterableSeries), seriesRepo.getSeries()))
+        self.__transferWidget.setRightTableItems(filterableSeries)
 
     def onFilterSaved(self) -> Event:
         return self.__onSavedEvent
@@ -69,6 +77,7 @@ class MetaDataMatchFilterCreationView(FilterCreationView, ABC):
 
 
 class RowContainsFilterCreationView(FilterCreationView, ABC):
+    """An abstract view that create a RowMetaDataContainsFilter"""
 
     def __init__(self):
         self.__onSavedEvent: InvokableEvent = InvokableEvent()
@@ -89,8 +98,10 @@ class RowContainsFilterCreationView(FilterCreationView, ABC):
 
         title: str = self._getTitleFromView()
         requiredMeta: str = self._getRequiredMetaDataFromView()
+        inverse: bool = self._getInverseFromView()
         self.__listFilter: RowMetaDataContainsFilter = RowMetaDataContainsFilter(requiredMeta)
         self.__listFilter.title = title
+        self.__listFilter.setInverse(inverse)
         self.__onSavedEvent(self)
 
     @abstractmethod
@@ -102,6 +113,10 @@ class RowContainsFilterCreationView(FilterCreationView, ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def _getInverseFromView(self) -> str:
+        raise NotImplementedError()
+
+    @abstractmethod
     def _showMessage(self, message: str) -> None:
         raise NotImplementedError()
 
@@ -110,11 +125,15 @@ class RowContainsFilterCreationView(FilterCreationView, ABC):
 
 
 class CreateFilterDialogSubViewFactory(ABC):
+    """An abstract base class for a factory that creates FilterCreationViews"""
 
     def __init__(self, seriesRepo: SeriesRepository):
         self._seriesRepo = seriesRepo
 
     def getSubViewVariantDisplayNameToNameDict(self) -> Dict[str, str]:
+        """Returns a dictionary with display names as keys and
+        strings that can be used to request new FilterCreationView instances"""
+
         return {
             "Match meta data in row": "RowContains",
             "Meta Data must be in all series": "ExactMetaMatch"
@@ -122,10 +141,13 @@ class CreateFilterDialogSubViewFactory(ABC):
 
     @abstractmethod
     def makeView(self, kind: str) -> FilterCreationView:
+        """Creates a FilterCreationView based on the provided string"""
+        
         raise NotImplementedError()
 
 
 class CreateFilterDialog(Dialog, ABC):
+    """A dialog that allows the user to configure and save new Filters"""
 
     def __init__(self, filterRepository: FilterRepository, subViewFactory: CreateFilterDialogSubViewFactory, commandFactory: FilterCommandFactory):
         self.__repository: FilterRepository = filterRepository

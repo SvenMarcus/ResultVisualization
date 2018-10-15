@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Iterable, List
+from enum import Enum
+from typing import Iterable, List, Tuple
 
 from ResultVisualization.Filter import ListFilter
+from ResultVisualization.SeriesVisitor import SeriesVisitor
 from ResultVisualization.Titled import Titled
 from ResultVisualization.util import isNumber
 
@@ -27,7 +29,7 @@ class Plotter(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def fillArea(self, xValues: Iterable, lowerYValues: Iterable, upperYValues: Iterable) -> None:
+    def fillArea(self, xValues: Iterable, lowerYValues: Iterable, upperYValues: Iterable, **kwargs) -> None:
         raise NotImplementedError()
 
     @abstractmethod
@@ -45,17 +47,6 @@ class Series(Titled, ABC):
         self._title: str = ""
         self._xLabel: str = ""
         self._yLabel: str = ""
-        self._metaData: List[str] = list()
-        self._filters: List[ListFilter] = list()
-
-    def addFilter(self, listFilter: ListFilter) -> None:
-        self._filters.append(listFilter)
-
-    def removeFilter(self, listFilter: ListFilter) -> None:
-        self._filters.remove(listFilter)
-
-    def clearFilters(self) -> None:
-        self._filters.clear()
 
     @abstractmethod
     def plot(self, plotter: Plotter) -> None:
@@ -89,6 +80,27 @@ class Series(Titled, ABC):
     def yLabel(self, value: str) -> None:
         self._yLabel = value
 
+    @abstractmethod
+    def accept(self, seriesVisitor: SeriesVisitor) -> None:
+        raise NotImplementedError()
+
+
+class FilterableSeries(Series):
+
+    def __init__(self):
+        super().__init__()
+        self._metaData: List[str] = list()
+        self._filters: List[ListFilter] = list()
+
+    def addFilter(self, listFilter: ListFilter) -> None:
+        self._filters.append(listFilter)
+
+    def removeFilter(self, listFilter: ListFilter) -> None:
+        self._filters.remove(listFilter)
+
+    def clearFilters(self) -> None:
+        self._filters.clear()
+
     @property
     def metaData(self) -> List[str]:
         """Returns a list with meta data for the plot."""
@@ -106,7 +118,6 @@ class Series(Titled, ABC):
     @filters.setter
     def filters(self, value: List[ListFilter]) -> None:
         self._filters = value
-
 
 class Graph(ABC):
 
@@ -130,20 +141,22 @@ class Graph(ABC):
         self.__plotter.finishPlot()
 
 
-class LineSeries(Series):
+class LineSeries(FilterableSeries):
 
     def __init__(self):
         super().__init__()
         self.__xValues = []
         self.__yValues = []
-        self.__xLimits = ()
-        self.__yLimits = ()
         self.__confidenceBand: float = 0
+        self.__style: str = "-"
 
     def plot(self, plotter: Plotter) -> None:
-        x, y = self.__getPlotValues()
+        x, y, meta = self.__getPlotValues()
         self.__plotConfidenceBand(plotter, x, y)
-        plotter.lineSeries(x, y, xLabel=self._xLabel, yLabel=self._yLabel, title=self._title)
+        plotter.lineSeries(x, y, xLabel=self._xLabel, yLabel=self._yLabel, title=self._title, style=self.style)
+
+    def accept(self, seriesVisitor: SeriesVisitor) -> None:
+        seriesVisitor.visitLineSeries(self)
 
     def __getPlotValues(self) -> tuple:
         filteredX, filteredY, filteredMeta = self.__removeNonNumberEntries()
@@ -152,7 +165,7 @@ class LineSeries(Series):
 
         filteredX, filteredY, filteredMeta = self.__sortValuesByX(filteredX, filteredY, filteredMeta)
         filteredX, filteredY = self.__filterValues(filteredX, filteredY, filteredMeta)
-        return filteredX, filteredY
+        return filteredX, filteredY, filteredMeta
 
     def __removeNonNumberEntries(self) -> tuple:
         indexesToRemove = self.__determineIndexesToRemove()
@@ -228,7 +241,9 @@ class LineSeries(Series):
             upper = [y * (1 + self.__confidenceBand) for y in yValues]
 
             plotter.fillArea(xValues, lower, upper, alpha=0.3)
-            plotter.text(xValues[len(xValues ) - 1] * 0.9, upper[len(upper) - 1], str(self.__confidenceBand * 100) + "%")
+            xText = xValues[len(xValues) - 1] * 0.9
+            yText = upper[len(upper) - 1]
+            plotter.text(xText, yText, str(self.__confidenceBand * 100) + "%")
 
     @property
     def xValues(self) -> list:
@@ -255,24 +270,6 @@ class LineSeries(Series):
         self.__yValues = value
 
     @property
-    def xLimits(self) -> tuple:
-        return self.__xLimits
-
-    @xLimits.setter
-    def xLimits(self, value: tuple) -> None:
-        self.__assertAllEntriesAreNumbers(value)
-        self.__xLimits = value
-
-    @property
-    def yLimits(self) -> tuple:
-        return self.__yLimits
-
-    @yLimits.setter
-    def yLimits(self, value: tuple) -> None:
-        self.__assertAllEntriesAreNumbers(value)
-        self.__yLimits = value
-
-    @property
     def confidenceBand(self) -> float:
         """Returns the confidence band value for the series. Percentage based on y values."""
 
@@ -284,22 +281,37 @@ class LineSeries(Series):
 
         self.__confidenceBand = value
 
+    @property
+    def style(self) -> str:
+        """Returns the style string for the series."""
+
+        return self.__style
+
+    @style.setter
+    def style(self, value: str) -> None:
+        """Sets the style string for the series."""
+
+        self.__style = value
+
     def __assertAllEntriesAreNumbers(self, collection: Iterable):
         for item in collection:
             if not isNumber(item):
                 raise NonNumberInPlotConfigError()
 
 
-class BoxSeries(Series):
+class BoxSeries(FilterableSeries):
 
     def __init__(self):
         super(BoxSeries, self).__init__()
-        
+
         self.__data: List[List] = list()
 
     def plot(self, plotter: Plotter):
         data, meta = self.__filterData()
         plotter.boxplot(data, xLabels=meta, show_median_values=True)
+
+    def accept(self, seriesVisitor: SeriesVisitor) -> None:
+        seriesVisitor.visitBoxSeries(self)
 
     def __filterData(self):
         meta = list(self._metaData)
@@ -317,6 +329,7 @@ class BoxSeries(Series):
             data.pop(index)
 
         return data, meta
+
     @property
     def data(self) -> List[List]:
         return self.__data
@@ -324,3 +337,128 @@ class BoxSeries(Series):
     @data.setter
     def data(self, value: List[List]) -> None:
         self.__data = value
+
+
+class TextPosition(Enum):
+    Left = 0
+    TopLeft = 1
+    TopCenter = 2
+    TopRight = 3
+    Right = 4
+    BottomRight = 5
+    BottomCenter = 6
+    BottomLeft = 7
+
+
+class FillAreaSeries(Series):
+
+    def __init__(self):
+        super().__init__()
+        self.__xLims: Tuple[float, float] = (0, 0)
+        self.__yLims: Tuple[float, float] = (0, 0)
+        self.__text: str = ""
+        self.__textPos: TextPosition = TextPosition.Right
+        self.__color: Tuple[float, float, float, float] = (0, 0, 0, 0.1)
+        self.__textColor: Tuple[float, float, float, float] = (0, 0, 0, 1)
+
+    def plot(self, plotter: Plotter):
+        plotter.fillArea(self.__xLims, [self.__yLims[0], self.__yLims[0]], [self.__yLims[1], self.__yLims[1]], color=self.__color)
+        self.plotText(plotter)
+
+    def accept(self, seriesVisitor: SeriesVisitor) -> None:
+        seriesVisitor.visitFillAreaSeries(self)
+
+    def plotText(self, plotter: Plotter):
+        if not self.text:
+            return
+
+        x = 0
+        y = 0
+        halignment = "center"
+        valignment = "center"
+        if self.textPosition == TextPosition.Left:
+            x = self.xLimits[0]
+            y = (self.yLimits[0] + self.yLimits[1]) / 2
+            halignment = "left"
+        elif self.textPosition == TextPosition.Right:
+            x = self.xLimits[1]
+            y = (self.yLimits[0] + self.yLimits[1]) / 2
+            halignment = "right"
+        elif self.textPosition == TextPosition.TopLeft:
+            x = self.xLimits[0]
+            y = self.yLimits[1]
+            halignment = "left"
+            valignment = "top"
+        elif self.textPosition == TextPosition.TopCenter:
+            x = (self.xLimits[0] + self.xLimits[1]) / 2
+            y = self.yLimits[1]
+            valignment = "top"
+        elif self.textPosition == TextPosition.TopRight:
+            x = self.xLimits[1]
+            y = self.yLimits[1]
+            halignment = "right"
+            valignment = "top"
+        elif self.textPosition == TextPosition.BottomLeft:
+            x = self.xLimits[0]
+            y = self.yLimits[0]
+            halignment = "left"
+            valignment = "bottom"
+        elif self.textPosition == TextPosition.BottomCenter:
+            x = (self.xLimits[0] + self.xLimits[1]) / 2
+            y = self.yLimits[0]
+            valignment = "bottom"
+        elif self.textPosition == TextPosition.BottomRight:
+            x = self.xLimits[1]
+            y = self.yLimits[0]
+            halignment = "right"
+            valignment = "bottom"
+
+        plotter.text(x, y, self.text, halignment=halignment, valignment=valignment, color=self.textColor)
+
+    @property
+    def xLimits(self) -> Tuple[float, float]:
+        return self.__xLims
+
+    @xLimits.setter
+    def xLimits(self, value: Tuple[float, float]) -> None:
+        self.__xLims = value
+
+    @property
+    def yLimits(self) -> Tuple[float, float]:
+        return self.__yLims
+
+    @yLimits.setter
+    def yLimits(self, value: Tuple[float, float]) -> None:
+        self.__yLims = value
+
+    @property
+    def text(self) -> str:
+        return self.__text
+
+    @text.setter
+    def text(self, value: str) -> None:
+        self.__text = value
+
+    @property
+    def textPosition(self) -> TextPosition:
+        return self.__textPos
+
+    @textPosition.setter
+    def textPosition(self, value: TextPosition) -> None:
+        self.__textPos = value
+
+    @property
+    def textColor(self) -> Tuple[int, int, int, int]:
+        return self.__textColor
+
+    @textColor.setter
+    def textColor(self, value: Tuple[int, int, int, int]) -> None:
+        self.__textColor = value
+
+    @property
+    def color(self) -> Tuple[int, int, int, int]:
+        return self.__color
+
+    @color.setter
+    def color(self, value: Tuple[int, int, int]) -> None:
+        self.__color = value
