@@ -164,7 +164,10 @@ class LineSeries(FilterableSeries):
             return list(), list()
 
         filteredX, filteredY, filteredMeta = self.__sortValuesByX(filteredX, filteredY, filteredMeta)
-        filteredX, filteredY = self.__filterValues(filteredX, filteredY, filteredMeta)
+        self.__xValues = filteredX
+        self.__yValues = filteredY
+        self._metaData = filteredMeta
+        filteredX, filteredY = self.__filterValues(self.__xValues, self.__yValues, self._metaData)
         return filteredX, filteredY, filteredMeta
 
     def __removeNonNumberEntries(self) -> tuple:
@@ -218,6 +221,7 @@ class LineSeries(FilterableSeries):
                 shouldAdd = shouldAdd and rowFilter.appliesToIndex(self, i)
 
             if shouldAdd:
+                print(meta[i])
                 filteredX.append(x[i])
                 filteredY.append(y[i])
 
@@ -240,7 +244,10 @@ class LineSeries(FilterableSeries):
             lower = [y * (1 - self.__confidenceBand) for y in yValues]
             upper = [y * (1 + self.__confidenceBand) for y in yValues]
 
-            plotter.fillArea(xValues, lower, upper, alpha=0.3)
+            if len(self.style) > 0:
+                plotter.fillArea(xValues, lower, upper, alpha=0.3, color=self.style[0])
+            else:
+                plotter.fillArea(xValues, lower, upper, alpha=0.3)
             xText = xValues[len(xValues) - 1] * 0.9
             yText = upper[len(upper) - 1]
             plotter.text(xText, yText, str(self.__confidenceBand * 100) + "%")

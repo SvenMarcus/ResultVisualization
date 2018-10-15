@@ -140,7 +140,7 @@ class MatplotlibPlotter(Plotter):
 
         if color is not None:
             self.__axes.fill_between(
-                xValues, lowerYValues, upperYValues, facecolor=color)
+                xValues, lowerYValues, upperYValues, facecolor=color, alpha=alpha)
         else:
             self.__axes.fill_between(
                 xValues, lowerYValues, upperYValues, alpha=alpha)
