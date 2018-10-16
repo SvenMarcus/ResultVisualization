@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import List
 
 from ResultVisualization.Plot import Series
 
@@ -39,14 +40,18 @@ class ChooseFileDialog(Dialog, ABC):
     """Interface for a file chooser dialog"""
 
     @abstractmethod
-    def setStartingFolder(self, path: str) -> None:
-        """Shows the dialog window. Modality depends on implementation."""
+    def getSelectedFile(self) -> str:
+        """Returns the file selected by the user. If the dialog was canceled, returns an empty string."""
 
         raise NotImplementedError()
 
+
+class ChooseMultipleFilesDialog(Dialog, ABC):
+    """Interface for a file chooser dialog that can open multiple files"""
+
     @abstractmethod
-    def getSelectedFile(self) -> str:
-        """Returns the file selected by the user. If the dialog was canceled, returns an empty string."""
+    def getSelectedFiles(self) -> List[str]:
+        """Returns the files selected by the user. If the dialog was canceled, returns an empty list."""
 
         raise NotImplementedError()
 

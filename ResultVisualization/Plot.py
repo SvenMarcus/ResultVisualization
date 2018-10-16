@@ -119,6 +119,7 @@ class FilterableSeries(Series):
     def filters(self, value: List[ListFilter]) -> None:
         self._filters = value
 
+
 class Graph(ABC):
 
     def __init__(self, plotter: Plotter = None):
@@ -161,7 +162,7 @@ class LineSeries(FilterableSeries):
     def __getPlotValues(self) -> tuple:
         filteredX, filteredY, filteredMeta = self.__removeNonNumberEntries()
         if len(filteredX) == 0:
-            return list(), list()
+            return list(), list(), list()
 
         filteredX, filteredY, filteredMeta = self.__sortValuesByX(filteredX, filteredY, filteredMeta)
         self.__xValues = filteredX
@@ -221,7 +222,6 @@ class LineSeries(FilterableSeries):
                 shouldAdd = shouldAdd and rowFilter.appliesToIndex(self, i)
 
             if shouldAdd:
-                print(meta[i])
                 filteredX.append(x[i])
                 filteredY.append(y[i])
 
@@ -248,6 +248,7 @@ class LineSeries(FilterableSeries):
                 plotter.fillArea(xValues, lower, upper, alpha=0.3, color=self.style[0])
             else:
                 plotter.fillArea(xValues, lower, upper, alpha=0.3)
+
             xText = xValues[len(xValues) - 1] * 0.9
             yText = upper[len(upper) - 1]
             plotter.text(xText, yText, str(self.__confidenceBand * 100) + "%")

@@ -14,6 +14,9 @@ class GraphView(ABC):
             self._addEntryToListView(series.title)
             self._graph.addPlot(series)
 
+        self.createTemplate: 'Command' = None
+        self.loadFromTemplate: 'Command' = None
+
         self.__saveCommand: 'Command' = None
         self.__addSeriesCommand: 'Command' = None
         self.__editSeriesCommand: 'Command' = None

@@ -12,7 +12,6 @@ class QtSeriesDialogFactory(SeriesDialogFactory):
         dialog = None
         if kind:
             if kind == "linear":
-                print(kind, initialSeries)
                 dialog = QtLineSeriesDialog()
                 dialog.getWidget().setMinimumSize(1000, 800)
             elif kind == "box":

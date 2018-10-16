@@ -7,14 +7,30 @@ from ResultVisualization.GraphViewFactory import GraphViewFactory
 
 class MainWindow(ABC):
 
-    def __init__(self, graphViewFactory: GraphViewFactory):
+    def __init__(self, graphViewFactory: GraphViewFactory, loadTemplatesCommand: 'Command'):
+        self.__loadTemplatesCommand: 'Command' = loadTemplatesCommand
+        loadTemplatesCommand.execute()
+        self.__saveTemplatesCommand: 'Command' = None
+
         self.__graphViewFactory: GraphViewFactory = graphViewFactory
         self.__currentViews: List[GraphView] = list()
         self.__activeView: GraphView = None
         self.__linearGraphCount: int = 0
         self.__boxGraphCount: int = 0
         self.__loadFileCommand: 'Command' = None
+        self.__loadFileCommand: 'Command' = None
         self._newLinearPlot()
+
+    def _createTemplate(self):
+        if self.__activeView is not None and self.__activeView.createTemplate is not None:
+            self.__activeView.createTemplate.execute()
+
+    def _loadFromTemplate(self):
+        if self.__activeView is not None and self.__activeView.loadFromTemplate is not None:
+            self.__activeView.loadFromTemplate.execute()
+
+    def _onClose(self):
+        self.saveTemplatesCommand.execute()
 
     @property
     def loadFileCommand(self) -> 'Command':
@@ -23,6 +39,22 @@ class MainWindow(ABC):
     @loadFileCommand.setter
     def loadFileCommand(self, value: 'Command') -> None:
         self.__loadFileCommand = value
+
+    @property
+    def loadTemplatesCommand(self) -> 'Command':
+        return self.__loadTemplatesCommand
+
+    @loadTemplatesCommand.setter
+    def loadTemplatesCommand(self, value: 'Command') -> None:
+        self.__loadTemplatesCommand = value
+
+    @property
+    def saveTemplatesCommand(self) -> 'Command':
+        return self.__saveTemplatesCommand
+
+    @saveTemplatesCommand.setter
+    def saveTemplatesCommand(self, value: 'Command') -> None:
+        self.__saveTemplatesCommand = value
 
     def addGraphView(self, graphView: GraphView, title: str) -> None:
         self.__currentViews.append(graphView)
@@ -35,13 +67,15 @@ class MainWindow(ABC):
             self.__activeView = self.__currentViews[index]
 
     def _save(self) -> None:
-        self.__activeView.saveCommand.execute()
+        if self.__activeView is not None:
+            self.__activeView.saveCommand.execute()
 
     def _newLinearPlot(self) -> None:
         graphView: GraphView = self.__graphViewFactory.makeGraphView("linear")
         self.__linearGraphCount += 1
         self.__currentViews.append(graphView)
-        self._appendGraphView(graphView, "Linear Plot" + str(self.__linearGraphCount))
+        self._appendGraphView(graphView, "Linear Plot" +
+                              str(self.__linearGraphCount))
         self.__activeView = graphView
         self._selectGraphViewAt(self.__currentViews.index(self.__activeView))
 
@@ -49,7 +83,8 @@ class MainWindow(ABC):
         graphView: GraphView = self.__graphViewFactory.makeGraphView("box")
         self.__boxGraphCount += 1
         self.__currentViews.append(graphView)
-        self._appendGraphView(graphView, "Box Plot" + str(self.__boxGraphCount))
+        self._appendGraphView(graphView, "Box Plot" +
+                              str(self.__boxGraphCount))
         self.__activeView = graphView
         self._selectGraphViewAt(self.__currentViews.index(self.__activeView))
 
@@ -63,7 +98,10 @@ class MainWindow(ABC):
             noCurrentViews = len(self.__currentViews)
             if noCurrentViews > 0:
                 self.__activeView = self.__currentViews[noCurrentViews - 1]
-                self._selectGraphViewAt(self.__currentViews.index(self.__activeView))
+                self._selectGraphViewAt(
+                    self.__currentViews.index(self.__activeView))
+            else:
+                self.__activeView = None
 
     @abstractmethod
     def show(self):

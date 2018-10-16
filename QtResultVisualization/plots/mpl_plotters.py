@@ -43,13 +43,15 @@ class MatplotlibPlotter(Plotter):
             self.__axes.set_xticklabels(self.__xTicks)
         elif len(self.__lineData) > 0:
             for lineData in self.__lineData:
-                self.__axes.plot(lineData[0], lineData[1], lineData[2], label=lineData[3])
+                self.__axes.plot(
+                    lineData[0], lineData[1], lineData[2], label=lineData[3])
             self.__axes.set_xlabel(self.__xLabel)
             self.__axes.set_ylabel(self.__yLabel)
             self.__axes.legend(loc=4)
 
         self.__axes.grid(True)
-        self.__axes.get_yaxis().set_major_formatter(StrMethodFormatter("{x:.2f}"))
+        self.__axes.get_yaxis().set_major_formatter(
+            StrMethodFormatter("{x:.2f}"))
         self.update()
 
     def clear(self) -> None:
@@ -138,12 +140,19 @@ class MatplotlibPlotter(Plotter):
             if key == "color":
                 color = value
 
-        if color is not None:
-            self.__axes.fill_between(
-                xValues, lowerYValues, upperYValues, facecolor=color, alpha=alpha)
-        else:
+        if color is None:
             self.__axes.fill_between(
                 xValues, lowerYValues, upperYValues, alpha=alpha)
+        else:
+            canPlot = True
+
+            if isinstance(color, str):
+                if color[0] not in {'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'}:
+                    canPlot = False
+
+            if canPlot:
+                self.__axes.fill_between(
+                    xValues, lowerYValues, upperYValues, facecolor=color, alpha=alpha)
 
     def text(self, x: float, y: float, text: str, **kwargs) -> None:
         halignment = "center"
@@ -157,7 +166,8 @@ class MatplotlibPlotter(Plotter):
             elif key == "color":
                 color = value
 
-        self.__axes.text(x, y, text, horizontalalignment=halignment, verticalalignment=valignment, color=color)
+        self.__axes.text(x, y, text, horizontalalignment=halignment,
+                         verticalalignment=valignment, color=color)
 
     def update(self) -> None:
         self.__canvas.draw_idle()

@@ -1,27 +1,36 @@
 from PyQt5.QtWidgets import QWidget
 
-
 from QtResultVisualization.Dialogs import QtSaveFileDialog
 from QtResultVisualization.QtFilterDialogFactory import QtFilterDialogFactory
 from QtResultVisualization.QtGraphView import QtGraphView
 from QtResultVisualization.QtSeriesDialogFactory import QtSeriesDialogFactory
-
+from QtResultVisualization.QtTemplateDialogFactory import \
+    QtTemplateDialogFactory
 from ResultVisualization.Commands import (DuplicateSeriesCommand,
                                           RemoveSeriesCommand,
+                                          SaveGraphCommand,
                                           ShowAddSeriesDialogCommand,
                                           ShowCreateFilterDialogCommand,
                                           ShowEditSeriesDialogCommand,
                                           ShowEditSeriesFilterDialogCommand,
-                                          SaveGraphCommand)
+                                          ShowLoadFromTemplateDialogCommand,
+                                          ShowTemplateCreationDialogCommand)
 from ResultVisualization.Dialogs import SeriesDialogFactory
 from ResultVisualization.FilterDialogFactory import FilterDialogFactory
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.GraphView import GraphView
 from ResultVisualization.GraphViewFactory import GraphViewFactory
 from ResultVisualization.SeriesRepository import SeriesRepository
+from ResultVisualization.TemplateRepository import TemplateRepository
 
 
 class QtGraphViewFactory(GraphViewFactory):
+
+    def __init__(self, templateRepo: TemplateRepository = None):
+        self.__templateRepo: TemplateRepository = None
+
+    def setTemplateRepository(self, templateRepo):
+        self.__templateRepo = templateRepo
 
     def makeGraphView(self, kind: str, seriesRepo=None, filterRepo=None) -> GraphView:
         graphView: QtGraphView = None
@@ -31,7 +40,14 @@ class QtGraphViewFactory(GraphViewFactory):
 
         filterDialogFactory: FilterDialogFactory = QtFilterDialogFactory(filterRepo, seriesRepo)
 
+
         graphView = QtGraphView(seriesRepo.getSeries())
+
+        if kind == "linear":
+            templateDialogFactory = QtTemplateDialogFactory(self.__templateRepo, graphView, seriesRepo)
+            graphView.loadFromTemplate = ShowLoadFromTemplateDialogCommand(templateDialogFactory)
+            graphView.createTemplate = ShowTemplateCreationDialogCommand(templateDialogFactory)
+
         graphView.addSeriesCommand = ShowAddSeriesDialogCommand(graphView, seriesDialogFactory, seriesRepo, kind)
         graphView.editSeriesCommand = ShowEditSeriesDialogCommand(graphView, seriesDialogFactory)
         graphView.removeSeriesCommand = RemoveSeriesCommand(graphView, seriesRepo)

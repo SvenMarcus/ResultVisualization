@@ -7,7 +7,9 @@ from QtResultVisualization.Dialogs import QtChooseFileDialog
 from QtResultVisualization.QtGraphViewFactory import QtGraphViewFactory
 from QtResultVisualization.QtMainWindow import QtMainWindow
 
-from ResultVisualization.Commands import LoadGraphCommand
+from ResultVisualization.Commands import LoadGraphCommand, LoadTemplatesCommand, SaveTemplatesCommand
+from ResultVisualization.TemplateRepository import TemplateRepository
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -15,11 +17,18 @@ if __name__ == "__main__":
     app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app.setApplicationName("Simple Graphs")
 
+    templateRepo = TemplateRepository()
     factory = QtGraphViewFactory()
-    print(sys.path)
-    mainWindow: QtMainWindow = QtMainWindow(factory)
+
+    loadTemplatesCommand = LoadTemplatesCommand(sys.path[0] + "/resources/templates", factory)
+    saveTemplatesCommand = SaveTemplatesCommand(sys.path[0] + "/resources/templates", templateRepo)
+
+    mainWindow: QtMainWindow = QtMainWindow(factory, loadTemplatesCommand)
+    mainWindow.loadTemplatesCommand = loadTemplatesCommand
+    mainWindow.saveTemplatesCommand = saveTemplatesCommand
     loadCommand = LoadGraphCommand(mainWindow, factory, QtChooseFileDialog("*.graph", parent=mainWindow.getWidget()))
     mainWindow.loadFileCommand = loadCommand
     mainWindow.show()
 
     sys.exit(app.exec_())
+

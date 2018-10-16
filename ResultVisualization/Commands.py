@@ -1,19 +1,28 @@
 import copy
-import pickle
 import os.path
-
+import pickle
 from abc import ABC, abstractmethod
 
-from ResultVisualization.Dialogs import Dialog, DialogResult, SeriesDialogFactory, SeriesDialog, ChooseFileDialog
-from ResultVisualization.Filter import FilterVisitor, ListFilter, ExactMetaDataMatchesInAllSeriesFilter, RowMetaDataContainsFilter
+from ResultVisualization.Dialogs import (ChooseFileDialog, Dialog,
+                                         DialogResult, SeriesDialog,
+                                         SeriesDialogFactory)
+from ResultVisualization.Filter import (ExactMetaDataMatchesInAllSeriesFilter,
+                                        FilterVisitor, ListFilter,
+                                        RowMetaDataContainsFilter)
 from ResultVisualization.FilterDialogFactory import FilterDialogFactory
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.GraphView import GraphView
 from ResultVisualization.GraphViewFactory import GraphViewFactory
+from ResultVisualization.LoadFromTemplateDialog import LoadFromTemplateDialog
 from ResultVisualization.MainWindow import MainWindow
-from ResultVisualization.Plot import BoxSeries, FillAreaSeries, LineSeries, FilterableSeries, Series
+from ResultVisualization.Plot import (BoxSeries, FillAreaSeries,
+                                      FilterableSeries, LineSeries, Series)
 from ResultVisualization.SeriesRepository import SeriesRepository
 from ResultVisualization.SeriesVisitor import SeriesVisitor
+from ResultVisualization.TemplateCreationDialog import TemplateCreationDialog
+from ResultVisualization.TemplateDialogFactory import TemplateDialogFactory
+from ResultVisualization.TemplateRepository import TemplateRepository
+
 
 class Command(ABC):
 
@@ -31,7 +40,8 @@ class ShowAddSeriesDialogCommand(Command):
         self.__kind: str = dialogKind
 
     def execute(self) -> None:
-        dialog: SeriesDialog = self.__seriesDialogFactory.makeSeriesDialog(kind=self.__kind)
+        dialog: SeriesDialog = self.__seriesDialogFactory.makeSeriesDialog(
+            kind=self.__kind)
         result: DialogResult = dialog.show()
 
         if result == DialogResult.Ok:
@@ -52,7 +62,8 @@ class ShowEditSeriesDialogCommand(Command):
         if series is None:
             return
 
-        dialog: SeriesDialog = self.__seriesDialogFactory.makeSeriesDialog(initialSeries=series)
+        dialog: SeriesDialog = self.__seriesDialogFactory.makeSeriesDialog(
+            initialSeries=series)
         result: DialogResult = dialog.show()
 
         if result == DialogResult.Ok:
@@ -161,11 +172,13 @@ class FillAreaCommand(Command):
         if series is None:
             return
 
-        dialog: SeriesDialog = self.__seriesDialogFactory.makeSeriesDialog(series)
+        dialog: SeriesDialog = self.__seriesDialogFactory.makeSeriesDialog(
+            series)
         result: DialogResult = dialog.show()
 
         if result == DialogResult.Ok:
             self.__graphView.updateSeries(series)
+
 
 class ShowEditSeriesFilterDialogCommand(Command):
 
@@ -179,7 +192,8 @@ class ShowEditSeriesFilterDialogCommand(Command):
         if series is None or not isinstance(series, FilterableSeries):
             return
 
-        dialog: Dialog = self.__dialogFactory.makeEditSeriesFilterDialog(series)
+        dialog: Dialog = self.__dialogFactory.makeEditSeriesFilterDialog(
+            series)
         result: DialogResult = dialog.show()
 
         if result == DialogResult.Ok:
@@ -269,10 +283,12 @@ class SaveGraphCommand(Command):
 
             try:
                 file = open(filePath, 'wb')
-                pickle.dump([self.__kind, self.__seriesRepo, self.__filterRepo], file)
+                pickle.dump([self.__kind, self.__seriesRepo,
+                             self.__filterRepo], file)
                 file.close()
             except Exception:
                 pass
+
 
 class LoadGraphCommand(Command):
 
@@ -298,12 +314,74 @@ class LoadGraphCommand(Command):
                 kind: str = data[0]
                 seriesRepo: SeriesRepository = data[1]
                 filterRepo: FilterRepository = data[2]
-                graphView = self.__factory.makeGraphView(kind, seriesRepo, filterRepo)
-                self.__window.addGraphView(graphView, os.path.basename(filePath))
+                graphView = self.__factory.makeGraphView(
+                    kind, seriesRepo, filterRepo)
+                self.__window.addGraphView(
+                    graphView, os.path.basename(filePath))
 
             except Exception:
                 pass
 
+
+class ShowTemplateCreationDialogCommand(Command):
+
+    def __init__(self, dialogFactory: TemplateDialogFactory):
+        self.__factory: TemplateDialogFactory = dialogFactory
+
+    def execute(self) -> None:
+        dialog: TemplateCreationDialog = self.__factory.makeTemplateCreationDialog()
+        dialog.show()
+
+
+class ShowLoadFromTemplateDialogCommand(Command):
+
+    def __init__(self, dialogFactory: TemplateDialogFactory):
+        self.__factory: TemplateDialogFactory = dialogFactory
+
+    def execute(self) -> None:
+        dialog: TemplateCreationDialog = self.__factory.makeLoadFromTemplateDialog()
+        dialog.show()
+
+
+class SaveTemplatesCommand(Command):
+
+    def __init__(self, path: str, templateRepo: TemplateRepository):
+        self.__path: str = path
+        self.__repo: str = templateRepo
+
+    def execute(self):
+        try:
+            file = open(self.__path, 'wb')
+            print(list(self.__repo.getTemplates()))
+            pickle.dump(list(self.__repo.getTemplates()), file)
+            file.close()
+        except Exception:
+            pass
+
+
+class LoadTemplatesCommand(Command):
+
+    def __init__(self, path: str, factory: GraphViewFactory):
+        self.__path: str = path
+        self.__factory = factory
+
+    def execute(self):
+        if not os.path.exists(self.__path):
+            return
+
+        try:
+            file = open(self.__path, 'rb')
+            templateRepo: TemplateRepository = TemplateRepository()
+            templates = pickle.load(file)
+            print(templates)
+            for template in templates:
+                templateRepo.addTemplate(template)
+            file.close()
+
+            self.__factory.setTemplateRepository(templateRepo)
+        except Exception:
+            print("failed")
+            pass
 
 class FilterCommandFactory:
 

@@ -102,7 +102,7 @@ class QtMetaDataMatchFilterCreationView(MetaDataMatchFilterCreationView):
 class QtCreateFilterDialogSubViewFactory(CreateFilterDialogSubViewFactory):
 
     def __init__(self, seriesRepo: SeriesRepository):
-        return super().__init__(seriesRepo)
+        super().__init__(seriesRepo)
 
     def makeView(self, kind: str) -> FilterCreationView:
         filterCreationView: FilterCreationView = None

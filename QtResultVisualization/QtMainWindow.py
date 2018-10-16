@@ -4,14 +4,29 @@ from PyQt5.QtWidgets import QAction, QMainWindow, QTabWidget, QToolBar, QWidget
 
 from QtResultVisualization.QtGraphViewFactory import QtGraphViewFactory
 
+from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.GraphView import GraphView
 from ResultVisualization.MainWindow import MainWindow
 
 
+class CustomMainWindow(QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+        self.__onClose = InvokableEvent()
+    
+    def onClose(self) -> Event:
+        return self.__onClose
+
+    def closeEvent(self, a0):
+        self.__onClose(self)
+        return super().closeEvent(a0)
+
+
 class QtMainWindow(MainWindow):
 
-    def __init__(self, graphViewFactory: QtGraphViewFactory):
-        self.__window: QMainWindow = QMainWindow()
+    def __init__(self, graphViewFactory: QtGraphViewFactory, loadTemplatesCommand: 'Command'):
+        self.__window: QMainWindow = CustomMainWindow()
         self.__toolbar: QToolBar = QToolBar()
 
         moduleFolder: str = sys.path[0]
@@ -35,6 +50,12 @@ class QtMainWindow(MainWindow):
         loadAction: QAction = QAction(loadIcon, "Load Plot", self.__toolbar)
         loadAction.triggered.connect(lambda: self.loadFileCommand.execute())
 
+        createTemplateAction: QAction = QAction("Create Template", self.__toolbar)
+        createTemplateAction.triggered.connect(lambda: self._createTemplate())
+
+        loadFromTemplateAction: QAction = QAction("Load From Template", self.__toolbar)
+        loadFromTemplateAction.triggered.connect(lambda: self._loadFromTemplate())
+
         self.__toolbar.addAction(linearAction)
         self.__toolbar.addAction(boxAction)
         self.__toolbar.addSeparator()
@@ -42,14 +63,17 @@ class QtMainWindow(MainWindow):
         self.__toolbar.addSeparator()
         self.__toolbar.addAction(saveAction)
         self.__toolbar.addAction(loadAction)
+        self.__toolbar.addAction(createTemplateAction)
+        self.__toolbar.addAction(loadFromTemplateAction)
         self.__window.addToolBar(self.__toolbar)
 
         self.__widget: QTabWidget = QTabWidget()
         self.__widget.currentChanged.connect(lambda index: self._setActiveIndex(index))
 
         self.__window.setCentralWidget(self.__widget)
+        self.__window.onClose().append(lambda x,y: self._onClose())
 
-        super().__init__(graphViewFactory)
+        super().__init__(graphViewFactory, loadTemplatesCommand)
 
     def getWidget(self) -> QWidget:
         return self.__window
