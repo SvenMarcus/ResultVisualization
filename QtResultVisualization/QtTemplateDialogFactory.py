@@ -20,5 +20,5 @@ class QtTemplateDialogFactory(TemplateDialogFactory):
     def makeTemplateCreationDialog(self) -> TemplateCreationDialog:
         return QtTemplateCreationDialog(self.__templateRepo)
 
-    def makeLoadFromTemplateDialog(self) -> TemplateCreationDialog:
+    def makeLoadFromTemplateDialog(self) -> LoadFromTemplateDialog:
         return QtLoadFromTemplateDialog(self.__templateRepo, self.__graphView, self.__seriesRepo)

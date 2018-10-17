@@ -30,7 +30,11 @@ class QtGraphViewFactory(GraphViewFactory):
         self.__templateRepo: TemplateRepository = None
 
     def setTemplateRepository(self, templateRepo):
+        print("Setting template repo", str(templateRepo))
         self.__templateRepo = templateRepo
+
+    def getTemplateRepository(self) -> TemplateRepository:
+        return self.__templateRepo
 
     def makeGraphView(self, kind: str, seriesRepo=None, filterRepo=None) -> GraphView:
         graphView: QtGraphView = None
@@ -40,10 +44,10 @@ class QtGraphViewFactory(GraphViewFactory):
 
         filterDialogFactory: FilterDialogFactory = QtFilterDialogFactory(filterRepo, seriesRepo)
 
-
         graphView = QtGraphView(seriesRepo.getSeries())
 
         if kind == "linear":
+            print("Factory Template Repo", self.__templateRepo)
             templateDialogFactory = QtTemplateDialogFactory(self.__templateRepo, graphView, seriesRepo)
             graphView.loadFromTemplate = ShowLoadFromTemplateDialogCommand(templateDialogFactory)
             graphView.createTemplate = ShowTemplateCreationDialogCommand(templateDialogFactory)

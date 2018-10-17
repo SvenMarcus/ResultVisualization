@@ -345,15 +345,15 @@ class ShowLoadFromTemplateDialogCommand(Command):
 
 class SaveTemplatesCommand(Command):
 
-    def __init__(self, path: str, templateRepo: TemplateRepository):
+    def __init__(self, path: str, factory: GraphViewFactory):
         self.__path: str = path
-        self.__repo: str = templateRepo
+        self.__factory: GraphViewFactory = factory
 
     def execute(self):
         try:
             file = open(self.__path, 'wb')
-            print(list(self.__repo.getTemplates()))
-            pickle.dump(list(self.__repo.getTemplates()), file)
+            print("Dumping:", self.__factory.getTemplateRepository(), "to", self.__path)
+            pickle.dump(self.__factory.getTemplateRepository(), file)
             file.close()
         except Exception:
             pass
@@ -366,22 +366,23 @@ class LoadTemplatesCommand(Command):
         self.__factory = factory
 
     def execute(self):
+        templateRepo = TemplateRepository()
+
         if not os.path.exists(self.__path):
             return
 
         try:
             file = open(self.__path, 'rb')
-            templateRepo: TemplateRepository = TemplateRepository()
-            templates = pickle.load(file)
-            print(templates)
-            for template in templates:
-                templateRepo.addTemplate(template)
-            file.close()
+            tmpTemplateRepo = pickle.load(file)
+            print("Loaded Repo:", tmpTemplateRepo)
+            if tmpTemplateRepo is not None:
+                templateRepo = tmpTemplateRepo
 
-            self.__factory.setTemplateRepository(templateRepo)
+            file.close()
         except Exception:
-            print("failed")
             pass
+
+        self.__factory.setTemplateRepository(templateRepo)
 
 class FilterCommandFactory:
 

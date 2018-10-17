@@ -22,12 +22,11 @@ class LoadFromTemplateDialog(Dialog, ABC):
         self.__templates: List[LineTemplate] = list(templateRepository.getTemplates())
         self.__graphView: GraphView = graphView
         self.__seriesRepo: SeriesRepository = seriesRepo
-        
+
         self.__files: List[str] = list()
 
         for template in self.__templates:
             self._addTemplateToComboBox(template.name)
-
 
     def _confirm(self) -> None:
         selectedTemplateIndex: int = self._getSelectedTemplateIndex()
@@ -88,8 +87,6 @@ class LoadFromTemplateDialog(Dialog, ABC):
 
             if index < len(template.styles):
                 series.style = template.styles[index]
-
-            
 
             self.__graphView.addSeries(series)
             self.__seriesRepo.addSeries(series)

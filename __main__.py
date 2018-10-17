@@ -17,11 +17,10 @@ if __name__ == "__main__":
     app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app.setApplicationName("Simple Graphs")
 
-    templateRepo = TemplateRepository()
     factory = QtGraphViewFactory()
 
     loadTemplatesCommand = LoadTemplatesCommand(sys.path[0] + "/resources/templates", factory)
-    saveTemplatesCommand = SaveTemplatesCommand(sys.path[0] + "/resources/templates", templateRepo)
+    saveTemplatesCommand = SaveTemplatesCommand(sys.path[0] + "/resources/templates", factory)
 
     mainWindow: QtMainWindow = QtMainWindow(factory, loadTemplatesCommand)
     mainWindow.loadTemplatesCommand = loadTemplatesCommand

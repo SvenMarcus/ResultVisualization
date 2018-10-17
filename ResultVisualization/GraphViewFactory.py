@@ -12,5 +12,9 @@ class GraphViewFactory(ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def getTemplateRepository(self) -> TemplateRepository:
+        raise NotImplementedError()
+
+    @abstractmethod
     def makeGraphView(self, kind: str, seriesRepo: SeriesRepository = None, filterRepo: FilterRepository = None) -> GraphView:
         raise NotImplementedError()
