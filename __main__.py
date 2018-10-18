@@ -6,12 +6,16 @@ from PyQt5.QtWidgets import QApplication
 from QtResultVisualization.Dialogs import QtChooseFileDialog
 from QtResultVisualization.QtGraphViewFactory import QtGraphViewFactory
 from QtResultVisualization.QtMainWindow import QtMainWindow
+from QtResultVisualization.QtToolbar import QtToolbar
 
 from ResultVisualization.Commands import LoadGraphCommand, LoadTemplatesCommand, SaveTemplatesCommand
-from ResultVisualization.TemplateRepository import TemplateRepository
+from ResultVisualization.Action import Action
+from ResultVisualization.Toolbar import Toolbar
 
 
 if __name__ == "__main__":
+    moduleFolder: str = sys.path[0]
+
     app = QApplication(sys.argv)
     app.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
     app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
@@ -22,11 +26,16 @@ if __name__ == "__main__":
     loadTemplatesCommand = LoadTemplatesCommand(sys.path[0] + "/resources/templates", factory)
     saveTemplatesCommand = SaveTemplatesCommand(sys.path[0] + "/resources/templates", factory)
 
-    mainWindow: QtMainWindow = QtMainWindow(factory, loadTemplatesCommand)
+    toolbar: Toolbar = QtToolbar()
+
+    mainWindow: QtMainWindow = QtMainWindow(toolbar, factory, loadTemplatesCommand)
     mainWindow.loadTemplatesCommand = loadTemplatesCommand
     mainWindow.saveTemplatesCommand = saveTemplatesCommand
+
     loadCommand = LoadGraphCommand(mainWindow, factory, QtChooseFileDialog("*.graph", parent=mainWindow.getWidget()))
-    mainWindow.loadFileCommand = loadCommand
+    loadGraphAction = Action("File", moduleFolder + "/resources/Load.svg", "Load Graph", loadCommand)
+    toolbar.addAction(loadGraphAction)
+
     mainWindow.show()
 
     sys.exit(app.exec_())

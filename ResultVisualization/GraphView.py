@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Iterable
 
+from ResultVisualization.Action import Action
 from ResultVisualization.Plot import Graph, Series
 
 
@@ -25,6 +26,12 @@ class GraphView(ABC):
         self.__fillAreaCommand: 'Command' = None
         self.__editSeriesFilterCommand: 'Command' = None
         self.__createFilterCommand: 'Command' = None
+
+        self.__actions: List[Action] = list()
+
+    @property
+    def actions(self) -> List[Action]:
+        return self.__actions
 
     def addSeries(self, series: Series) -> None:
         """Adds a series to the GraphView"""

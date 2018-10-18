@@ -3,11 +3,14 @@ from typing import List
 
 from ResultVisualization.GraphView import GraphView
 from ResultVisualization.GraphViewFactory import GraphViewFactory
+from ResultVisualization.Toolbar import Toolbar
 
 
 class MainWindow(ABC):
 
-    def __init__(self, graphViewFactory: GraphViewFactory, loadTemplatesCommand: 'Command'):
+    def __init__(self, toolBar: Toolbar, graphViewFactory: GraphViewFactory, loadTemplatesCommand: 'Command'):
+        self.__toolbar: Toolbar = toolBar
+
         self.__loadTemplatesCommand: 'Command' = loadTemplatesCommand
         loadTemplatesCommand.execute()
         self.__saveTemplatesCommand: 'Command' = None
