@@ -142,7 +142,7 @@ class CreateFilterDialogSubViewFactory(ABC):
     @abstractmethod
     def makeView(self, kind: str) -> FilterCreationView:
         """Creates a FilterCreationView based on the provided string"""
-        
+
         raise NotImplementedError()
 
 
@@ -184,6 +184,14 @@ class CreateFilterDialog(Dialog, ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def _removeFilterFromAvailableFiltersTable(self, index: int) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _getSelectedFilterIndexFromView(self) -> int:
+        raise NotImplementedError()
+
+    @abstractmethod
     def _addFilterOptionToView(self, optionName: str) -> None:
         raise NotImplementedError()
 
@@ -205,6 +213,17 @@ class CreateFilterDialog(Dialog, ABC):
         self.__currentView.onFilterSaved().append(self.__handleFilterSaved)
 
         self._showSubView(self.__currentView)
+
+    def _handleFilterRemove(self) -> None:
+        selectedIndex: int = self._getSelectedFilterIndexFromView()
+
+        if selectedIndex < 0:
+            return
+
+        self._removeFilterFromAvailableFiltersTable(selectedIndex)
+        filter: ListFilter = self.__addedFilters[selectedIndex]
+        cmd: Command = self.__commandFactory.makeDeleteFilterCommand(filter)
+        self.__commands.append(cmd)
 
     def _confirm(self) -> None:
         for cmd in self.__commands:

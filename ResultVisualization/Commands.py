@@ -267,6 +267,25 @@ class RegisterFilterCommand(Command, FilterVisitor):
             series.addFilter(listFilter)
 
 
+class DeleteFilterCommand(Command, FilterVisitor):
+
+    def __init__(self, listFilter: ListFilter, repo: FilterRepository):
+        self.__filter: ListFilter = listFilter
+        self.__repo: FilterRepository = repo
+        self.__undo: bool = False
+
+    def execute(self) -> None:
+        self.__repo.removeFilter(self.__filter)
+        self.__filter.accept(self)
+
+    def visitRowMetaDataContains(self, listFilter: RowMetaDataContainsFilter) -> None:
+        pass
+
+    def visitExactMetaDataMatchesInAllSeries(self, listFilter: ExactMetaDataMatchesInAllSeriesFilter) -> None:
+        for series in listFilter.getSeries():
+            series.removeFilter(listFilter)
+
+
 class SaveGraphCommand(Command):
 
     def __init__(self, fileChooser: ChooseFileDialog, graphKind: str, seriesRepo: SeriesRepository, filterRepo: FilterRepository):
@@ -397,3 +416,6 @@ class FilterCommandFactory:
 
     def makeRegisterFilterCommand(self, listFilter: ListFilter) -> Command:
         return RegisterFilterCommand(listFilter, self.__repo)
+
+    def makeDeleteFilterCommand(self, listFilter: ListFilter) -> Command:
+        return DeleteFilterCommand(listFilter, self.__repo)

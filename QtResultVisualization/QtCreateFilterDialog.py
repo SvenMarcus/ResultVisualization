@@ -1,3 +1,5 @@
+from typing import List
+
 from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialog, QGridLayout, QHBoxLayout,
                              QHeaderView, QLabel, QLineEdit, QMessageBox,
                              QPushButton, QTableWidget, QTableWidgetItem,
@@ -124,6 +126,7 @@ class QtCreateFilterDialog(CreateFilterDialog):
         self.__dialog: QDialog = None
         self.__availableFilters: QTableWidget = None
         self.__addFilterButton: QPushButton = None
+        self.__removeFilterButton: QPushButton = None
         self.__filterTypeComboBox: QComboBox = None
         self.__subView: QWidget = None
         super(QtCreateFilterDialog, self).__init__(filterRepository, subViewFactory, commandFactory)
@@ -142,10 +145,13 @@ class QtCreateFilterDialog(CreateFilterDialog):
         self.__availableFilters.setColumnCount(1)
         self.__availableFilters.setHorizontalHeaderLabels(["Available Filters"])
         self.__availableFilters.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.__availableFilters.setMaximumWidth(250)
 
-        self.__addFilterButton: QPushButton = QPushButton("Select:")
+        self.__addFilterButton: QPushButton = QPushButton("Select")
         self.__addFilterButton.clicked.connect(lambda: self._handleFilterOptionSelection(self.__filterTypeComboBox.currentText()))
+
+        self.__removeFilterButton: QPushButton = QPushButton("Remove")
+        self.__removeFilterButton.clicked.connect(lambda: self._handleFilterRemove())
+
         self.__filterTypeComboBox: QComboBox = QComboBox()
 
         self.__okButton: QPushButton = QPushButton("Ok")
@@ -158,10 +164,11 @@ class QtCreateFilterDialog(CreateFilterDialog):
         self.__buttonBar.addWidget(self.__okButton)
         self.__buttonBar.addWidget(self.__cancelButton)
 
-        self.__dialog.layout().addWidget(self.__availableFilters, 0, 0, 5, 1)
-        self.__dialog.layout().addWidget(self.__addFilterButton, 0, 1)
-        self.__dialog.layout().addWidget(self.__filterTypeComboBox, 0, 2, 1, 3)
-        self.__dialog.layout().addLayout(self.__buttonBar, 6, 0)
+        self.__dialog.layout().addWidget(self.__availableFilters, 0, 0, 5, 3)
+        self.__dialog.layout().addWidget(self.__addFilterButton, 0, 3)
+        self.__dialog.layout().addWidget(self.__filterTypeComboBox, 0, 4)
+        self.__dialog.layout().addWidget(self.__removeFilterButton, 6, 0, 1, 3)
+        self.__dialog.layout().addLayout(self.__buttonBar, 7, 0)
 
     def _addFilterToAvailableFiltersTable(self, filterName: str) -> None:
         rows: int = self.__availableFilters.rowCount()
@@ -171,13 +178,22 @@ class QtCreateFilterDialog(CreateFilterDialog):
     def _addFilterOptionToView(self, optionName: str) -> None:
         self.__filterTypeComboBox.addItem(optionName)
 
+    def _removeFilterFromAvailableFiltersTable(self, index: int) -> None:
+        self.__availableFilters.removeRow(index)
+
+    def _getSelectedFilterIndexFromView(self) -> int:
+        indexes: List[int] = self.__availableFilters.selectedIndexes()
+        if len(indexes) > 0:
+            return indexes[0].row()
+        return -1
+
     def _showSubView(self, view: FilterCreationView) -> None:
         if self.__subView is not None:
             self.__subView.setParent(None)
             self.__subView.deleteLater()
 
         self.__subView = view.getWidget()
-        self.__dialog.layout().addWidget(self.__subView, 1, 1, 4, 4)
+        self.__dialog.layout().addWidget(self.__subView, 1, 3, 4, 4)
         self.__dialog.repaint()
 
     def _closeSubView(self, view: FilterCreationView) -> None:
