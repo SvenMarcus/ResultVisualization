@@ -1,32 +1,11 @@
-import csv
-import numpy
+import pandas as pd
+import numpy as np
 from typing import List
 
 
-class semicolon(csv.excel):
-    """An excel csv dialect using semicolons as delimiters."""
-
-    delimiter = ";"
-
-    def __init__(self):
-        super().__init__()
-
-# def readFile(filePath: str, dialect=None) -> List[List[str]]:
-#     """Reads a cvs file and returns a list of lists, each representing a row within the file."""
-
-#     with open(filePath, newline='', encoding='ISO-8859-1') as csvfile:
-#         lst = []
-
-#         if dialect is None:
-#             dialect = csv.excel
-
-#         reader = csv.reader((line.replace('\0', '') for line in csvfile), dialect)
-
-#         for row in reader:
-#             lst.append(row)
-
-#         return lst
-
-
-def readFile(filePath: str, delimiter=';') -> List[List[str]]:
-    return numpy.genfromtxt(filePath, encoding='ISO-8859-1', delimiter=delimiter, dtype=None, comments=None)
+def readFile(filePath: str, delimiter=None) -> List[List[str]]:
+    dataFrame: pd.DataFrame = pd.read_csv(filePath, sep=delimiter, encoding='ISO-8859-1')
+    dataFrame.dropna(inplace=True)
+    values = dataFrame.values
+    values = np.insert(values, 0, dataFrame.columns.values, axis=0)
+    return values

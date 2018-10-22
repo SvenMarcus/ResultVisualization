@@ -5,14 +5,12 @@ import numpy as np
 from abc import ABC, abstractmethod
 from typing import List
 
-from Reader.CsvReader import readFile
 from ResultVisualization.Dialogs import ChooseMultipleFilesDialog, Dialog, DialogResult
 from ResultVisualization.GraphView import GraphView
 from ResultVisualization.Plot import LineSeries
 from ResultVisualization.SeriesRepository import SeriesRepository
 from ResultVisualization.Templates import LineTemplate
 from ResultVisualization.TemplateRepository import TemplateRepository
-from ResultVisualization.util import isNumber, transposeList
 
 
 class LoadFromTemplateDialog(Dialog, ABC):
@@ -54,7 +52,7 @@ class LoadFromTemplateDialog(Dialog, ABC):
             index += 1
             series: LineSeries = LineSeries()
 
-            dataFrame: pd.DataFrame = pd.read_csv(file, sep=';', encoding='ISO-8859-1')
+            dataFrame: pd.DataFrame = pd.read_csv(file, sep=None, encoding='ISO-8859-1')
             dataFrame.sort_values(template.xColumnTitle, inplace=True)
             dataFrame.dropna(inplace=True)
 
