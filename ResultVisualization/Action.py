@@ -11,7 +11,7 @@ class Action:
 
     @property
     def category(self) -> str:
-        return self.__icon
+        return self.__category
 
     @property
     def icon(self) -> str:

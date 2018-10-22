@@ -26,7 +26,7 @@ class CustomMainWindow(QMainWindow):
 
 class QtMainWindow(MainWindow):
 
-    def __init__(self, toolbar: QtToolbar, graphViewFactory: QtGraphViewFactory, loadTemplatesCommand: 'Command'):
+    def __init__(self, toolbar: QtToolbar, graphViewFactory: QtGraphViewFactory):
         self.__window: QMainWindow = CustomMainWindow()
         self.__toolbar: QToolBar = toolbar.getWidget()
 
@@ -72,9 +72,9 @@ class QtMainWindow(MainWindow):
         self.__widget.currentChanged.connect(lambda index: self._setActiveIndex(index))
 
         self.__window.setCentralWidget(self.__widget)
-        self.__window.onClose().append(lambda x, y: self._onClose())
+        self.__window.onClose().append(lambda x, y: self._onClose(self))
 
-        super().__init__(toolbar, graphViewFactory, loadTemplatesCommand)
+        super().__init__(toolbar, graphViewFactory)
 
     def getWidget(self) -> QWidget:
         return self.__window

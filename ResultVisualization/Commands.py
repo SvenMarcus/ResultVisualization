@@ -368,12 +368,14 @@ class SaveTemplatesCommand(Command):
         self.__path: str = path
         self.__factory: GraphViewFactory = factory
 
-    def execute(self):
+    def execute(self) -> None:
         try:
             file = open(self.__path, 'wb')
-            print("Dumping:", self.__factory.getTemplateRepository(), "to", self.__path)
+
             pickle.dump(self.__factory.getTemplateRepository(), file)
+
             file.close()
+
         except Exception:
             pass
 
@@ -384,7 +386,7 @@ class LoadTemplatesCommand(Command):
         self.__path: str = path
         self.__factory = factory
 
-    def execute(self):
+    def execute(self) -> None:
         templateRepo = TemplateRepository()
 
         if not os.path.exists(self.__path):
@@ -392,16 +394,39 @@ class LoadTemplatesCommand(Command):
 
         try:
             file = open(self.__path, 'rb')
+
             tmpTemplateRepo = pickle.load(file)
-            print("Loaded Repo:", tmpTemplateRepo)
             if tmpTemplateRepo is not None:
                 templateRepo = tmpTemplateRepo
 
             file.close()
+
         except Exception:
             pass
 
         self.__factory.setTemplateRepository(templateRepo)
+
+
+class AddGraphViewCommand(Command):
+
+    def __init__(self, mainWindow: MainWindow, factory: GraphViewFactory, kind: str):
+        self.__mainWindow: MainWindow = mainWindow
+        self.__factory: GraphViewFactory = factory
+        self.__kind: str = kind
+
+    def execute(self) -> None:
+        graphView: GraphView = self.__factory.makeGraphView(self.__kind)
+        self.__mainWindow.addGraphView(graphView)
+
+
+class CloseGraphViewCommand(Command):
+
+    def __init__(self, mainWindow: MainWindow):
+        self.__mainWindow: MainWindow = mainWindow
+
+    def execute(self) -> None:
+        self.__mainWindow.closeActiveGraphView()
+
 
 class FilterCommandFactory:
 
