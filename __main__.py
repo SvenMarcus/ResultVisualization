@@ -1,3 +1,4 @@
+import os.path as path
 import sys
 
 from PyQt5 import QtCore
@@ -23,10 +24,10 @@ if __name__ == "__main__":
 
     factory = QtGraphViewFactory()
 
-    loadTemplatesCommand = LoadTemplatesCommand(sys.path[0] + "/resources/templates", factory)
+    loadTemplatesCommand = LoadTemplatesCommand(path.join(moduleFolder, "resources", "templates"), factory)
     loadTemplatesCommand.execute()
 
-    saveTemplatesCommand = SaveTemplatesCommand(sys.path[0] + "/resources/templates", factory)
+    saveTemplatesCommand = SaveTemplatesCommand(path.join(moduleFolder, "resources", "templates"), factory)
 
     toolbar: Toolbar = QtToolbar()
 
@@ -34,16 +35,16 @@ if __name__ == "__main__":
     mainWindow.onCloseEvent().append(lambda sender, args: saveTemplatesCommand.execute())
 
     addLinePlotCommand = AddGraphViewCommand(mainWindow, factory, "linear")
-    addLinePlotAction = Action("Create", moduleFolder + "/resources/LinePlot2.svg", "New Line Plot", addLinePlotCommand)
+    addLinePlotAction = Action("Create", path.join(moduleFolder, "resources", "LinePlot2.svg"), "New Line Plot", addLinePlotCommand)
 
     addBoxPlotCommand = AddGraphViewCommand(mainWindow, factory, "box")
-    addBoxPlotAction = Action("Create", moduleFolder + "/resources/BoxPlot2.svg", "New Box Plot", addBoxPlotCommand)
+    addBoxPlotAction = Action("Create", path.join(moduleFolder, "resources", "BoxPlot2.svg"), "New Box Plot", addBoxPlotCommand)
 
     closeViewCommand = CloseGraphViewCommand(mainWindow)
-    closeViewAction = Action("Close", moduleFolder + "/resources/Close.svg", "Close View", closeViewCommand)
+    closeViewAction = Action("Close", path.join(moduleFolder, "resources", "Close.svg"), "Close View", closeViewCommand)
 
     loadCommand = LoadGraphCommand(mainWindow, factory, QtChooseFileDialog("*.graph", parent=mainWindow.getWidget()))
-    loadGraphAction = Action("File", moduleFolder + "/resources/Load.svg", "Load Graph", loadCommand)
+    loadGraphAction = Action("File", path.join(moduleFolder, "resources", "Load.svg"), "Load Graph", loadCommand)
 
     toolbar.addAction(addLinePlotAction)
     toolbar.addAction(addBoxPlotAction)

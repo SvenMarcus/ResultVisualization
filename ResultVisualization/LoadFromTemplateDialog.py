@@ -65,11 +65,11 @@ class LoadFromTemplateDialog(Dialog, ABC):
 
             xValues = list(dataFrame[template.xColumnTitle].values)
             yValues = list(dataFrame[template.yColumnTitle].values)
-            
+
             meta = list()
             if template.metaColumnTitle and template.metaColumnTitle in dataFrame.columns:
                 meta = list(dataFrame[template.metaColumnTitle])
-            
+
             if len(xValues) != len(yValues):
                 failedFileNames.append(file)
                 continue
