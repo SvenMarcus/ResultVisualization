@@ -389,14 +389,11 @@ class LoadTemplatesCommand(Command):
     def execute(self) -> None:
         templateRepo = TemplateRepository()
 
-        if not os.path.exists(self.__path):
-            return
-
         try:
             file = open(self.__path, 'rb')
 
             tmpTemplateRepo = pickle.load(file)
-            if tmpTemplateRepo is not None:
+            if isinstance(tmpTemplateRepo, TemplateRepository):
                 templateRepo = tmpTemplateRepo
 
             file.close()

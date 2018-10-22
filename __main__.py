@@ -31,7 +31,7 @@ if __name__ == "__main__":
     toolbar: Toolbar = QtToolbar()
 
     mainWindow: QtMainWindow = QtMainWindow(toolbar, factory)
-    mainWindow.onCloseEvent
+    mainWindow.onCloseEvent().append(lambda sender, args: saveTemplatesCommand.execute())
 
     addLinePlotCommand = AddGraphViewCommand(mainWindow, factory, "linear")
     addLinePlotAction = Action("Create", moduleFolder + "/resources/LinePlot2.svg", "New Line Plot", addLinePlotCommand)
