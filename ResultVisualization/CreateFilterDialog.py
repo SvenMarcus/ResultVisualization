@@ -156,7 +156,6 @@ class CreateFilterDialog(Dialog, ABC):
         self._initUI()
 
         self.__availableFilters: List[ListFilter] = list(self.__repository.getFilters())
-        self.__addedFilters: List[ListFilter] = list()
         self.__commands: List[Command] = list()
 
         for listFilter in self.__availableFilters:
@@ -221,7 +220,7 @@ class CreateFilterDialog(Dialog, ABC):
             return
 
         self._removeFilterFromAvailableFiltersTable(selectedIndex)
-        filter: ListFilter = self.__addedFilters[selectedIndex]
+        filter: ListFilter = self.__availableFilters.pop(selectedIndex)
         cmd: Command = self.__commandFactory.makeDeleteFilterCommand(filter)
         self.__commands.append(cmd)
 
@@ -234,7 +233,6 @@ class CreateFilterDialog(Dialog, ABC):
 
     def __handleFilterSaved(self, sender, args) -> None:
         addedFilter: ListFilter = self.__currentView.getFilter()
-        self.__addedFilters.append(addedFilter)
         cmd: Command = self.__commandFactory.makeRegisterFilterCommand(addedFilter)
         self.__commands.append(cmd)
         self.__availableFilters.append(addedFilter)

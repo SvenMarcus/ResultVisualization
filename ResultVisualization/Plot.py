@@ -152,7 +152,7 @@ class LineSeries(FilterableSeries):
         self.__style: str = "-"
 
     def plot(self, plotter: Plotter) -> None:
-        x, y, meta = self.__getPlotValues()
+        x, y = self.__getPlotValues()
         self.__plotConfidenceBand(plotter, x, y)
         plotter.lineSeries(x, y, xLabel=self._xLabel, yLabel=self._yLabel, title=self._title, style=self.style)
 
@@ -160,49 +160,26 @@ class LineSeries(FilterableSeries):
         seriesVisitor.visitLineSeries(self)
 
     def __getPlotValues(self) -> tuple:
-        filteredX, filteredY, filteredMeta = self.__removeNonNumberEntries()
-        if len(filteredX) == 0:
-            return list(), list(), list()
+        x, y, meta = self.__sortAndReduceToNumbers()
+        filteredX, filteredY = self.__filterValues(x, y, meta)
+        return filteredX, filteredY
 
-        filteredX, filteredY, filteredMeta = self.__sortValuesByX(filteredX, filteredY, filteredMeta)
-        self.__xValues = filteredX
-        self.__yValues = filteredY
-        self._metaData = filteredMeta
-        filteredX, filteredY = self.__filterValues(self.__xValues, self.__yValues, self._metaData)
-        return filteredX, filteredY, filteredMeta
+    def __sortAndReduceToNumbers(self) -> tuple:
+        meta = self._metaData
+        reassignMeta = True
 
-    def __removeNonNumberEntries(self) -> tuple:
-        indexesToRemove = self.__determineIndexesToRemove()
-        filteredX = list(self.xValues)
-        filteredY = list(self.yValues)
-        filteredMeta = list(self._metaData)
-        for index in indexesToRemove:
-            if index < len(filteredX):
-                filteredX.pop(index)
+        if len(self._metaData) == 0:
+            reassignMeta = False
+            meta = ["" for i in range(len(self.__xValues))]
 
-            if index < len(filteredY):
-                filteredY.pop(index)
+        tuples = zip(self.__xValues, self.__yValues, meta)
+        numbersOnly = filter(lambda x: isNumber(x[0]) or isNumber(x[1]), tuples)
+        self.__xValues, self.__yValues, meta = list(zip(*sorted(numbersOnly)))
 
-            if index < len(filteredMeta):
-                filteredMeta.pop(index)
+        if reassignMeta:
+            self._metaData = meta
 
-        return filteredX, filteredY, filteredMeta
-
-    def __determineIndexesToRemove(self) -> List[int]:
-        xIndexesToRemove = self.__getNonNumberIndexes(self.xValues)
-        yIndexesToRemove = self.__getNonNumberIndexes(self.yValues)
-
-        combinedIndexes = xIndexesToRemove.union(yIndexesToRemove)
-        return list(sorted(combinedIndexes, reverse=True))
-
-    def __getNonNumberIndexes(self, entries: List) -> set:
-        nonNumberEntries = set()
-        for index in range(len(entries)):
-            entry = entries[index]
-            if not isNumber(entry):
-                nonNumberEntries.add(index)
-
-        return nonNumberEntries
+        return self.__xValues, self.__yValues, self._metaData
 
     def __filterValues(self, x, y, meta) -> tuple:
         if len(self._filters) == 0 or len(meta) == 0:
@@ -226,18 +203,6 @@ class LineSeries(FilterableSeries):
                 filteredY.append(y[i])
 
         return filteredX, filteredY
-
-    def __sortValuesByX(self, x, y, meta) -> tuple:
-        zipped = None
-        sortedX, sortedY, sortedMeta = (list(), list(), list())
-        if len(meta) > 0:
-            zipped = zip(x, y, meta)
-            sortedX, sortedY, sortedMeta = list(zip(*sorted(zipped)))
-        else:
-            zipped = zip(x, y)
-            sortedX, sortedY = list(zip(*sorted(zipped)))
-
-        return sortedX, sortedY, sortedMeta
 
     def __plotConfidenceBand(self, plotter: Plotter, xValues: list, yValues: list) -> None:
         if self.__confidenceBand > 0:
