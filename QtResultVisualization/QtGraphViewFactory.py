@@ -50,12 +50,8 @@ class QtGraphViewFactory(GraphViewFactory):
 
         graphView = QtGraphView(seriesRepo.getSeries())
 
-        if kind == "linear":
-            templateDialogFactory = QtTemplateDialogFactory(self.__templateRepo, graphView, seriesRepo)
-            graphView.loadFromTemplate = ShowLoadFromTemplateDialogCommand(templateDialogFactory)
-            graphView.createTemplate = ShowTemplateCreationDialogCommand(templateDialogFactory)
-
         modulePath = sys.path[0]
+
         addSeriesCommand = ShowAddSeriesDialogCommand(graphView, seriesDialogFactory, seriesRepo, kind)
         addSeriesAction = Action("Plot", modulePath + "/resources/Add.svg", "Add Series", addSeriesCommand)
 
@@ -94,6 +90,19 @@ class QtGraphViewFactory(GraphViewFactory):
                 createFilterAction
             ]
         )
+
+        if kind == "linear":
+            templateDialogFactory = QtTemplateDialogFactory(self.__templateRepo, graphView, seriesRepo)
+            loadFromTemplate = ShowLoadFromTemplateDialogCommand(templateDialogFactory)
+            loadFromTemplateAction = Action("Plot", modulePath + "/resources/LoadTemplate.svg", "Load from Template", loadFromTemplate)
+
+            createTemplate = ShowTemplateCreationDialogCommand(templateDialogFactory)
+            createTemplateAction = Action("Plot", modulePath + "/resources/Template.svg", "Create Template", createTemplate)
+            graphView.actions.extend([
+                loadFromTemplateAction,
+                createTemplateAction
+            ])
+
         filterDialogFactory.setParent(widget)
 
         return graphView
