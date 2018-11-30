@@ -33,9 +33,10 @@ class QtGraphViewFactory(GraphViewFactory):
 
     def __init__(self, templateRepo: TemplateRepository = None):
         self.__templateRepo: TemplateRepository = None
+        self.__lineFilterRepo = FilterRepository()
+        self.__boxFilterRepo = FilterRepository()
 
     def setTemplateRepository(self, templateRepo):
-        print("Setting template repo", str(templateRepo))
         self.__templateRepo = templateRepo
 
     def getTemplateRepository(self) -> TemplateRepository:
@@ -44,7 +45,12 @@ class QtGraphViewFactory(GraphViewFactory):
     def makeGraphView(self, kind: str, seriesRepo=None, filterRepo=None) -> GraphView:
         graphView: QtGraphView = None
         seriesRepo = seriesRepo or SeriesRepository()
-        filterRepo = filterRepo or FilterRepository()
+
+        if filterRepo:
+            self.__mergeFilterRepositories(kind, filterRepo)
+
+        filterRepo = self.__getFilterRepository(kind)
+
         seriesDialogFactory: SeriesDialogFactory = QtSeriesDialogFactory()
 
         filterDialogFactory: FilterDialogFactory = QtFilterDialogFactory(filterRepo, seriesRepo)
@@ -107,3 +113,19 @@ class QtGraphViewFactory(GraphViewFactory):
         filterDialogFactory.setParent(widget)
 
         return graphView
+
+    def __getFilterRepository(self, kind: str) -> FilterRepository:
+        if kind == "linear":
+            return self.__lineFilterRepo
+
+        return self.__boxFilterRepo
+
+    def __mergeFilterRepositories(self, kind: str, repository: FilterRepository) -> None:
+        targetRepository: FilterRepository
+        if kind == "linear":
+            targetRepository = self.__lineFilterRepo
+        else:
+            targetRepository = self.__boxFilterRepo
+
+        for filter in repository.getFilters():
+            targetRepository.addFilter(filter)
