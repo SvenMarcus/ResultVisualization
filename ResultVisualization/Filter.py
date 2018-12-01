@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Iterable
+from typing import List, Iterable, Set
 
 
 class ListFilter(ABC):
@@ -74,6 +74,30 @@ class ExactMetaDataMatchesInAllSeriesFilter(ListFilter):
         filterVisitor.visitExactMetaDataMatchesInAllSeries(self)
 
 
+class CompositeFilter(ListFilter):
+
+    def __init__(self, filters: Set[ListFilter] = []):
+        self.__filters: Set[ListFilter] = filters
+
+    def addFilter(self, filter: ListFilter) -> None:
+        self.__filters.add(filter)
+
+    def removeFilter(self, filter: ListFilter) -> None:
+        self.__filters.discard(filter)
+
+    def getFilters(self) -> Set[ListFilter]:
+        return set(self.__filters)
+
+    def appliesToIndex(self, sourceSeries, index):
+        for filter in self.__filters:
+            if not filter.appliesToIndex(sourceSeries, index):
+                return False
+        return True
+
+    def accept(self, filterVisitor):
+        filterVisitor.visitCompositeFilter(self)
+
+
 class FilterVisitor(ABC):
 
     @abstractmethod
@@ -82,4 +106,8 @@ class FilterVisitor(ABC):
 
     @abstractmethod
     def visitExactMetaDataMatchesInAllSeries(self, filter: ExactMetaDataMatchesInAllSeriesFilter) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def visitCompositeFilter(self, filter: CompositeFilter) -> None:
         raise NotImplementedError()

@@ -6,13 +6,15 @@ from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialog, QGridLayout, QHBoxLa
                              QVBoxLayout, QWidget)
 
 from QtResultVisualization.QtTransferWidget import QtTransferWidget
-from ResultVisualization.CreateFilterDialog import (CreateFilterDialog,
+from ResultVisualization.CreateFilterDialog import (CompositeFilterCreationView,
+                                                    CreateFilterDialog,
                                                     CreateFilterDialogSubViewFactory,
                                                     FilterCreationView,
                                                     MetaDataMatchFilterCreationView,
                                                     RowContainsFilterCreationView)
 from ResultVisualization.Commands import FilterCommandFactory
 from ResultVisualization.Dialogs import DialogResult
+from ResultVisualization.Filter import ListFilter
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.Plot import Series
 from ResultVisualization.SeriesRepository import SeriesRepository
@@ -101,10 +103,49 @@ class QtMetaDataMatchFilterCreationView(MetaDataMatchFilterCreationView):
         QMessageBox.information(self.__widget, "Error", message)
 
 
+class QtCompositeFilterCreationView(CompositeFilterCreationView):
+
+    def __init__(self, filters: List[ListFilter], parent: QWidget = None):
+        self.__parent: QWidget = parent
+        super().__init__(filters)
+
+    def getWidget(self) -> QWidget:
+        return self.__widget
+
+    def _initUI(self) -> None:
+        self.__widget: QWidget = QWidget(self.__parent)
+
+        self.__titleBox: QLineEdit = QLineEdit()
+        self.__transferWidget: QtTransferWidget = QtTransferWidget()
+
+        self.__okButton: QPushButton = QPushButton("Ok")
+        self.__okButton.clicked.connect(lambda: self._save())
+
+        self.__buttonBar: QHBoxLayout = QHBoxLayout()
+        self.__buttonBar.addWidget(self.__okButton, 1)
+        self.__buttonBar.addStretch(3)
+
+        self.__widget.setLayout(QVBoxLayout())
+
+        self.__widget.layout().addWidget(QLabel("Filter Title:"))
+        self.__widget.layout().addWidget(self.__titleBox)
+        self.__widget.layout().addWidget(self.__transferWidget.getWidget(), 3)
+        self.__widget.layout().addLayout(self.__buttonBar)
+
+    def _getTransferWidget(self) -> TransferWidget[Series]:
+        return self.__transferWidget
+
+    def _getTitleFromView(self) -> str:
+        return self.__titleBox.text()
+
+    def _showMessage(self, message: str):
+        QMessageBox.information(self.__widget, "Error", message)
+
+
 class QtCreateFilterDialogSubViewFactory(CreateFilterDialogSubViewFactory):
 
-    def __init__(self, seriesRepo: SeriesRepository):
-        super().__init__(seriesRepo)
+    def __init__(self, seriesRepo: SeriesRepository, filterRepo: FilterRepository):
+        super().__init__(seriesRepo, filterRepo)
 
     def makeView(self, kind: str) -> FilterCreationView:
         filterCreationView: FilterCreationView = None
@@ -112,6 +153,8 @@ class QtCreateFilterDialogSubViewFactory(CreateFilterDialogSubViewFactory):
             filterCreationView = QtRowContainsFilterWidget()
         elif kind == "ExactMetaMatch":
             filterCreationView = QtMetaDataMatchFilterCreationView(self._seriesRepo)
+        elif kind == "CompositeFilter":
+            filterCreationView = QtCompositeFilterCreationView(self._filterRepo.getFilters())
         else:
             return None
 

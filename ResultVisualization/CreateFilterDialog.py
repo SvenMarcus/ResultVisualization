@@ -4,7 +4,7 @@ from typing import Dict, List
 from ResultVisualization.Commands import FilterCommandFactory, Command
 from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.Dialogs import Dialog, DialogResult
-from ResultVisualization.Filter import ExactMetaDataMatchesInAllSeriesFilter, ListFilter, RowMetaDataContainsFilter
+from ResultVisualization.Filter import CompositeFilter, ExactMetaDataMatchesInAllSeriesFilter, ListFilter, RowMetaDataContainsFilter
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.Plot import FilterableSeries, Series
 from ResultVisualization.SeriesRepository import SeriesRepository
@@ -124,11 +124,71 @@ class RowContainsFilterCreationView(FilterCreationView, ABC):
         return self._getTitleFromView() and self._getRequiredMetaDataFromView()
 
 
+class CompositeFilterCreationView(FilterCreationView):
+
+    def __init__(self, availableFilters: List[ListFilter]):
+        self.__onSaveEvent: InvokableEvent = InvokableEvent()
+        self.__filters: List[ListFilter] = availableFilters
+
+        self._initUI()
+        self.__transferWidget: TransferWidget[ListFilter] = self._getTransferWidget()
+        self.__transferWidget.setLeftHeader("Included Filters")
+        self.__transferWidget.setRightHeader("Available Filters")
+        self.__transferWidget.setRightTableItems(self.__filters)
+        self.__compositeFilter: CompositeFilter = CompositeFilter()
+
+    def onFilterSaved(self) -> Event:
+        return self.__onSaveEvent
+
+    def _save(self):
+        self.__compositeFilter.title = self._getTitleFromView()
+        includedFilters: List[ListFilter] = self.__transferWidget.getLeftTableItems()
+
+        if not self.__validate():
+            return
+
+        for filter in includedFilters:
+            self.__compositeFilter.addFilter(filter)
+
+        self.__onSaveEvent(self)
+
+    def getFilter(self):
+        return self.__compositeFilter
+
+    def __validate(self) -> bool:
+        if not self.__compositeFilter.title:
+            self._showMessage("Please enter a title.")
+            return False
+
+        if len(self.__compositeFilter.getFilters()) == 0:
+            self._showMessage("Must include at least one filter.")
+            return False
+
+        return True
+
+    @abstractmethod
+    def _initUI(self) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _showMessage(self, message: str) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _getTitleFromView(self) -> str:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _getTransferWidget(self) -> TransferWidget[ListFilter]:
+        raise NotImplementedError()
+
+
 class CreateFilterDialogSubViewFactory(ABC):
     """An abstract base class for a factory that creates FilterCreationViews"""
 
-    def __init__(self, seriesRepo: SeriesRepository):
+    def __init__(self, seriesRepo: SeriesRepository, filterRepo: FilterRepository):
         self._seriesRepo = seriesRepo
+        self._filterRepo = filterRepo
 
     def getSubViewVariantDisplayNameToNameDict(self) -> Dict[str, str]:
         """Returns a dictionary with display names as keys and
@@ -136,7 +196,8 @@ class CreateFilterDialogSubViewFactory(ABC):
 
         return {
             "Match meta data in row": "RowContains",
-            "Meta Data must be in all series": "ExactMetaMatch"
+            "Meta Data must be in all series": "ExactMetaMatch",
+            "Filter Group": "CompositeFilter"
         }
 
     @abstractmethod

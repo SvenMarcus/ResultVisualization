@@ -24,7 +24,7 @@ class QtFilterDialogFactory(FilterDialogFactory):
         self.__parent = parent
 
     def makeCreateFilterDialog(self) -> CreateFilterDialog:
-        subViewFactory = QtCreateFilterDialogSubViewFactory(self.__seriesRepo)
+        subViewFactory = QtCreateFilterDialogSubViewFactory(self.__seriesRepo, self.__filterRepo)
         return QtCreateFilterDialog(self.__filterRepo, subViewFactory, self.__commandFactory, self.__parent)
 
     def makeEditSeriesFilterDialog(self, series: Series) -> EditSeriesFilterDialog:

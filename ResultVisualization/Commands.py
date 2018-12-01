@@ -13,7 +13,6 @@ from ResultVisualization.FilterDialogFactory import FilterDialogFactory
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.GraphView import GraphView
 from ResultVisualization.GraphViewFactory import GraphViewFactory
-from ResultVisualization.LoadFromTemplateDialog import LoadFromTemplateDialog
 from ResultVisualization.MainWindow import MainWindow
 from ResultVisualization.Plot import (BoxSeries, FillAreaSeries,
                                       FilterableSeries, LineSeries, Series)
@@ -96,6 +95,10 @@ class RemoveSeriesCommand(Command, FilterVisitor):
 
     def visitRowMetaDataContains(self, filter):
         pass
+
+    def visitCompositeFilter(self, filter):
+        for subFilter in filter.getFilters():
+            subFilter.accept(self)
 
 
 class DuplicateSeriesCommand(Command, SeriesVisitor):
@@ -230,6 +233,10 @@ class AddFilterToSeriesCommand(Command, FilterVisitor):
     def visitRowMetaDataContains(self, filter: RowMetaDataContainsFilter) -> None:
         pass
 
+    def visitCompositeFilter(self, filter):
+        for subFilter in filter.getFilters():
+            subFilter.accept(self)
+
 
 class RemoveFilterFromSeriesCommand(Command, FilterVisitor):
 
@@ -246,6 +253,10 @@ class RemoveFilterFromSeriesCommand(Command, FilterVisitor):
 
     def visitRowMetaDataContains(self, filter: RowMetaDataContainsFilter) -> None:
         pass
+
+    def visitCompositeFilter(self, filter):
+        for subFilter in filter.getFilters():
+            subFilter.accept(self)
 
 
 class RegisterFilterCommand(Command, FilterVisitor):
@@ -266,6 +277,10 @@ class RegisterFilterCommand(Command, FilterVisitor):
         for series in listFilter.getSeries():
             series.addFilter(listFilter)
 
+    def visitCompositeFilter(self, filter):
+        for subFilter in filter.getFilters():
+            subFilter.accept(self)
+
 
 class DeleteFilterCommand(Command, FilterVisitor):
 
@@ -284,6 +299,10 @@ class DeleteFilterCommand(Command, FilterVisitor):
     def visitExactMetaDataMatchesInAllSeries(self, listFilter: ExactMetaDataMatchesInAllSeriesFilter) -> None:
         for series in listFilter.getSeries():
             series.removeFilter(listFilter)
+
+    def visitCompositeFilter(self, filter):
+        for subFilter in filter.getFilters():
+            subFilter.accept(self)
 
 
 class SaveGraphCommand(Command):
