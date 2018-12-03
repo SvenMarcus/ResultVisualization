@@ -6,7 +6,7 @@
 
 ### Filter:
 - [x] global
-- [ ] Composite/Gruppen Filter
+- [x] Composite/Gruppen Filter
 
 ### Templates
 - [ ] Filter für Templates
