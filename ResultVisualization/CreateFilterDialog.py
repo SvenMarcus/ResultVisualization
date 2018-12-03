@@ -295,6 +295,9 @@ class CreateFilterDialog(Dialog, ABC):
         self._close()
 
     def _onWindowClosed(self) -> None:
+        if self._result == DialogResult.Ok:
+            return
+
         self._result = DialogResult.Cancel
         while self.__commandStack.canUndo():
             self.__commandStack.undo()
