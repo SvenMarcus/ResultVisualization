@@ -76,7 +76,7 @@ class ExactMetaDataMatchesInAllSeriesFilter(ListFilter):
 
 class CompositeFilter(ListFilter):
 
-    def __init__(self, filters: Set[ListFilter] = []):
+    def __init__(self, filters: Set[ListFilter] = set()):
         self.__filters: Set[ListFilter] = filters
 
     def addFilter(self, filter: ListFilter) -> None:

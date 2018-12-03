@@ -1,18 +1,18 @@
 from typing import List
 
-from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialog, QGridLayout, QHBoxLayout,
-                             QHeaderView, QLabel, QLineEdit, QMessageBox,
-                             QPushButton, QTableWidget, QTableWidgetItem,
-                             QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialog, QGridLayout,
+                             QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+                             QMessageBox, QPushButton, QTableWidget,
+                             QTableWidgetItem, QVBoxLayout, QWidget)
 
 from QtResultVisualization.QtTransferWidget import QtTransferWidget
+from ResultVisualization.Commands import FilterCommandFactory
 from ResultVisualization.CreateFilterDialog import (CompositeFilterCreationView,
                                                     CreateFilterDialog,
                                                     CreateFilterDialogSubViewFactory,
                                                     FilterCreationView,
                                                     MetaDataMatchFilterCreationView,
                                                     RowContainsFilterCreationView)
-from ResultVisualization.Commands import FilterCommandFactory
 from ResultVisualization.Dialogs import DialogResult
 from ResultVisualization.Filter import ListFilter
 from ResultVisualization.FilterRepository import FilterRepository
@@ -164,7 +164,7 @@ class QtCreateFilterDialogSubViewFactory(CreateFilterDialogSubViewFactory):
 
 class QtCreateFilterDialog(CreateFilterDialog):
 
-    def __init__(self, filterRepository: FilterRepository, subViewFactory: CreateFilterDialogSubViewFactory, commandFactory: FilterCommandFactory, parent: QWidget):
+    def __init__(self, filterRepository: FilterRepository, subViewFactory: CreateFilterDialogSubViewFactory, commandFactory: FilterCommandFactory, parent: QWidget = None):
         self.__parent: QWidget = parent
         self.__dialog: QDialog = None
         self.__availableFilters: QTableWidget = None
@@ -182,6 +182,7 @@ class QtCreateFilterDialog(CreateFilterDialog):
         self.__dialog.setWindowTitle("Filter Creator")
         self.__dialog.setMinimumSize(1000, 800)
         self.__dialog.setLayout(QGridLayout())
+        self.__dialog.finished.connect(lambda x: self._onWindowClosed())
 
         self.__availableFilters: QTableWidget = QTableWidget()
         self.__availableFilters.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -201,7 +202,7 @@ class QtCreateFilterDialog(CreateFilterDialog):
         self.__okButton.setDefault(True)
         self.__okButton.clicked.connect(lambda: self._confirm())
         self.__cancelButton: QPushButton = QPushButton("Cancel")
-        self.__cancelButton.clicked.connect(lambda: self._close())
+        self.__cancelButton.clicked.connect(lambda: self._cancel())
 
         self.__buttonBar: QHBoxLayout = QHBoxLayout()
         self.__buttonBar.addWidget(self.__okButton)

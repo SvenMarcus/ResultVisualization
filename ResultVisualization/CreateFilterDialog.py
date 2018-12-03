@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
-from ResultVisualization.Commands import FilterCommandFactory, Command
+from ResultVisualization.Commands import FilterCommandFactory, UndoableCommand
+from ResultVisualization.CommandStack import CommandStack
 from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.Dialogs import Dialog, DialogResult
 from ResultVisualization.Filter import CompositeFilter, ExactMetaDataMatchesInAllSeriesFilter, ListFilter, RowMetaDataContainsFilter
@@ -144,11 +145,11 @@ class CompositeFilterCreationView(FilterCreationView):
         self.__compositeFilter.title = self._getTitleFromView()
         includedFilters: List[ListFilter] = self.__transferWidget.getLeftTableItems()
 
-        if not self.__validate():
-            return
-
         for filter in includedFilters:
             self.__compositeFilter.addFilter(filter)
+
+        if not self.__validate():
+            return
 
         self.__onSaveEvent(self)
 
@@ -217,7 +218,7 @@ class CreateFilterDialog(Dialog, ABC):
         self._initUI()
 
         self.__availableFilters: List[ListFilter] = list(self.__repository.getFilters())
-        self.__commands: List[Command] = list()
+        self.__commandStack: CommandStack = CommandStack()
 
         for listFilter in self.__availableFilters:
             self._addFilterToAvailableFiltersTable(listFilter.title)
@@ -282,20 +283,27 @@ class CreateFilterDialog(Dialog, ABC):
 
         self._removeFilterFromAvailableFiltersTable(selectedIndex)
         filter: ListFilter = self.__availableFilters.pop(selectedIndex)
-        cmd: Command = self.__commandFactory.makeDeleteFilterCommand(filter)
-        self.__commands.append(cmd)
+        cmd: UndoableCommand = self.__commandFactory.makeDeleteFilterCommand(filter)
+        self.__commandStack.addCommand(cmd)
 
     def _confirm(self) -> None:
-        for cmd in self.__commands:
-            cmd.execute()
-
         self._result = DialogResult.Ok
         self._close()
 
+    def _cancel(self) -> None:
+        self._onWindowClosed()
+        self._close()
+
+    def _onWindowClosed(self) -> None:
+        self._result = DialogResult.Cancel
+        while self.__commandStack.canUndo():
+            self.__commandStack.undo()
+
     def __handleFilterSaved(self, sender, args) -> None:
         addedFilter: ListFilter = self.__currentView.getFilter()
-        cmd: Command = self.__commandFactory.makeRegisterFilterCommand(addedFilter)
-        self.__commands.append(cmd)
+        cmd: UndoableCommand = self.__commandFactory.makeRegisterFilterCommand(addedFilter)
+        self.__commandStack.addCommand(cmd)
+
         self.__availableFilters.append(addedFilter)
         self._addFilterToAvailableFiltersTable(addedFilter.title)
         self._closeSubView(self.__currentView)
