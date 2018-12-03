@@ -183,26 +183,21 @@ class LineSeries(FilterableSeries):
 
     def __filterValues(self, x, y, meta) -> tuple:
         if len(self._filters) == 0 or len(meta) == 0:
-            filteredX = x
-            filteredY = y
-            return filteredX, filteredY
+            return x, y
 
-        filteredX = list()
-        filteredY = list()
-
-        for i in range(len(meta)):
-            if i >= len(x) or i >= len(y):
-                break
-
-            shouldAdd: bool = True
-            for rowFilter in self._filters:
-                shouldAdd = shouldAdd and rowFilter.appliesToIndex(self, i)
-
-            if shouldAdd:
-                filteredX.append(x[i])
-                filteredY.append(y[i])
+        zipped = zip(meta, x, y)
+        filtered = list(filter(self.__appliesToEntry, zipped))
+        _, filteredX, filteredY = zip(*filtered)
 
         return filteredX, filteredY
+
+    def __appliesToEntry(self, entry):
+        metaEntry = entry[0]
+        i = self._metaData.index(metaEntry)
+        for rowFilter in self._filters:
+            if not rowFilter.appliesToIndex(self, i):
+                return False
+        return True
 
     def __plotConfidenceBand(self, plotter: Plotter, xValues: list, yValues: list) -> None:
         if self.__confidenceBand > 0:
@@ -287,21 +282,21 @@ class BoxSeries(FilterableSeries):
         seriesVisitor.visitBoxSeries(self)
 
     def __filterData(self):
-        meta = list(self._metaData)
-        indexesToRemove = set()
-        for index in range(len(meta)):
-            for listFilter in self._filters:
-                if not listFilter.appliesToIndex(self, index):
-                    indexesToRemove.add(index)
-
-        sortedIndexes = list(sorted(indexesToRemove, reverse=True))
-        data = list(self.__data)
-
-        for index in sortedIndexes:
-            meta.pop(index)
-            data.pop(index)
+        zipped = zip(self._metaData, self.__data)
+        filtered = list(filter(self.__shouldFilterEntry, zipped))
+        meta, data = zip(*filtered)
 
         return data, meta
+
+    def __shouldFilterEntry(self, entry) -> bool:
+        metaEntry = entry[0]
+        index = self._metaData.index(metaEntry)
+
+        for listFilter in self._filters:
+            if not listFilter.appliesToIndex(self, index):
+                return False
+
+        return True
 
     @property
     def data(self) -> List[List]:
