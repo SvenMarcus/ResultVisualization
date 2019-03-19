@@ -284,7 +284,7 @@ class BoxSeries(FilterableSeries):
 
     def plot(self, plotter: Plotter):
         data, meta = self.__filterData()
-        plotter.boxplot(data, xLabels=meta, show_median_values=True)
+        plotter.boxplot(data, xLabels=meta, show_median_values=True, group=self.title)
 
     def accept(self, seriesVisitor: SeriesVisitor) -> None:
         seriesVisitor.visitBoxSeries(self)

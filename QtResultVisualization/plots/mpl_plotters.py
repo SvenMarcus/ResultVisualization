@@ -48,7 +48,6 @@ class MatplotlibPlotter(Plotter):
             numCols = len(mergedBoxData.keys())
             allAxes = self.__figure.subplots(nrows=1, ncols=numCols, sharex='all', sharey='all')
             axIndex = 0
-
             xTickLabels = list()
             groupColorLookup = self.__createGroupColorLookup()
 
@@ -67,7 +66,11 @@ class MatplotlibPlotter(Plotter):
             self.__axes = self.__figure.add_subplot(111)
             for lineData in self.__lineData:
                 self.__axes.plot(
-                    lineData[0], lineData[1], lineData[2], label=lineData[3])
+                    lineData[0],
+                    lineData[1],
+                    lineData[2],
+                    label=lineData[3]
+                )
             self.__axes.set_xlabel(self.__xLabel)
             self.__axes.set_ylabel(self.__yLabel)
             self.__axes.legend(loc=4)
@@ -186,7 +189,7 @@ class MatplotlibPlotter(Plotter):
 
     def boxplot(self, data, **kwargs):
         xLabels: List[str] = []
-        group: str = "a"
+        group: str = ""
         if "xLabels" in kwargs.keys():
             xLabels = kwargs["xLabels"]
         if "show_median_values" in kwargs.keys():
