@@ -40,6 +40,14 @@ class Plotter(ABC):
     def update(self) -> None:
         raise NotImplementedError()
 
+    @abstractmethod
+    def resetPlotData(self):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def finishPlot(self):
+        raise NotImplementedError()
+
 
 class Series(Titled, ABC):
 
@@ -85,7 +93,7 @@ class Series(Titled, ABC):
         raise NotImplementedError()
 
 
-class FilterableSeries(Series):
+class FilterableSeries(Series, ABC):
 
     def __init__(self):
         super().__init__()

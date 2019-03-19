@@ -8,11 +8,10 @@ from QtResultVisualization.Dialogs import QtChooseFileDialog
 from QtResultVisualization.QtGraphViewFactory import QtGraphViewFactory
 from QtResultVisualization.QtMainWindow import QtMainWindow
 from QtResultVisualization.QtToolbar import QtToolbar
-
-from ResultVisualization.Commands import LoadGraphCommand, LoadTemplatesCommand, SaveTemplatesCommand, AddGraphViewCommand, CloseGraphViewCommand
 from ResultVisualization.Action import Action
+from ResultVisualization.Commands import LoadGraphCommand, LoadTemplatesCommand, SaveTemplatesCommand, \
+    AddGraphViewCommand, CloseGraphViewCommand
 from ResultVisualization.Toolbar import Toolbar
-
 
 if __name__ == "__main__":
     moduleFolder: str = sys.path[0]

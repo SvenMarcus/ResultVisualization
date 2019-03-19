@@ -1,9 +1,12 @@
 from numbers import Number
 from typing import Iterable, List, Tuple
 
-from matplotlib.ticker import StrMethodFormatter
 from matplotlib.backends.backend_template import FigureCanvas
 from matplotlib.figure import Axes, Figure
+from matplotlib.pyplot import boxplot
+from matplotlib.ticker import StrMethodFormatter
+
+from pandas import DataFrame, Series
 
 from ResultVisualization.Plot import Plotter
 
@@ -13,7 +16,7 @@ class MatplotlibPlotter(Plotter):
     def __init__(self, canvas: FigureCanvas):
         self.__canvas: FigureCanvas = canvas
         self.__figure: Figure = canvas.figure
-        self.__axes: Axes = self.__figure.add_subplot(111)
+        # self.__axes: Axes = self.__figure.add_subplot(111)
 
         self.__lineData: List[Tuple] = list()
         self.__boxData: List[Iterable[Number]] = list()
@@ -34,13 +37,30 @@ class MatplotlibPlotter(Plotter):
 
     def finishPlot(self) -> None:
         if len(self.__boxData) > 0:
-            boxplots = self.__axes.boxplot(self.__boxData)
-            for line in boxplots["medians"]:
-                x, y = line.get_xydata()[1]
-                self.__axes.text(x, y, '%.1f' % y,
-                                 horizontalalignment='right')
+            mergedBoxData = self.__mergeBoxplotData()
+            xTickLabels = list()
+            numCols = len(mergedBoxData.keys())
+            print("numCols", numCols)
+            allAxes = self.__figure.subplots(nrows=1, ncols=numCols, sharex='all', sharey='all')
+            axIndex = 0
+            for key, value in mergedBoxData.items():
+                xTickLabels.append(key)
+                allAxes[axIndex].boxplot(list(value))
+                allAxes[axIndex].set_xlabel(key)
+                axIndex += 1
 
-            self.__axes.set_xticklabels(self.__xTicks)
+            # df = DataFrame(mergedBoxData)
+            # df['HEADERS'] = Series(list(mergedBoxData.keys()))
+            # df.boxplot(by='HEADERS', ax=self.__axes)
+
+            # self.__figure.subplots().set_xticklabels(xTickLabels)
+            # boxplots = self.__axes.boxplot(self.__boxData)
+            # for line in boxplots["medians"]:
+            #     x, y = line.get_xydata()[1]
+            #     self.__axes.text(x, y, '%.1f' % y,
+            #                      horizontalalignment='right')
+
+            # self.__axes.set_xticklabels(self.__xTicks)
         elif len(self.__lineData) > 0:
             for lineData in self.__lineData:
                 self.__axes.plot(
@@ -49,13 +69,25 @@ class MatplotlibPlotter(Plotter):
             self.__axes.set_ylabel(self.__yLabel)
             self.__axes.legend(loc=4)
 
-        self.__axes.grid(True)
-        self.__axes.get_yaxis().set_major_formatter(
-            StrMethodFormatter("{x:.2f}"))
+        # self.__axes.grid(True)
+        # self.__axes.get_yaxis().set_major_formatter(
+        #     StrMethodFormatter("{x:.2f}"))
         self.update()
 
+    def __mergeBoxplotData(self) -> dict:
+        mergedData = dict()
+
+        for index, xLabel in enumerate(self.__xTicks):
+            if xLabel not in mergedData.keys():
+                mergedData[xLabel] = list()
+
+            mergedData[xLabel].append(list(self.__boxData[index]))
+
+        return mergedData
+
     def clear(self) -> None:
-        self.__axes.clear()
+        # self.__axes.clear()
+        self.__figure.clear()
 
     def lineSeries(self, xValues: Iterable, yValues: Iterable, **kwargs) -> None:
         title: str = ""
