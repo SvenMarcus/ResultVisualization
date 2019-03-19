@@ -4,6 +4,7 @@ from typing import Iterable, List, Tuple
 from matplotlib import pyplot
 from matplotlib.backends.backend_template import FigureCanvas
 from matplotlib.figure import Axes, Figure
+from matplotlib.patches import Patch
 from matplotlib.ticker import StrMethodFormatter
 
 from ResultVisualization.Plot import Plotter
@@ -36,6 +37,7 @@ class MatplotlibPlotter(Plotter):
     def resetPlotData(self) -> None:
         self.__lineData = list()
         self.__boxData = list()
+        self.__groups = list()
         self.__title = ""
         self.__xLabel = ""
         self.__yLabel = ""
@@ -61,6 +63,10 @@ class MatplotlibPlotter(Plotter):
                 axIndex += 1
                 self.__plotMedianValues(ax, boxplots)
                 self.__colorBoxes(boxplots, boxplotData["groups"], groupColorLookup)
+
+            groupset = set().union(self.__groups)
+            groupcolors = [Patch(color=groupColorLookup[group]) for group in groupset]
+            allAxes[axIndex - 1].legend(groupcolors, groupset, loc=4)
 
         elif len(self.__lineData) > 0:
             self.__axes = self.__figure.add_subplot(111)
