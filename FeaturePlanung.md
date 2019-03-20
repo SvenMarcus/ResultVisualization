@@ -13,7 +13,7 @@
 
 ## Extras
 ### Gefordert
-- [ ]  Plots als PDF exportieren
+- [ ]  Plots als PDF exportieren (Alle Plots hintereinander in einer PDF)
 - [ ] Umbenennen von Tabs
 - [ ] Achsenbegrenzungen unabhängig von matplotlib festlegen
 

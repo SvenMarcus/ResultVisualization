@@ -4,7 +4,8 @@ import sys
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
 
-from QtResultVisualization.Dialogs import QtChooseFileDialog
+from QtResultVisualization.Dialogs import QtChooseFileDialog, QtSaveFileDialog
+from QtResultVisualization.MplCommands import ExportPdfCommand
 from QtResultVisualization.QtGraphViewFactory import QtGraphViewFactory
 from QtResultVisualization.QtMainWindow import QtMainWindow
 from QtResultVisualization.QtToolbar import QtToolbar
@@ -45,10 +46,15 @@ if __name__ == "__main__":
     loadCommand = LoadGraphCommand(mainWindow, factory, QtChooseFileDialog("*.graph", parent=mainWindow.getWidget()))
     loadGraphAction = Action("File", path.join(moduleFolder, "resources", "Load.svg"), "Load Graph", loadCommand)
 
+    exportCommand = ExportPdfCommand(mainWindow, QtSaveFileDialog("*.pdf", parent=mainWindow.getWidget()))
+    exportAction = Action("File", path.join(moduleFolder, "resources", "file-pdf.svg"), "Export Pdf", exportCommand)
+
     toolbar.addAction(addLinePlotAction)
     toolbar.addAction(addBoxPlotAction)
     toolbar.addAction(closeViewAction)
+    toolbar.addAction(exportAction)
     toolbar.addAction(loadGraphAction)
+
     addLinePlotAction.trigger()
     mainWindow.show()
 
