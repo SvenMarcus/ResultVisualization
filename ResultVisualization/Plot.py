@@ -40,6 +40,14 @@ class Plotter(ABC):
     def update(self) -> None:
         raise NotImplementedError()
 
+    @abstractmethod
+    def resetPlotData(self):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def finishPlot(self):
+        raise NotImplementedError()
+
 
 class Series(Titled, ABC):
 
@@ -85,7 +93,7 @@ class Series(Titled, ABC):
         raise NotImplementedError()
 
 
-class FilterableSeries(Series):
+class FilterableSeries(Series, ABC):
 
     def __init__(self):
         super().__init__()
@@ -276,7 +284,7 @@ class BoxSeries(FilterableSeries):
 
     def plot(self, plotter: Plotter):
         data, meta = self.__filterData()
-        plotter.boxplot(data, xLabels=meta, show_median_values=True)
+        plotter.boxplot(data, xLabels=meta, show_median_values=True, group=self.title)
 
     def accept(self, seriesVisitor: SeriesVisitor) -> None:
         seriesVisitor.visitBoxSeries(self)

@@ -1,8 +1,8 @@
 from typing import Iterable
 
-from PyQt5.QtWidgets import (QHBoxLayout, QHeaderView,
-                             QPushButton, QSplitter, QTableWidget,
-                             QTableWidgetItem, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (QHeaderView,
+                             QSplitter, QTableWidget,
+                             QTableWidgetItem, QWidget)
 
 from QtResultVisualization.QtGraph import QtGraph
 from ResultVisualization.GraphView import GraphView
