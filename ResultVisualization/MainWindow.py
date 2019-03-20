@@ -37,6 +37,9 @@ class MainWindow(ABC):
         self._appendGraphView(graphView, title or "Plot")
         self._selectGraphViewAt(len(self.__currentViews) - 1)
 
+    def getCurrentViews(self) -> List[GraphView]:
+        return list(self.__currentViews)
+
     def _setActiveIndex(self, index: int) -> None:
         if self.__activeView is not None:
             for action in self.__activeView.actions:

@@ -31,7 +31,8 @@ class QtChooseFolderDialog(ChooseFolderDialog):
 
 class QtSaveFileDialog(ChooseFileDialog):
 
-    def __init__(self, parent: QWidget = None):
+    def __init__(self, extension: str, parent: QWidget = None):
+        self.__extension = extension
         self.__selectedFile: str = ""
         self.__parent: QWidget = parent
 
@@ -43,7 +44,7 @@ class QtSaveFileDialog(ChooseFileDialog):
 
     def show(self) -> DialogResult:
         self.__selectedFile = QFileDialog.getSaveFileName(
-            self.__parent, "Save File", filter="*.graph")[0]
+            self.__parent, "Save File", filter=self.__extension)[0]
         if self.__selectedFile and isinstance(self.__selectedFile, str):
             return DialogResult.Ok
 

@@ -36,3 +36,6 @@ class QtGraph(Graph):
 
     def getWidget(self) -> QWidget:
         return self.__widget
+
+    def getFigureCanvas(self) -> FigureCanvas:
+        return self.__canvas

@@ -8,8 +8,8 @@ class MplAreaPlot:
         self.__axes = None
         self.__areas = list()
 
-    def addArea(self, xValues, lowerYValues, upperYValues, color=None):
-        self.__areas.append((xValues, lowerYValues, upperYValues, color))
+    def addArea(self, xValues, lowerYValues, upperYValues, color=None, alpha=1):
+        self.__areas.append((xValues, lowerYValues, upperYValues, color, alpha))
 
     def canDraw(self):
         return self.__figure is not None and len(self.__areas) > 0
@@ -21,10 +21,11 @@ class MplAreaPlot:
             lowerYValues = area[1]
             upperYValues = area[2]
             color = area[3]
+            alpha = area[4]
 
             if color is None:
                 self.__axes.fill_between(
-                    xValues, lowerYValues, upperYValues)
+                    xValues, lowerYValues, upperYValues, alpha=alpha)
             else:
                 canPlot = True
 

@@ -71,10 +71,13 @@ class MatplotlibPlotter(Plotter):
 
     def fillArea(self, xValues: Iterable, lowerYValues: Iterable, upperYValues: Iterable, **kwargs) -> None:
         color = None
+        alpha = 1
         for key, value in kwargs.items():
             if key == "color":
                 color = value
-        self.__areaPlot.addArea(xValues, lowerYValues, upperYValues, color)
+            if key == "alpha":
+                alpha = value
+        self.__areaPlot.addArea(xValues, lowerYValues, upperYValues, color, alpha)
 
     def text(self, x: float, y: float, text: str, **kwargs) -> None:
         halignment = "center"

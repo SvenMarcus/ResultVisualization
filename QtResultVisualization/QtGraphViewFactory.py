@@ -78,7 +78,7 @@ class QtGraphViewFactory(GraphViewFactory):
 
         widget: QWidget = graphView.getWidget()
 
-        saveCommand = SaveGraphCommand(QtSaveFileDialog(widget), kind, seriesRepo, filterRepo)
+        saveCommand = SaveGraphCommand(QtSaveFileDialog("*.graph", widget), kind, seriesRepo, filterRepo)
         saveAction = Action("Plot", path.join(resources, "Save.svg"), "Save Graph", saveCommand)
 
         graphView.actions.extend(

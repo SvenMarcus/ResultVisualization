@@ -300,6 +300,7 @@ class DeleteFilterCommand(UndoableCommand):
         self.__repo.addFilter(self.__filter)
         self.__connector.connect(self.__filter)
 
+
 class SaveGraphCommand(Command):
 
     def __init__(self, fileChooser: ChooseFileDialog, graphKind: str, seriesRepo: SeriesRepository, filterRepo: FilterRepository):

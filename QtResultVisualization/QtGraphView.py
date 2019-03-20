@@ -57,3 +57,7 @@ class QtGraphView(GraphView):
 
     def getWidget(self) -> QWidget:
         return self.__splitter
+
+    def getGraph(self) -> QtGraph:
+        return self._graph
+
