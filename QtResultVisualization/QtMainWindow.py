@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QTabWidget, QToolBar, QWidget
+from PyQt5.QtWidgets import QMainWindow, QTabWidget, QToolBar, QWidget, QMenuBar
 
 from QtResultVisualization.QtGraphViewFactory import QtGraphViewFactory
 from QtResultVisualization.QtToolbar import QtToolbar
@@ -24,11 +24,15 @@ class CustomMainWindow(QMainWindow):
 
 class QtMainWindow(MainWindow):
 
-    def __init__(self, toolbar: QtToolbar, graphViewFactory: QtGraphViewFactory):
+    def __init__(self, graphViewFactory: QtGraphViewFactory, toolBar: QtToolbar = None, menuBar=None):
         self.__window: QMainWindow = CustomMainWindow()
-        self.__toolbar: QToolBar = toolbar.getWidget()
+        if toolBar is not None:
+            self.__toolbar: QToolBar = toolBar.getWidget()
+            self.__window.addToolBar(self.__toolbar)
 
-        self.__window.addToolBar(self.__toolbar)
+        if menuBar is not None:
+            self.__menuBar: QMenuBar = menuBar.getQMenuBar()
+            self.__window.setMenuBar(self.__menuBar)
 
         self.__widget: QTabWidget = QTabWidget()
         self.__widget.currentChanged.connect(lambda index: self._setActiveIndex(index))
@@ -36,7 +40,7 @@ class QtMainWindow(MainWindow):
         self.__window.setCentralWidget(self.__widget)
         self.__window.onClose().append(lambda x, y: self._onClose(self))
 
-        super().__init__(toolbar, graphViewFactory)
+        super().__init__(graphViewFactory, toolBar)
 
     def getWidget(self) -> QWidget:
         return self.__window

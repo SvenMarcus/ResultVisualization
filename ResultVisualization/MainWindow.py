@@ -5,12 +5,14 @@ from ResultVisualization.Action import Action
 from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.GraphView import GraphView
 from ResultVisualization.GraphViewFactory import GraphViewFactory
+from ResultVisualization.MenuBar import MenuBar
 from ResultVisualization.Toolbar import Toolbar
 
 
 class MainWindow(ABC):
 
-    def __init__(self, toolBar: Toolbar, graphViewFactory: GraphViewFactory):
+    def __init__(self, graphViewFactory: GraphViewFactory, toolBar: Toolbar = None, menuBar: MenuBar = None):
+        self.__menuBar: MenuBar = menuBar
         self.__toolbar: Toolbar = toolBar
         self.__actions: List[Action] = list()
         self._onClose: InvokableEvent = InvokableEvent()

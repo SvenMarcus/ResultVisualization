@@ -1,8 +1,7 @@
 class Action:
 
-    def __init__(self, category: str, icon: str, text: str, command: 'Command'):
+    def __init__(self, icon: str, text: str, command: 'Command'):
         self.__command: 'Command' = command
-        self.__category: str = category
         self.__text: str = text
         self.__icon: str = icon
 
