@@ -38,5 +38,6 @@ class MplAreaPlot:
                         xValues,
                         lowerYValues,
                         upperYValues,
-                        facecolor=color
+                        facecolor=color,
+                        alpha=alpha
                     )

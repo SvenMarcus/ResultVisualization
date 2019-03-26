@@ -2,7 +2,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.ticker import StrMethodFormatter
 
-from QtResultVisualization.plots import mpl_style
+from ResultVisualization import Style
 
 
 class MplLinePlot:
@@ -15,7 +15,7 @@ class MplLinePlot:
         self.__yLabel = ""
 
     def addLineData(self, xValues, yValues, style="-", title="", xLabel="", yLabel=""):
-        if not mpl_style.validate(style):
+        if not Style.validate(style):
             style = "-"
 
         self.__lineData.append((xValues, yValues, style, title))

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Iterable, List, Tuple
 
+from ResultVisualization import Style
 from ResultVisualization.Filter import ListFilter
 from ResultVisualization.SeriesVisitor import SeriesVisitor
 from ResultVisualization.Titled import Titled
@@ -212,7 +213,7 @@ class LineSeries(FilterableSeries):
             lower = [y * (1 - self.__confidenceBand) for y in yValues]
             upper = [y * (1 + self.__confidenceBand) for y in yValues]
 
-            if len(self.style) > 0:
+            if Style.has_color(self.style):
                 plotter.fillArea(xValues, lower, upper, alpha=0.3, color=self.style[0])
             else:
                 plotter.fillArea(xValues, lower, upper, alpha=0.3)
@@ -338,7 +339,7 @@ class FillAreaSeries(Series):
         self.__textColor: Tuple[float, float, float, float] = (0, 0, 0, 1)
 
     def plot(self, plotter: Plotter):
-        plotter.fillArea(self.__xLims, [self.__yLims[0], self.__yLims[0]], [self.__yLims[1], self.__yLims[1]], color=self.__color)
+        plotter.fillArea(self.__xLims, [self.__yLims[0], self.__yLims[0]], [self.__yLims[1], self.__yLims[1]], color=self.__color[0:3], alpha=self.__color[3])
         self.plotText(plotter)
 
     def accept(self, seriesVisitor: SeriesVisitor) -> None:

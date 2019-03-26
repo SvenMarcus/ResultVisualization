@@ -1,8 +1,12 @@
+def has_color(style: str) -> bool:
+    return style and style[0] in {'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'}
+
+
 def validate(style: str) -> bool:
     if not style:
         return False
 
-    if style[0] in {'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'}:
+    if has_color(style):
         style = style[1:]
 
     markers = {
