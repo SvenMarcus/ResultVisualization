@@ -27,7 +27,7 @@ class MplBoxPlot:
     def draw(self):
         mergedBoxData = self.__mergeBoxplotData()
         numCols = len(mergedBoxData.keys())
-        allAxes = self.__figure.subplots(nrows=1, ncols=numCols, sharex='all', sharey='all')
+        allAxes = self.__figure.subplots(nrows=1, ncols=numCols, sharey='all')
         axIndex = 0
         groupColorLookup = self.__createGroupColorLookup()
         for key, boxplotData in mergedBoxData.items():
@@ -40,7 +40,7 @@ class MplBoxPlot:
         self.__createLegend(ax, groupColorLookup)
 
     def __drawBox(self, ax, boxplotData, groupColorLookup):
-        boxplots = ax.boxplot(list(boxplotData["values"]), patch_artist=True)
+        boxplots = ax.boxplot(list(boxplotData["values"]), patch_artist=True, positions=range(1, len(boxplotData["values"]) + 1))
         self.__plotMedianValues(ax, boxplots)
         self.__colorBoxes(boxplots, boxplotData["groups"], groupColorLookup)
 
