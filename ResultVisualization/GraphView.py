@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Iterable
 
 from ResultVisualization.Action import Action
+from ResultVisualization.Events import InvokableEvent, Event
 from ResultVisualization.Plot import Graph, Series
 
 
@@ -10,6 +11,9 @@ class GraphView(ABC):
     def __init__(self, initialSeries: Iterable[Series]):
         self._graph: Graph = self._makeGraph()
         self.__series: List[Series] = list(initialSeries)
+        self.__title: str = ""
+
+        self.__titleChangedEvent: InvokableEvent = InvokableEvent()
 
         for series in self.__series:
             self._addEntryToListView(series.title)
@@ -18,8 +22,20 @@ class GraphView(ABC):
         self.__actions: List[Action] = list()
 
     @property
+    def titleChanged(self) -> Event:
+        return self.__titleChangedEvent
+
+    @property
     def actions(self) -> List[Action]:
         return self.__actions
+
+    def setTitle(self, title: str) -> None:
+        self.__title = title
+        self._graph.setTitle(title)
+        self.__titleChangedEvent(self)
+
+    def getTitle(self) -> str:
+        return self.__title
 
     def addSeries(self, series: Series) -> None:
         """Adds a series to the GraphView"""

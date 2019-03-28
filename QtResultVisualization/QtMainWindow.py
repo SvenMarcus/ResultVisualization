@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QTabWidget, QToolBar, QWidget, QMenuBar
 
 from QtResultVisualization.QtGraphViewFactory import QtGraphViewFactory
+from QtResultVisualization.QtMenuBar import QtMenuBar
 from QtResultVisualization.QtToolbar import QtToolbar
 
 from ResultVisualization.Events import Event, InvokableEvent
@@ -24,7 +25,7 @@ class CustomMainWindow(QMainWindow):
 
 class QtMainWindow(MainWindow):
 
-    def __init__(self, graphViewFactory: QtGraphViewFactory, toolBar: QtToolbar = None, menuBar=None):
+    def __init__(self, graphViewFactory: QtGraphViewFactory, toolBar: QtToolbar = None, menuBar: QtMenuBar = None):
         self.__window: QMainWindow = CustomMainWindow()
         if toolBar is not None:
             self.__toolbar: QToolBar = toolBar.getWidget()
@@ -40,7 +41,7 @@ class QtMainWindow(MainWindow):
         self.__window.setCentralWidget(self.__widget)
         self.__window.onClose().append(lambda x, y: self._onClose(self))
 
-        super().__init__(graphViewFactory, toolBar)
+        super().__init__(graphViewFactory, toolBar, menuBar)
 
     def getWidget(self) -> QWidget:
         return self.__window
@@ -50,6 +51,9 @@ class QtMainWindow(MainWindow):
 
     def _appendGraphView(self, graphView: GraphView, title: str) -> None:
         self.__widget.addTab(graphView.getWidget(), title)
+
+    def _setGraphViewTitleAt(self, title: str, index: int) -> None:
+        self.__widget.setTabText(index, title)
 
     def _selectGraphViewAt(self, index):
         self.__widget.setCurrentIndex(index)

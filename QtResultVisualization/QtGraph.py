@@ -34,6 +34,9 @@ class QtGraph(Graph):
         layout.addWidget(navBar)
         layout.addWidget(self.__canvas)
 
+    def _setTitleInView(self, title: str):
+        self.__canvas.figure.suptitle(title)
+
     def getWidget(self) -> QWidget:
         return self.__widget
 

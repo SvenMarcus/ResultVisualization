@@ -1,6 +1,7 @@
 class Action:
 
-    def __init__(self, icon: str, text: str, command: 'Command'):
+    def __init__(self, parentMenu, icon: str, text: str, command: 'Command'):
+        self.__parentMenu: str = parentMenu
         self.__command: 'Command' = command
         self.__text: str = text
         self.__icon: str = icon
@@ -9,8 +10,8 @@ class Action:
         self.__command.execute()
 
     @property
-    def category(self) -> str:
-        return self.__category
+    def parentMenu(self) -> str:
+        return self.__parentMenu
 
     @property
     def icon(self) -> str:

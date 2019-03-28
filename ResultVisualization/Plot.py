@@ -134,6 +134,7 @@ class Graph(ABC):
     def __init__(self, plotter: Plotter = None):
         self.__plotter: Plotter = plotter
         self.__series: List[Series] = list()
+        self.__title: str = ""
 
     def addPlot(self, series: Series) -> None:
         self.__series.append(series)
@@ -149,7 +150,15 @@ class Graph(ABC):
         for series in self.__series:
             series.plot(self.__plotter)
         self.__plotter.finishPlot()
+        self._setTitleInView(self.__title)
 
+    def setTitle(self, title: str) -> None:
+        self.__title = title
+        self._setTitleInView(title)
+
+    @abstractmethod
+    def _setTitleInView(self, title: str) -> None:
+        raise NotImplementedError()
 
 class LineSeries(FilterableSeries):
 
