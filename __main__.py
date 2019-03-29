@@ -41,24 +41,24 @@ if __name__ == "__main__":
     mainWindow.onCloseEvent().append(lambda sender, args: saveTemplatesCommand.execute())
 
     addLinePlotCommand = AddGraphViewCommand(mainWindow, factory, "linear", QtTextInputDialog())
-    addLinePlotAction = Action("New", path.join(resourcesFolder, "LinePlot2.svg"), "New Line Plot",
-                               addLinePlotCommand)
+    addLinePlotAction = Action("New", path.join(resourcesFolder, "LinePlot2.svg"), "Line Plot",
+                               addLinePlotCommand, shortcut="Ctrl+L")
 
     addBoxPlotCommand = AddGraphViewCommand(mainWindow, factory, "box", QtTextInputDialog())
-    addBoxPlotAction = Action("New", path.join(resourcesFolder, "BoxPlot2.svg"), "New Box Plot",
-                              addBoxPlotCommand)
+    addBoxPlotAction = Action("New", path.join(resourcesFolder, "BoxPlot2.svg"), "Box Plot",
+                              addBoxPlotCommand, shortcut="Ctrl+B")
 
     editGraphViewTitleCommand = EditGraphViewTitleCommand(mainWindow, QtTextInputDialog())
-    editGraphViewTitleAction = Action("Edit", "", "Edit Graph Title", editGraphViewTitleCommand)
+    editGraphViewTitleAction = Action("Edit", "", "Edit Graph Title", editGraphViewTitleCommand, shortcut="Ctrl+R")
 
     closeViewCommand = CloseGraphViewCommand(mainWindow)
-    closeViewAction = Action("View", path.join(resourcesFolder, "Close.svg"), "Close View", closeViewCommand)
+    closeViewAction = Action("View", path.join(resourcesFolder, "Close.svg"), "Close View", closeViewCommand, shortcut="Ctrl+W")
 
     loadCommand = LoadGraphCommand(mainWindow, factory, QtChooseFileDialog("*.graph", parent=mainWindow.getWidget()))
-    loadGraphAction = Action("File", path.join(resourcesFolder, "Load.svg"), "Load Graph", loadCommand)
+    loadGraphAction = Action("File", path.join(resourcesFolder, "Load.svg"), "Load Graph", loadCommand, shortcut="Ctrl+O")
 
     exportCommand = ExportPdfCommand(mainWindow, QtSaveFileDialog("*.pdf", parent=mainWindow.getWidget()))
-    exportAction = Action("File", path.join(resourcesFolder, "file-pdf.svg"), "Export Pdf", exportCommand)
+    exportAction = Action("File", path.join(resourcesFolder, "file-pdf.svg"), "Export Pdf", exportCommand, shortcut="Ctrl+P")
 
     toolbar.addAction(addLinePlotAction)
     toolbar.addAction(addBoxPlotAction)

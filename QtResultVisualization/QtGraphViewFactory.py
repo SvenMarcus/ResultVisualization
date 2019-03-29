@@ -58,28 +58,28 @@ class QtGraphViewFactory(GraphViewFactory):
         resources = path.join(sys.path[0], "resources")
 
         addSeriesCommand = ShowAddSeriesDialogCommand(graphView, seriesDialogFactory, seriesRepo, kind)
-        addSeriesAction = Action("Plot", path.join(resources, "Add.svg"), "Add Series", addSeriesCommand)
+        addSeriesAction = Action("Plot", path.join(resources, "Add.svg"), "Add Series", addSeriesCommand, shortcut="Ctrl+N")
 
         editSeriesCommand = ShowEditSeriesDialogCommand(graphView, seriesDialogFactory)
-        editSeriesAction = Action("Plot", path.join(resources, "Edit.svg"), "Edit Series", editSeriesCommand)
+        editSeriesAction = Action("Plot", path.join(resources, "Edit.svg"), "Edit Series", editSeriesCommand, shortcut="Ctrl+E")
 
         removeSeriesCommand = RemoveSeriesCommand(graphView, seriesRepo)
-        removeSeriesAction = Action("Plot", path.join(resources, "Remove.svg"), "Remove Series", removeSeriesCommand)
+        removeSeriesAction = Action("Plot", path.join(resources, "Remove.svg"), "Remove Series", removeSeriesCommand, shortcut="Ctrl+K")
 
         duplicateCommand = DuplicateSeriesCommand(graphView, seriesRepo)
-        duplicateAction = Action("Plot", path.join(resources, "Duplicate.svg"), "Duplicate Series", duplicateCommand)
+        duplicateAction = Action("Plot", path.join(resources, "Duplicate.svg"), "Duplicate Series", duplicateCommand, shortcut="Ctrl+D")
 
         editSeriesFilterCommand = ShowEditSeriesFilterDialogCommand(graphView, filterDialogFactory)
-        editSeriesFilterAction = Action("Plot", path.join(resources, "EditFilters.svg"), "Edit Series Filter",
-                                        editSeriesFilterCommand)
+        editSeriesFilterAction = Action("Plot", path.join(resources, "EditFilters.svg"), "Edit Series Filters",
+                                        editSeriesFilterCommand, shortcut="Ctrl+F")
 
         createFilterCommand = ShowCreateFilterDialogCommand(graphView, filterDialogFactory)
-        createFilterAction = Action("Plot", path.join(resources, "Filter.svg"), "Manage Filters", createFilterCommand)
+        createFilterAction = Action("Plot", path.join(resources, "Filter.svg"), "Manage Filters", createFilterCommand, shortcut="Ctrl+M")
 
         widget: QWidget = graphView.getWidget()
 
         saveCommand = SaveGraphCommand(QtSaveFileDialog("*.graph", widget), kind, seriesRepo, filterRepo)
-        saveAction = Action("File", path.join(resources, "Save.svg"), "Save Graph", saveCommand)
+        saveAction = Action("File", path.join(resources, "Save.svg"), "Save Graph", saveCommand, shortcut="Ctrl+S")
 
         graphView.actions.extend(
             [
@@ -98,7 +98,7 @@ class QtGraphViewFactory(GraphViewFactory):
         if kind == "linear":
             title = "Line Plot"
             fillAreaCommand = ShowAddSeriesDialogCommand(graphView, seriesDialogFactory, seriesRepo, "area")
-            fillAreaAction = Action("Plot", path.join(resources, "Fill.svg"), "Fill Area", fillAreaCommand)
+            fillAreaAction = Action("Plot", path.join(resources, "Fill.svg"), "Fill Area", fillAreaCommand, shortcut="Ctrl+A")
             graphView.actions.append(fillAreaAction)
 
             templateDialogFactory = QtTemplateDialogFactory(self.__templateRepo, graphView, seriesRepo)

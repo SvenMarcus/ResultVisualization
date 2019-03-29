@@ -1,3 +1,4 @@
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QMenu, QMenuBar, QAction
 
 from ResultVisualization.Action import Action
@@ -19,6 +20,8 @@ class QtMenu(Menu):
 
     def _addActionInView(self, action: Action):
         menuAction: QAction = QAction(action.text, self.__qMenu)
+        if action.shortcut:
+            menuAction.setShortcut(QKeySequence(action.shortcut))
         menuAction.triggered.connect(action.trigger)
         self.__actionQActionMap[action] = menuAction
         self.__qMenu.addAction(menuAction)
