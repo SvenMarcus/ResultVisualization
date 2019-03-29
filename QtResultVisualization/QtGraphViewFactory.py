@@ -79,7 +79,7 @@ class QtGraphViewFactory(GraphViewFactory):
         widget: QWidget = graphView.getWidget()
 
         saveCommand = SaveGraphCommand(QtSaveFileDialog("*.graph", widget), kind, seriesRepo, filterRepo)
-        saveAction = Action("Plot", path.join(resources, "Save.svg"), "Save Graph", saveCommand)
+        saveAction = Action("File", path.join(resources, "Save.svg"), "Save Graph", saveCommand)
 
         graphView.actions.extend(
             [
@@ -93,25 +93,28 @@ class QtGraphViewFactory(GraphViewFactory):
             ]
         )
 
+        title: str = "Box Plot"
+
         if kind == "linear":
+            title = "Line Plot"
             fillAreaCommand = ShowAddSeriesDialogCommand(graphView, seriesDialogFactory, seriesRepo, "area")
             fillAreaAction = Action("Plot", path.join(resources, "Fill.svg"), "Fill Area", fillAreaCommand)
             graphView.actions.append(fillAreaAction)
 
             templateDialogFactory = QtTemplateDialogFactory(self.__templateRepo, graphView, seriesRepo)
             loadFromTemplate = ShowLoadFromTemplateDialogCommand(templateDialogFactory)
-            loadFromTemplateAction = Action("Plot", path.join(resources, "LoadTemplate.svg"), "Load from Template",
+            loadFromTemplateAction = Action("Template", path.join(resources, "LoadTemplate.svg"), "Load from Template",
                                             loadFromTemplate)
 
             createTemplate = ShowTemplateCreationDialogCommand(templateDialogFactory)
-            createTemplateAction = Action("Plot", path.join(resources, "Template.svg"), "Create Template",
-                                          createTemplate)
+            createTemplateAction = Action("Template", path.join(resources, "Template.svg"), "Create Template", createTemplate)
             graphView.actions.extend([
                 loadFromTemplateAction,
                 createTemplateAction
             ])
 
         filterDialogFactory.setParent(widget)
+        graphView.setTitle(title)
 
         return graphView
 

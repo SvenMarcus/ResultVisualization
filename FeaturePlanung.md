@@ -1,7 +1,7 @@
 # Brandschutz Visualisierung
 ## Fokus auf Vergleich von Daten
 ### Boxplots:
-- [ ] Overlay Funktion für gleiche Spaltennamen
+- [x] Overlay Funktion für gleiche Spaltennamen
 - [ ] Templates für Boxplots
 
 ### Filter:
@@ -13,7 +13,7 @@
 
 ## Extras
 ### Gefordert
-- [ ]  Plots als PDF exportieren (Alle Plots hintereinander in einer PDF)
+- [x]  Plots als PDF exportieren (Alle Plots hintereinander in einer PDF)
 - [ ] Umbenennen von Tabs
 - [ ] Achsenbegrenzungen unabhängig von matplotlib festlegen
 

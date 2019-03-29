@@ -1,35 +1,20 @@
 from abc import ABC, abstractmethod
-from collections import OrderedDict
 from typing import List
 
 from ResultVisualization.Action import Action
 
+
 class Toolbar(ABC):
 
     def __init__(self):
-        self.__actions: dict = dict()
+        self.__actions: list = list()
 
     def addAction(self, action: Action) -> None:
-        if action.category not in self.__actions.keys():
-            self.__actions[action.category] = list()
-
-        actionsInCategory: List[Action] = self.__actions[action.category]
-        actionsInCategory.append(action)
+        self.__actions.append(action)
         self._addActionToView(action)
 
     def removeAction(self, action: Action) -> None:
-        if action.category not in self.__actions.keys():
-            return
-
-        actionsInCategory: List[Action] = self.__actions[action.category]
-        try:
-            actionsInCategory.remove(action)
-        except:
-            print(action.text)
-
-        if len(actionsInCategory) == 0:
-            self.__actions.pop(action.category)
-
+        self.__actions.remove(action)
         self._removeActionFromView(action)
 
     def clearActions(self) -> None:

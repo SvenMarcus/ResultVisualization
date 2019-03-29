@@ -22,6 +22,7 @@ from ResultVisualization.SeriesVisitor import SeriesVisitor
 from ResultVisualization.TemplateCreationDialog import TemplateCreationDialog
 from ResultVisualization.TemplateDialogFactory import TemplateDialogFactory
 from ResultVisualization.TemplateRepository import TemplateRepository
+from ResultVisualization.TextInputDialog import TextInputDialog
 
 
 class Command(ABC):
@@ -40,7 +41,8 @@ class UndoableCommand(Command, ABC):
 
 class ShowAddSeriesDialogCommand(Command):
 
-    def __init__(self, graphView: GraphView, dialogFactory: SeriesDialogFactory, seriesRepo: SeriesRepository, dialogKind: str):
+    def __init__(self, graphView: GraphView, dialogFactory: SeriesDialogFactory, seriesRepo: SeriesRepository,
+                 dialogKind: str):
         self.__graphView: GraphView = graphView
         self.__seriesDialogFactory: SeriesDialogFactory = dialogFactory
         self.__repository: SeriesRepository = seriesRepo
@@ -303,7 +305,8 @@ class DeleteFilterCommand(UndoableCommand):
 
 class SaveGraphCommand(Command):
 
-    def __init__(self, fileChooser: ChooseFileDialog, graphKind: str, seriesRepo: SeriesRepository, filterRepo: FilterRepository):
+    def __init__(self, fileChooser: ChooseFileDialog, graphKind: str, seriesRepo: SeriesRepository,
+                 filterRepo: FilterRepository):
         self.__kind: str = graphKind
         self.__seriesRepo: SeriesRepository = seriesRepo
         self.__filterRepo: FilterRepository = filterRepo
@@ -421,14 +424,32 @@ class LoadTemplatesCommand(Command):
 
 class AddGraphViewCommand(Command):
 
-    def __init__(self, mainWindow: MainWindow, factory: GraphViewFactory, kind: str):
+    def __init__(self, mainWindow: MainWindow, factory: GraphViewFactory, kind: str, textInputDialog: TextInputDialog):
         self.__mainWindow: MainWindow = mainWindow
         self.__factory: GraphViewFactory = factory
         self.__kind: str = kind
+        self.__textInputDialog: TextInputDialog = textInputDialog
 
     def execute(self) -> None:
-        graphView: GraphView = self.__factory.makeGraphView(self.__kind)
-        self.__mainWindow.addGraphView(graphView)
+        result: DialogResult = self.__textInputDialog.show()
+        if result is DialogResult.Ok:
+            graphView: GraphView = self.__factory.makeGraphView(self.__kind)
+            graphView.setTitle(self.__textInputDialog.getText())
+            self.__mainWindow.addGraphView(graphView, graphView.getTitle())
+
+
+class EditGraphViewTitleCommand(Command):
+
+    def __init__(self, mainWindow: MainWindow, textInputDialog: TextInputDialog):
+        self.__textInputDialog = textInputDialog
+        self.__mainWindow = mainWindow
+
+    def execute(self) -> None:
+        result: DialogResult = self.__textInputDialog.show()
+        if result is DialogResult.Ok:
+            graphView: GraphView = self.__mainWindow.getActiveView()
+            graphView.setTitle(self.__textInputDialog.getText())
+            graphView.update()
 
 
 class CloseGraphViewCommand(Command):
