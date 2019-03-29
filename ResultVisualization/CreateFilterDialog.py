@@ -5,7 +5,7 @@ from ResultVisualization.Commands import FilterCommandFactory, UndoableCommand
 from ResultVisualization.CommandStack import CommandStack
 from ResultVisualization.Events import Event, InvokableEvent
 from ResultVisualization.Dialogs import Dialog, DialogResult
-from ResultVisualization.Filter import CompositeFilter, ExactMetaDataMatchesInAllSeriesFilter, ListFilter, RowMetaDataContainsFilter
+from ResultVisualization.Filter import CompositeFilter, ExactMetaDataMatchesInAllSeriesFilter, SeriesFilter, RowMetaDataContainsFilter
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.Plot import FilterableSeries, Series
 from ResultVisualization.SeriesRepository import SeriesRepository
@@ -23,7 +23,7 @@ class FilterCreationView(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def getFilter(self) -> ListFilter:
+    def getFilter(self) -> SeriesFilter:
         """Returns the Filter created in the view"""
 
         raise NotImplementedError()
@@ -34,7 +34,7 @@ class MetaDataMatchFilterCreationView(FilterCreationView, ABC):
 
     def __init__(self, seriesRepo: SeriesRepository):
         self.__onSavedEvent: InvokableEvent = InvokableEvent()
-        self.__listFilter: ListFilter = None
+        self.__listFilter: SeriesFilter = None
         self._initUI()
         self.__transferWidget: TransferWidget[Series] = self._getTransferWidget()
         self.__transferWidget.setLeftHeader("Selected Series")
@@ -46,7 +46,7 @@ class MetaDataMatchFilterCreationView(FilterCreationView, ABC):
     def onFilterSaved(self) -> Event:
         return self.__onSavedEvent
 
-    def getFilter(self) -> ListFilter:
+    def getFilter(self) -> SeriesFilter:
         return self.__listFilter
 
     def _save(self) -> None:
@@ -82,12 +82,12 @@ class RowContainsFilterCreationView(FilterCreationView, ABC):
 
     def __init__(self):
         self.__onSavedEvent: InvokableEvent = InvokableEvent()
-        self.__listFilter: ListFilter = None
+        self.__listFilter: SeriesFilter = None
 
     def onFilterSaved(self) -> Event:
         return self.__onSavedEvent
 
-    def getFilter(self) -> ListFilter:
+    def getFilter(self) -> SeriesFilter:
         return self.__listFilter
 
     def _save(self):
@@ -127,12 +127,12 @@ class RowContainsFilterCreationView(FilterCreationView, ABC):
 
 class CompositeFilterCreationView(FilterCreationView):
 
-    def __init__(self, availableFilters: List[ListFilter]):
+    def __init__(self, availableFilters: List[SeriesFilter]):
         self.__onSaveEvent: InvokableEvent = InvokableEvent()
-        self.__filters: List[ListFilter] = availableFilters
+        self.__filters: List[SeriesFilter] = availableFilters
 
         self._initUI()
-        self.__transferWidget: TransferWidget[ListFilter] = self._getTransferWidget()
+        self.__transferWidget: TransferWidget[SeriesFilter] = self._getTransferWidget()
         self.__transferWidget.setLeftHeader("Included Filters")
         self.__transferWidget.setRightHeader("Available Filters")
         self.__transferWidget.setRightTableItems(self.__filters)
@@ -143,7 +143,7 @@ class CompositeFilterCreationView(FilterCreationView):
 
     def _save(self):
         self.__compositeFilter.title = self._getTitleFromView()
-        includedFilters: List[ListFilter] = self.__transferWidget.getLeftTableItems()
+        includedFilters: List[SeriesFilter] = self.__transferWidget.getLeftTableItems()
 
         for filter in includedFilters:
             self.__compositeFilter.addFilter(filter)
@@ -180,7 +180,7 @@ class CompositeFilterCreationView(FilterCreationView):
         raise NotImplementedError()
 
     @abstractmethod
-    def _getTransferWidget(self) -> TransferWidget[ListFilter]:
+    def _getTransferWidget(self) -> TransferWidget[SeriesFilter]:
         raise NotImplementedError()
 
 
@@ -217,7 +217,7 @@ class CreateFilterDialog(Dialog, ABC):
         self.__commandFactory: FilterCommandFactory = commandFactory
         self._initUI()
 
-        self.__availableFilters: List[ListFilter] = list(self.__repository.getFilters())
+        self.__availableFilters: List[SeriesFilter] = list(self.__repository.getFilters())
         self.__commandStack: CommandStack = CommandStack()
 
         for listFilter in self.__availableFilters:
@@ -282,7 +282,7 @@ class CreateFilterDialog(Dialog, ABC):
             return
 
         self._removeFilterFromAvailableFiltersTable(selectedIndex)
-        filter: ListFilter = self.__availableFilters.pop(selectedIndex)
+        filter: SeriesFilter = self.__availableFilters.pop(selectedIndex)
         cmd: UndoableCommand = self.__commandFactory.makeDeleteFilterCommand(filter)
         self.__commandStack.addCommand(cmd)
 
@@ -303,7 +303,7 @@ class CreateFilterDialog(Dialog, ABC):
             self.__commandStack.undo()
 
     def __handleFilterSaved(self, sender, args) -> None:
-        addedFilter: ListFilter = self.__currentView.getFilter()
+        addedFilter: SeriesFilter = self.__currentView.getFilter()
         cmd: UndoableCommand = self.__commandFactory.makeRegisterFilterCommand(addedFilter)
         self.__commandStack.addCommand(cmd)
 

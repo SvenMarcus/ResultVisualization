@@ -1,5 +1,6 @@
 from typing import List
 
+from PyQt5.QtCore import QModelIndex
 from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDialog, QGridLayout,
                              QHBoxLayout, QHeaderView, QLabel, QLineEdit,
                              QMessageBox, QPushButton, QTableWidget,
@@ -14,7 +15,7 @@ from ResultVisualization.CreateFilterDialog import (CompositeFilterCreationView,
                                                     MetaDataMatchFilterCreationView,
                                                     RowContainsFilterCreationView)
 from ResultVisualization.Dialogs import DialogResult
-from ResultVisualization.Filter import ListFilter
+from ResultVisualization.Filter import SeriesFilter
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.Plot import Series
 from ResultVisualization.SeriesRepository import SeriesRepository
@@ -33,7 +34,7 @@ class QtRowContainsFilterWidget(RowContainsFilterCreationView):
         self.__requiredDataBox: QLineEdit = QLineEdit()
         self.__inverseCheckBox: QCheckBox = QCheckBox("Inverse")
         self.__okButton: QPushButton = QPushButton("OK")
-        self.__okButton.clicked.connect(lambda: self._save())
+        self.__okButton.clicked.connect(self._save)
 
         self.__buttonBar: QHBoxLayout = QHBoxLayout()
         self.__buttonBar.addWidget(self.__okButton, 1)
@@ -80,7 +81,7 @@ class QtMetaDataMatchFilterCreationView(MetaDataMatchFilterCreationView):
         self.__transferWidget: QtTransferWidget = QtTransferWidget()
 
         self.__okButton: QPushButton = QPushButton("Ok")
-        self.__okButton.clicked.connect(lambda: self._save())
+        self.__okButton.clicked.connect(self._save)
 
         self.__buttonBar: QHBoxLayout = QHBoxLayout()
         self.__buttonBar.addWidget(self.__okButton, 1)
@@ -105,7 +106,7 @@ class QtMetaDataMatchFilterCreationView(MetaDataMatchFilterCreationView):
 
 class QtCompositeFilterCreationView(CompositeFilterCreationView):
 
-    def __init__(self, filters: List[ListFilter], parent: QWidget = None):
+    def __init__(self, filters: List[SeriesFilter], parent: QWidget = None):
         self.__parent: QWidget = parent
         super().__init__(filters)
 
@@ -119,7 +120,7 @@ class QtCompositeFilterCreationView(CompositeFilterCreationView):
         self.__transferWidget: QtTransferWidget = QtTransferWidget()
 
         self.__okButton: QPushButton = QPushButton("Ok")
-        self.__okButton.clicked.connect(lambda: self._save())
+        self.__okButton.clicked.connect(self._save)
 
         self.__buttonBar: QHBoxLayout = QHBoxLayout()
         self.__buttonBar.addWidget(self.__okButton, 1)
@@ -164,7 +165,8 @@ class QtCreateFilterDialogSubViewFactory(CreateFilterDialogSubViewFactory):
 
 class QtCreateFilterDialog(CreateFilterDialog):
 
-    def __init__(self, filterRepository: FilterRepository, subViewFactory: CreateFilterDialogSubViewFactory, commandFactory: FilterCommandFactory, parent: QWidget = None):
+    def __init__(self, filterRepository: FilterRepository, subViewFactory: CreateFilterDialogSubViewFactory,
+                 commandFactory: FilterCommandFactory, parent: QWidget = None):
         self.__parent: QWidget = parent
         self.__dialog: QDialog = None
         self.__availableFilters: QTableWidget = None
@@ -191,18 +193,19 @@ class QtCreateFilterDialog(CreateFilterDialog):
         self.__availableFilters.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
         self.__addFilterButton: QPushButton = QPushButton("Select")
-        self.__addFilterButton.clicked.connect(lambda: self._handleFilterOptionSelection(self.__filterTypeComboBox.currentText()))
+        self.__addFilterButton.clicked.connect(
+            lambda: self._handleFilterOptionSelection(self.__filterTypeComboBox.currentText()))
 
         self.__removeFilterButton: QPushButton = QPushButton("Remove")
-        self.__removeFilterButton.clicked.connect(lambda: self._handleFilterRemove())
+        self.__removeFilterButton.clicked.connect(self._handleFilterRemove)
 
         self.__filterTypeComboBox: QComboBox = QComboBox()
 
         self.__okButton: QPushButton = QPushButton("Ok")
         self.__okButton.setDefault(True)
-        self.__okButton.clicked.connect(lambda: self._confirm())
+        self.__okButton.clicked.connect(self._confirm)
         self.__cancelButton: QPushButton = QPushButton("Cancel")
-        self.__cancelButton.clicked.connect(lambda: self._cancel())
+        self.__cancelButton.clicked.connect(self._cancel)
 
         self.__buttonBar: QHBoxLayout = QHBoxLayout()
         self.__buttonBar.addWidget(self.__okButton)
@@ -226,8 +229,8 @@ class QtCreateFilterDialog(CreateFilterDialog):
         self.__availableFilters.removeRow(index)
 
     def _getSelectedFilterIndexFromView(self) -> int:
-        indexes: List[int] = self.__availableFilters.selectedIndexes()
-        if len(indexes) > 0:
+        indexes: List[QModelIndex] = self.__availableFilters.selectedIndexes()
+        if indexes:
             return indexes[0].row()
         return -1
 

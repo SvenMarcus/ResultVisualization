@@ -3,7 +3,7 @@ from typing import List
 
 from ResultVisualization.Commands import Command, FilterCommandFactory
 from ResultVisualization.Dialogs import Dialog, DialogResult
-from ResultVisualization.Filter import ListFilter
+from ResultVisualization.Filter import SeriesFilter
 from ResultVisualization.FilterRepository import FilterRepository
 from ResultVisualization.Plot import Series
 from ResultVisualization.TransferWidget import TransferWidget
@@ -12,8 +12,8 @@ class EditSeriesFilterDialog(Dialog, ABC):
 
     def __init__(self, series: Series, filterRepo: FilterRepository, commandFactory: FilterCommandFactory):
         self.__series: Series = series
-        self.__activeFilters: List[ListFilter] = list()
-        self.__availableFilters: List[ListFilter] = list()
+        self.__activeFilters: List[SeriesFilter] = list()
+        self.__availableFilters: List[SeriesFilter] = list()
 
         self.__factory: FilterCommandFactory = commandFactory
 
@@ -31,7 +31,7 @@ class EditSeriesFilterDialog(Dialog, ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def _getTransferWidget(self) -> TransferWidget[ListFilter]:
+    def _getTransferWidget(self) -> TransferWidget[SeriesFilter]:
         raise NotImplementedError()
 
     @abstractmethod
@@ -57,7 +57,7 @@ class EditSeriesFilterDialog(Dialog, ABC):
     def _addToActiveFilters(self, indexes: List[int]) -> None:
         movedFilters = list()
         for index in sorted(indexes, reverse=True):
-            filterToMove: ListFilter = self.__availableFilters[index]
+            filterToMove: SeriesFilter = self.__availableFilters[index]
             movedFilters.append(filterToMove)
             self.__activeFilters.append(filterToMove)
 
@@ -70,7 +70,7 @@ class EditSeriesFilterDialog(Dialog, ABC):
     def _removeFromActiveFilters(self, indexes: List[int]) -> None:
         movedFilters = list()
         for index in sorted(indexes, reverse=True):
-            filterToMove: ListFilter = self.__activeFilters[index]
+            filterToMove: SeriesFilter = self.__activeFilters[index]
             movedFilters.append(filterToMove)
             self.__availableFilters.append(filterToMove)
 
@@ -81,7 +81,7 @@ class EditSeriesFilterDialog(Dialog, ABC):
             self.__activeFilters.remove(listFilter)
 
     def _confirm(self) -> None:
-        currentFilters: List[ListFilter] = list(self.__series.filters)
+        currentFilters: List[SeriesFilter] = list(self.__series.filters)
         for listFilter in currentFilters:
             cmd: Command = self.__factory.makeRemoveFilterFromSeriesCommand(listFilter, self.__series)
             cmd.execute()

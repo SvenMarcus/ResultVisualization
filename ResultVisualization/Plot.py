@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Iterable, List, Tuple
 
 from ResultVisualization import Style
-from ResultVisualization.Filter import ListFilter
+from ResultVisualization.Filter import SeriesFilter
 from ResultVisualization.SeriesVisitor import SeriesVisitor
 from ResultVisualization.Titled import Titled
 from ResultVisualization.util import isNumber
@@ -99,12 +99,12 @@ class FilterableSeries(Series, ABC):
     def __init__(self):
         super().__init__()
         self._metaData: List[str] = list()
-        self._filters: List[ListFilter] = list()
+        self._filters: List[SeriesFilter] = list()
 
-    def addFilter(self, listFilter: ListFilter) -> None:
+    def addFilter(self, listFilter: SeriesFilter) -> None:
         self._filters.append(listFilter)
 
-    def removeFilter(self, listFilter: ListFilter) -> None:
+    def removeFilter(self, listFilter: SeriesFilter) -> None:
         self._filters.remove(listFilter)
 
     def clearFilters(self) -> None:
@@ -121,11 +121,11 @@ class FilterableSeries(Series, ABC):
         self._metaData = value
 
     @property
-    def filters(self) -> List[ListFilter]:
+    def filters(self) -> List[SeriesFilter]:
         return self._filters
 
     @filters.setter
-    def filters(self, value: List[ListFilter]) -> None:
+    def filters(self, value: List[SeriesFilter]) -> None:
         self._filters = value
 
 
@@ -186,7 +186,7 @@ class LineSeries(FilterableSeries):
         meta = self._metaData
         reassignMeta = True
 
-        if len(self._metaData) == 0:
+        if not self._metaData:
             reassignMeta = False
             meta = ["" for i in range(len(self.__xValues))]
 
@@ -200,7 +200,7 @@ class LineSeries(FilterableSeries):
         return self.__xValues, self.__yValues, self._metaData
 
     def __filterValues(self, x, y, meta) -> tuple:
-        if len(self._filters) == 0 or len(meta) == 0:
+        if not self._filters or not meta:
             return x, y
 
         zipped = zip(meta, x, y)

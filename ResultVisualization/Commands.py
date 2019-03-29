@@ -7,7 +7,7 @@ from ResultVisualization.Dialogs import (ChooseFileDialog, Dialog,
                                          DialogResult, SeriesDialog,
                                          SeriesDialogFactory)
 from ResultVisualization.Filter import (ExactMetaDataMatchesInAllSeriesFilter,
-                                        FilterVisitor, ListFilter,
+                                        FilterVisitor, SeriesFilter,
                                         RowMetaDataContainsFilter)
 from ResultVisualization.FilterDialogFactory import FilterDialogFactory
 from ResultVisualization.FilterRepository import FilterRepository
@@ -99,15 +99,15 @@ class RemoveSeriesCommand(Command, FilterVisitor):
             for listFilter in self.__series.filters:
                 listFilter.accept(self)
 
-    def visitExactMetaDataMatchesInAllSeries(self, filter):
-        if self.__series in filter.getSeries():
-            filter.removeSeries(self.__series)
+    def visitExactMetaDataMatchesInAllSeries(self, seriesFilter):
+        if self.__series in seriesFilter.getSeries():
+            seriesFilter.removeSeries(self.__series)
 
-    def visitRowMetaDataContains(self, filter):
+    def visitRowMetaDataContains(self, seriesFilter):
         pass
 
-    def visitCompositeFilter(self, filter):
-        for subFilter in filter.getFilters():
+    def visitCompositeFilter(self, seriesFilter):
+        for subFilter in seriesFilter.getFilters():
             subFilter.accept(self)
 
 
@@ -229,50 +229,50 @@ class ShowCreateFilterDialogCommand(Command):
 
 class AddFilterToSeriesCommand(Command, FilterVisitor):
 
-    def __init__(self, listFilter: ListFilter, series: FilterableSeries):
+    def __init__(self, listFilter: SeriesFilter, series: FilterableSeries):
         self.__series: FilterableSeries = series
-        self.__filter: ListFilter = listFilter
+        self.__filter: SeriesFilter = listFilter
 
     def execute(self) -> None:
         self.__series.addFilter(self.__filter)
         self.__filter.accept(self)
 
-    def visitExactMetaDataMatchesInAllSeries(self, filter: ExactMetaDataMatchesInAllSeriesFilter) -> None:
-        filter.addSeries(self.__series)
+    def visitExactMetaDataMatchesInAllSeries(self, seriesFilter: ExactMetaDataMatchesInAllSeriesFilter) -> None:
+        seriesFilter.addSeries(self.__series)
 
-    def visitRowMetaDataContains(self, filter: RowMetaDataContainsFilter) -> None:
+    def visitRowMetaDataContains(self, seriesFilter: RowMetaDataContainsFilter) -> None:
         pass
 
-    def visitCompositeFilter(self, filter):
-        for subFilter in filter.getFilters():
+    def visitCompositeFilter(self, seriesFilter):
+        for subFilter in seriesFilter.getFilters():
             subFilter.accept(self)
 
 
 class RemoveFilterFromSeriesCommand(Command, FilterVisitor):
 
-    def __init__(self, listFilter: ListFilter, series: FilterableSeries):
+    def __init__(self, listFilter: SeriesFilter, series: FilterableSeries):
         self.__series: FilterableSeries = series
-        self.__filter: ListFilter = listFilter
+        self.__filter: SeriesFilter = listFilter
 
     def execute(self) -> None:
         self.__series.removeFilter(self.__filter)
         self.__filter.accept(self)
 
-    def visitExactMetaDataMatchesInAllSeries(self, filter: ExactMetaDataMatchesInAllSeriesFilter) -> None:
-        filter.removeSeries(self.__series)
+    def visitExactMetaDataMatchesInAllSeries(self, seriesFilter: ExactMetaDataMatchesInAllSeriesFilter) -> None:
+        seriesFilter.removeSeries(self.__series)
 
-    def visitRowMetaDataContains(self, filter: RowMetaDataContainsFilter) -> None:
+    def visitRowMetaDataContains(self, seriesFilter: RowMetaDataContainsFilter) -> None:
         pass
 
-    def visitCompositeFilter(self, filter):
-        for subFilter in filter.getFilters():
+    def visitCompositeFilter(self, seriesFilter):
+        for subFilter in seriesFilter.getFilters():
             subFilter.accept(self)
 
 
 class RegisterFilterCommand(UndoableCommand):
 
-    def __init__(self, listFilter: ListFilter, repo: FilterRepository):
-        self.__filter: ListFilter = listFilter
+    def __init__(self, listFilter: SeriesFilter, repo: FilterRepository):
+        self.__filter: SeriesFilter = listFilter
         self.__repo: FilterRepository = repo
         self.__connector: FilterConnector = FilterConnector()
         self.__disconnector: FilterDisconnector = FilterDisconnector()
@@ -288,8 +288,8 @@ class RegisterFilterCommand(UndoableCommand):
 
 class DeleteFilterCommand(UndoableCommand):
 
-    def __init__(self, listFilter: ListFilter, repo: FilterRepository):
-        self.__filter: ListFilter = listFilter
+    def __init__(self, listFilter: SeriesFilter, repo: FilterRepository):
+        self.__filter: SeriesFilter = listFilter
         self.__repo: FilterRepository = repo
         self.__connector: FilterConnector = FilterConnector()
         self.__disconnector: FilterDisconnector = FilterDisconnector()
@@ -357,7 +357,7 @@ class LoadGraphCommand(Command):
                     graphView, os.path.basename(filePath))
 
             except Exception:
-                pass
+                return
 
 
 class ShowTemplateCreationDialogCommand(Command):
@@ -395,7 +395,7 @@ class SaveTemplatesCommand(Command):
             file.close()
 
         except Exception:
-            pass
+            return
 
 
 class LoadTemplatesCommand(Command):
@@ -466,14 +466,14 @@ class FilterCommandFactory:
     def __init__(self, filterRepo: FilterRepository):
         self.__repo: FilterRepository = filterRepo
 
-    def makeAddFilterToSeriesCommand(self, listFilter: ListFilter, series: Series) -> Command:
+    def makeAddFilterToSeriesCommand(self, listFilter: SeriesFilter, series: Series) -> Command:
         return AddFilterToSeriesCommand(listFilter, series)
 
-    def makeRemoveFilterFromSeriesCommand(self, listFilter: ListFilter, series: Series) -> Command:
+    def makeRemoveFilterFromSeriesCommand(self, listFilter: SeriesFilter, series: Series) -> Command:
         return RemoveFilterFromSeriesCommand(listFilter, series)
 
-    def makeRegisterFilterCommand(self, listFilter: ListFilter) -> UndoableCommand:
+    def makeRegisterFilterCommand(self, listFilter: SeriesFilter) -> UndoableCommand:
         return RegisterFilterCommand(listFilter, self.__repo)
 
-    def makeDeleteFilterCommand(self, listFilter: ListFilter) -> UndoableCommand:
+    def makeDeleteFilterCommand(self, listFilter: SeriesFilter) -> UndoableCommand:
         return DeleteFilterCommand(listFilter, self.__repo)
