@@ -2,7 +2,7 @@ from typing import List
 
 from PyQt5.QtWidgets import (QComboBox, QDialog, QGridLayout, QLabel,
                              QLineEdit, QMessageBox, QPushButton, QTableWidget,
-                             QTableWidgetItem, QWidget)
+                             QTableWidgetItem, QWidget, QHeaderView)
 
 from QtResultVisualization.Dialogs import QtChooseMultipleFilesDialog
 from ResultVisualization.Dialogs import ChooseMultipleFilesDialog, DialogResult
@@ -26,6 +26,7 @@ class QtLoadFromTemplateDialog(LoadFromTemplateDialog):
 
         confirmButton: QPushButton = QPushButton("Ok")
         confirmButton.clicked.connect(self._confirm)
+        confirmButton.setDefault(True)
 
         cancelButton: QPushButton = QPushButton("Cancel")
         cancelButton.clicked.connect(self._close)
@@ -36,6 +37,7 @@ class QtLoadFromTemplateDialog(LoadFromTemplateDialog):
         self.__fileList.setColumnCount(1)
         self.__fileList.setHorizontalHeaderLabels(["Files"])
         self.__fileList.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.__fileList.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
         self.__dialog.layout().addWidget(self.__fileList, 0, 2, -1, 1)
 

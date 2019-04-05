@@ -28,6 +28,7 @@ class MplBoxPlot:
         mergedBoxData = self.__mergeBoxplotData()
         numCols = len(mergedBoxData.keys())
         allAxes = self.__figure.subplots(nrows=1, ncols=numCols, sharey='all')
+        self.__figure.subplots_adjust(wspace=0)
         axIndex = 0
         groupColorLookup = self.__createGroupColorLookup()
         for key, boxplotData in mergedBoxData.items():

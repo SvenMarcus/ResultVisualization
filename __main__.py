@@ -9,11 +9,12 @@ from QtResultVisualization.MplCommands import ExportPdfCommand
 from QtResultVisualization.QtGraphViewFactory import QtGraphViewFactory
 from QtResultVisualization.QtMainWindow import QtMainWindow
 from QtResultVisualization.QtMenuBar import QtMenuBar, QtMenu
+from QtResultVisualization.QtPlotSettingsDialog import QtPlotSettingsDialog
 from QtResultVisualization.QtTextInputDialog import QtTextInputDialog
 from QtResultVisualization.QtToolbar import QtToolbar
 from ResultVisualization.Action import Action
 from ResultVisualization.Commands import LoadGraphCommand, LoadTemplatesCommand, SaveTemplatesCommand, \
-    AddGraphViewCommand, CloseGraphViewCommand, EditGraphViewTitleCommand
+    AddGraphViewCommand, CloseGraphViewCommand, EditGraphViewTitleCommand, ShowPlotSettingsDialogCommand
 from ResultVisualization.GraphView import GraphView
 from ResultVisualization.MenuBar import MenuBar, Menu
 from ResultVisualization.Toolbar import Toolbar
@@ -60,6 +61,9 @@ if __name__ == "__main__":
     exportCommand = ExportPdfCommand(mainWindow, QtSaveFileDialog("*.pdf", parent=mainWindow.getWidget()))
     exportAction = Action("File", path.join(resourcesFolder, "file-pdf.svg"), "Export Pdf", exportCommand, shortcut="Ctrl+P")
 
+    plotSettingsCommand = ShowPlotSettingsDialogCommand(mainWindow, QtPlotSettingsDialog(mainWindow.getWidget()))
+    plotSettingsAction = Action("Edit", "", "Plot Settings", plotSettingsCommand)
+
     toolbar.addAction(addLinePlotAction)
     toolbar.addAction(addBoxPlotAction)
     toolbar.addAction(closeViewAction)
@@ -73,6 +77,7 @@ if __name__ == "__main__":
     menubar.addAction(addLinePlotAction)
     menubar.addAction(addBoxPlotAction)
     menubar.addAction(editGraphViewTitleAction)
+    menubar.addAction(plotSettingsAction)
     menubar.addAction(exportAction)
     menubar.addAction(loadGraphAction)
     menubar.addAction(closeViewAction)

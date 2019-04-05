@@ -129,12 +129,30 @@ class FilterableSeries(Series, ABC):
         self._filters = value
 
 
+class PlotSettings:
+
+    def __init__(self, **kwargs):
+        self.minX = 0
+        self.maxX = 0
+        self.minY = 0
+        self.maxY = 0
+
+        if "clone" in kwargs.keys():
+            original: PlotSettings = kwargs["clone"]
+            self.minX = original.minX
+            self.maxX = original.maxX
+            self.minY = original.minY
+            self.maxY = original.maxY
+
+
 class Graph(ABC):
 
     def __init__(self, plotter: Plotter = None):
         self.__plotter: Plotter = plotter
         self.__series: List[Series] = list()
         self.__title: str = ""
+        self.__plotSettings: PlotSettings = PlotSettings()
+        self.__plotSettingsEnabled: bool = False
 
     def addPlot(self, series: Series) -> None:
         self.__series.append(series)
@@ -151,6 +169,18 @@ class Graph(ABC):
             series.plot(self.__plotter)
         self.__plotter.finishPlot()
         self._setTitleInView(self.__title)
+        if self.__plotSettingsEnabled:
+            self._setPlotSettingsInView(self.__plotSettings)
+
+    def enablePlotSettings(self, enabled: bool) -> None:
+        self.__plotSettingsEnabled = enabled
+
+    def setPlotSettings(self, settings: PlotSettings) -> None:
+        self.__plotSettings = settings
+        self.updatePlot()
+
+    def getPlotSettings(self) -> PlotSettings:
+        return PlotSettings(clone=self.__plotSettings)
 
     def setTitle(self, title: str) -> None:
         self.__title = title
@@ -159,6 +189,11 @@ class Graph(ABC):
     @abstractmethod
     def _setTitleInView(self, title: str) -> None:
         raise NotImplementedError()
+
+    @abstractmethod
+    def _setPlotSettingsInView(self, plotSettings: PlotSettings) -> None:
+        raise NotImplementedError()
+
 
 class LineSeries(FilterableSeries):
 
@@ -302,7 +337,10 @@ class BoxSeries(FilterableSeries):
     def __filterData(self):
         zipped = zip(self._metaData, self.__data)
         filtered = list(filter(self.__shouldFilterEntry, zipped))
-        meta, data = zip(*filtered)
+
+        meta, data = list(), list()
+        if filtered:
+            meta, data = zip(*filtered)
 
         return data, meta
 
@@ -348,7 +386,8 @@ class FillAreaSeries(Series):
         self.__textColor: Tuple[float, float, float, float] = (0, 0, 0, 1)
 
     def plot(self, plotter: Plotter):
-        plotter.fillArea(self.__xLims, [self.__yLims[0], self.__yLims[0]], [self.__yLims[1], self.__yLims[1]], color=self.__color[0:3], alpha=self.__color[3])
+        plotter.fillArea(self.__xLims, [self.__yLims[0], self.__yLims[0]], [self.__yLims[1], self.__yLims[1]],
+                         color=self.__color[0:3], alpha=self.__color[3])
         self.plotText(plotter)
 
     def accept(self, seriesVisitor: SeriesVisitor) -> None:

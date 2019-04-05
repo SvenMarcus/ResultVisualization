@@ -72,6 +72,9 @@ class GraphView(ABC):
         if selectedRow > -1:
             return self.__series[selectedRow]
 
+    def getGraph(self) -> Graph:
+        return self._graph
+
     @abstractmethod
     def show(self) -> None:
         raise NotImplementedError()

@@ -16,7 +16,8 @@ from ResultVisualization.GraphView import GraphView
 from ResultVisualization.GraphViewFactory import GraphViewFactory
 from ResultVisualization.MainWindow import MainWindow
 from ResultVisualization.Plot import (BoxSeries, FillAreaSeries,
-                                      FilterableSeries, LineSeries, Series)
+                                      FilterableSeries, LineSeries, Series, Graph)
+from ResultVisualization.PlotSettingsDialog import PlotSettingsDialog
 from ResultVisualization.SeriesRepository import SeriesRepository
 from ResultVisualization.SeriesVisitor import SeriesVisitor
 from ResultVisualization.TemplateCreationDialog import TemplateCreationDialog
@@ -459,6 +460,20 @@ class CloseGraphViewCommand(Command):
 
     def execute(self) -> None:
         self.__mainWindow.closeActiveGraphView()
+
+
+class ShowPlotSettingsDialogCommand(Command):
+
+    def __init__(self, mainWindow: MainWindow, plotSettingsDialog: PlotSettingsDialog):
+        self.__mainWindow = mainWindow
+        self.__plotSettingsDialog = plotSettingsDialog
+
+    def execute(self) -> None:
+        result: DialogResult = self.__plotSettingsDialog.show()
+        graph = self.__mainWindow.getActiveView().getGraph()
+        if result is DialogResult.Ok:
+            graph.setPlotSettings(self.__plotSettingsDialog.getPlotSettings())
+            graph.enablePlotSettings(True)
 
 
 class FilterCommandFactory:

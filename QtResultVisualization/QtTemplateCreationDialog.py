@@ -1,7 +1,7 @@
 from typing import List
 
 from PyQt5.QtWidgets import (QDialog, QGridLayout, QLabel, QLineEdit, QMessageBox,
-                             QPushButton, QWidget, QTableWidget, QTableWidgetItem)
+                             QPushButton, QWidget, QTableWidget, QTableWidgetItem, QHeaderView)
 
 from ResultVisualization.Dialogs import DialogResult
 from ResultVisualization.TemplateCreationDialog import TemplateCreationDialog
@@ -30,6 +30,7 @@ class QtTemplateCreationDialog(TemplateCreationDialog):
 
         confirmButton: QPushButton = QPushButton("Ok")
         confirmButton.clicked.connect(self._confirm)
+        confirmButton.setDefault(True)
 
         cancelButton: QPushButton = QPushButton("Cancel")
         cancelButton.clicked.connect(self._close)
@@ -38,30 +39,33 @@ class QtTemplateCreationDialog(TemplateCreationDialog):
         self.__styleList.setColumnCount(1)
         self.__styleList.setHorizontalHeaderLabels(["Styles"])
         self.__styleList.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.__styleList.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
         self.__dialog.layout().addWidget(self.__styleList, 0, 2, -1, 1)
 
         self.__dialog.layout().addWidget(QLabel("Title:"), 0, 0)
         self.__dialog.layout().addWidget(self.__title, 0, 1)
-        self.__dialog.layout().addWidget(QLabel("Quick Style:"), 1, 0)
-        self.__dialog.layout().addWidget(self.__style, 1, 1)
-        self.__dialog.layout().addWidget(addStyleButton, 2, 0)
-        self.__dialog.layout().addWidget(removeStyleButton, 2, 1)
 
-        self.__dialog.layout().addWidget(QLabel("X Column:"), 3, 0)
-        self.__dialog.layout().addWidget(self.__xColumn, 3, 1)
+        self.__dialog.layout().addWidget(QLabel("X Column:"), 1, 0)
+        self.__dialog.layout().addWidget(self.__xColumn, 1, 1)
 
-        self.__dialog.layout().addWidget(QLabel("Y Column:"), 4, 0)
-        self.__dialog.layout().addWidget(self.__yColumn, 4, 1)
+        self.__dialog.layout().addWidget(QLabel("Y Column:"), 2, 0)
+        self.__dialog.layout().addWidget(self.__yColumn, 2, 1)
 
-        self.__dialog.layout().addWidget(QLabel("Meta Column:"), 5, 0)
-        self.__dialog.layout().addWidget(self.__meta, 5, 1)
+        self.__dialog.layout().addWidget(QLabel("Meta Column:"), 3, 0)
+        self.__dialog.layout().addWidget(self.__meta, 3, 1)
 
-        self.__dialog.layout().addWidget(QLabel("X Label:"), 6, 0)
-        self.__dialog.layout().addWidget(self.__xLabel, 6, 1)
+        self.__dialog.layout().addWidget(QLabel("X Label:"), 4, 0)
+        self.__dialog.layout().addWidget(self.__xLabel, 4, 1)
 
-        self.__dialog.layout().addWidget(QLabel("Y Label:"), 7, 0)
-        self.__dialog.layout().addWidget(self.__yLabel, 7, 1)
+        self.__dialog.layout().addWidget(QLabel("Y Label:"), 5, 0)
+        self.__dialog.layout().addWidget(self.__yLabel, 5, 1)
+
+        self.__dialog.layout().addWidget(QLabel("Quick Style:"), 6, 0)
+        self.__dialog.layout().addWidget(self.__style, 6, 1)
+
+        self.__dialog.layout().addWidget(addStyleButton, 7, 0)
+        self.__dialog.layout().addWidget(removeStyleButton, 7, 1)
 
         self.__dialog.layout().addWidget(confirmButton, 8, 0)
         self.__dialog.layout().addWidget(cancelButton, 8, 1)

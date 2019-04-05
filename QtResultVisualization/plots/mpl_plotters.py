@@ -15,7 +15,6 @@ class MatplotlibPlotter(Plotter):
     def __init__(self, canvas: FigureCanvas):
         self.__canvas: FigureCanvas = canvas
         self.__figure: Figure = canvas.figure
-        self.__axes: Axes = None
         self.__boxPlot = MplBoxPlot(self.__figure)
         self.__linePlot = MplLinePlot(self.__figure)
         self.__areaPlot = MplAreaPlot(self.__figure)
@@ -28,14 +27,22 @@ class MatplotlibPlotter(Plotter):
         self.__textPlot = MplTextPlot(self.__figure)
 
     def finishPlot(self) -> None:
+        draw: bool = False
         if self.__boxPlot.canDraw():
             self.__boxPlot.draw()
+            draw = True
         if self.__linePlot.canDraw():
             self.__linePlot.draw()
+            draw = True
         if self.__areaPlot.canDraw():
             self.__areaPlot.draw()
+            draw = True
         if self.__textPlot.canDraw():
             self.__textPlot.draw()
+            draw = True
+
+        if not draw:
+            self.__figure.add_subplot(111)
 
         self.update()
 

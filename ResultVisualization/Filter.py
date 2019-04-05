@@ -34,10 +34,14 @@ class RowMetaDataContainsFilter(SeriesFilter):
         self.__inverse = value
 
     def appliesToIndex(self, sourceSeries, index: int) -> bool:
-        if not self.__inverse:
-            return self.__requiredValue in sourceSeries.metaData[index]
-        else:
-            return self.__requiredValue not in sourceSeries.metaData[index]
+        isInMeta: bool = self.__requiredValue in sourceSeries.metaData[index]
+        shouldBeInMeta: bool = not self.__inverse
+
+        return isInMeta is shouldBeInMeta
+        # if not self.__inverse:
+        #     return isInMeta is True
+        #
+        # return isInMeta is False
 
     def accept(self, filterVisitor) -> None:
         filterVisitor.visitRowMetaDataContains(self)
