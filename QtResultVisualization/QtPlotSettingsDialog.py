@@ -9,7 +9,6 @@ from ResultVisualization.util import tryConvertToFloat
 class QtPlotSettingsDialog(PlotSettingsDialog):
 
     def __init__(self, plotSettings: PlotSettings = None, parent: QWidget = None):
-        super().__init__(plotSettings)
         self.__widget = QDialog(parent)
         self.__layout: QGridLayout = QGridLayout()
         self.__widget.setLayout(self.__layout)
@@ -37,6 +36,7 @@ class QtPlotSettingsDialog(PlotSettingsDialog):
 
         self.__layout.addWidget(confirmButton, 4, 1)
         self.__layout.addWidget(cancelButton, 4, 2)
+        super().__init__(plotSettings)
 
     def _close(self) -> None:
         self.__widget.close()
@@ -52,6 +52,18 @@ class QtPlotSettingsDialog(PlotSettingsDialog):
 
     def _getMaxYFromView(self) -> float:
         return tryConvertToFloat(self.__maxY.text()) or 0
+
+    def _setMinXInView(self, x) -> None:
+        self.__minX.setText(str(x))
+
+    def _setMaxXInView(self, x) -> None:
+        self.__maxX.setText(str(x))
+
+    def _setMinYInView(self, y) -> None:
+        self.__minY.setText(str(y))
+
+    def _setMaxYInView(self, y) -> None:
+        self.__maxY.setText(str(y))
 
     def show(self) -> DialogResult:
         self._result = DialogResult.Cancel

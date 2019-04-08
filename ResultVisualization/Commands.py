@@ -2,6 +2,7 @@ import copy
 import os.path
 import pickle
 from abc import ABC, abstractmethod
+from typing import Callable
 
 from ResultVisualization.Dialogs import (ChooseFileDialog, Dialog,
                                          DialogResult, SeriesDialog,
@@ -464,15 +465,17 @@ class CloseGraphViewCommand(Command):
 
 class ShowPlotSettingsDialogCommand(Command):
 
-    def __init__(self, mainWindow: MainWindow, plotSettingsDialog: PlotSettingsDialog):
+    def __init__(self, mainWindow: MainWindow, makePlotSettingsDialogFunc: Callable):
         self.__mainWindow = mainWindow
-        self.__plotSettingsDialog = plotSettingsDialog
+        self.__makeDialog = makePlotSettingsDialogFunc
 
     def execute(self) -> None:
-        result: DialogResult = self.__plotSettingsDialog.show()
         graph = self.__mainWindow.getActiveView().getGraph()
+        settings = graph.getPlotSettings()
+        dialog: PlotSettingsDialog = self.__makeDialog(settings)
+        result: DialogResult = dialog.show()
         if result is DialogResult.Ok:
-            graph.setPlotSettings(self.__plotSettingsDialog.getPlotSettings())
+            graph.setPlotSettings(dialog.getPlotSettings())
             graph.enablePlotSettings(True)
 
 

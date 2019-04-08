@@ -61,7 +61,7 @@ if __name__ == "__main__":
     exportCommand = ExportPdfCommand(mainWindow, QtSaveFileDialog("*.pdf", parent=mainWindow.getWidget()))
     exportAction = Action("File", path.join(resourcesFolder, "file-pdf.svg"), "Export Pdf", exportCommand, shortcut="Ctrl+P")
 
-    plotSettingsCommand = ShowPlotSettingsDialogCommand(mainWindow, QtPlotSettingsDialog(mainWindow.getWidget()))
+    plotSettingsCommand = ShowPlotSettingsDialogCommand(mainWindow, lambda settings: QtPlotSettingsDialog(settings, mainWindow.getWidget()))
     plotSettingsAction = Action("Edit", "", "Plot Settings", plotSettingsCommand)
 
     toolbar.addAction(addLinePlotAction)
